@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+mkdir -p $HOME/.config
+
+# nix
+rm -rf $HOME/.config/nix
+ln -sf $DOTFILES/nix $HOME/.config/nix
+
+# home-manager
+rm -rf $HOME/.config/home-manager
+ln -sf $DOTFILES/home-manager $HOME/.config/home-manager
+
