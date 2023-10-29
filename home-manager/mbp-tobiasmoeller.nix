@@ -20,20 +20,7 @@
 
   programs.home-manager.enable = true;
 
-  programs.git = {
-    enable = true;
-    # includes = [{ path = "./gitconfig"; }];
-  };
-
-  # programs.fzf = {
-  #   enable = true;
-  # };
-
-  programs.tmux = {
-    enable = true;
-    baseIndex = 1;
-    prefix = "C-y";
-    historyLimit = 10000;
-    keyMode = "vi";
-  };
+  imports = [
+    ./packages/commons.nix
+  ];
 }
