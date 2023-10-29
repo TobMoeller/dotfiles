@@ -3,10 +3,12 @@
 {
   imports = [
     ./tmux.nix
+    ./zsh.nix
   ];
 
   home.packages = [
-    # pkgs.hello
+    pkgs.meslo-lgs-nf
+    pkgs.timewarrior
   ];
 
   home.file = {
