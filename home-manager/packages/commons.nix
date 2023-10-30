@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   imports = [
@@ -21,8 +21,8 @@
 
   programs.git = {
     enable = true;
-    userName = "TobMoeller";
-    userEmail = "tobiasmoellerw@t-online.de";
+    userName = lib.mkDefault "TobMoeller";
+    userEmail = lib.mkDefault "tobiasmoellerw@t-online.de";
     aliases = {
       s = "status -sb";
       st = "status";
