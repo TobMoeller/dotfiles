@@ -23,4 +23,9 @@
   };
 
   programs.home-manager.enable = true;
+
+  programs.git = {
+    userName = "eptmoeller";
+    userEmail = "tobias.moeller@ecoplan.de";
+  };
 }

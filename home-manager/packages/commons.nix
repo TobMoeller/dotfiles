@@ -21,7 +21,16 @@
 
   programs.git = {
     enable = true;
-    # includes = [{ path = "./gitconfig"; }];
+    userName = "TobMoeller";
+    userEmail = "tobiasmoellerw@t-online.de";
+    aliases = {
+      s = "status -sb";
+      st = "status";
+      ci = "commit";
+      co = "checkout";
+      nah = "!git reset --hard && git clean -df";
+      alias = "! git config --get-regexp ^alias\. | sed -e s/^alias\.// -e s/\ /\ =\ /";
+    };
   };
 
   # programs.fzf = {
