@@ -11,17 +11,27 @@
 
   outputs = { nixpkgs, home-manager, ... }:
     let
-      system = "aarch64-darwin";
-      pkgs = nixpkgs.legacyPackages.${system};
+      pkgs = nixpkgs.legacyPackages;
     in {
+      defaulPackage = {
+        aarch64-darwin = home-manager.defaulPackage.aarch64-darwin;
+        x86_64-linux = home-manager.defaulPackage.x86_64-linux;
+      };
+
       homeConfigurations = {
         "tobiasmoeller@mbp-tm" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
+          pkgs = pkgs.aarch64-darwin;
 
           modules = [ ./mbp-tobiasmoeller.nix ];
 
           # Optionally use extraSpecialArgs
           # to pass through arguments to home.nix
+        };
+
+        "tmoeller@EPNB83" = home-manager.lib.homeManagerConfiguration {
+          pkgs = pkgs.x86_64-linux;
+
+          modules = [ ./ep-wsl-tmoeller.nix ];
         };
       };
     };
