@@ -7,8 +7,11 @@
   ];
 
   home.packages = [
-    pkgs.meslo-lgs-nf
+    pkgs.meslo-lgs-nf # nerd font for powerlevel10k theme
     pkgs.timewarrior
+
+    pkgs.php82
+    pkgs.php82Packages.composer
   ];
 
   home.file = {
