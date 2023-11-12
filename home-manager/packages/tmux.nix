@@ -9,6 +9,7 @@
     baseIndex = 1;
     historyLimit = 10000;
     aggressiveResize = true;
+    terminal = "screen-256color";
 
 
     # The configurations below aren't available natively, so we use extraConfig.
@@ -17,7 +18,7 @@
         set-option -g renumber-windows on
 
         # colors
-        set -g default-terminal "''${TERM}"
+        # set -g default-terminal "''${TERM}"
 
         # Enable undercurl
         set -as terminal-overrides ',*:Smulx=\E[4::%p1%dm'

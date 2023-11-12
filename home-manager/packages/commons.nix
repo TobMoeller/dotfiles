@@ -4,6 +4,7 @@
   imports = [
     ./tmux.nix
     ./zsh.nix
+    ./nvim.nix
   ];
 
   home.packages = [
