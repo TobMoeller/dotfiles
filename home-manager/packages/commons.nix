@@ -7,12 +7,15 @@
     ./nvim.nix
   ];
 
-  home.packages = [
-    pkgs.meslo-lgs-nf # nerd font for powerlevel10k theme
-    pkgs.timewarrior
+  home.packages = with pkgs; [
+    meslo-lgs-nf # nerd font for powerlevel10k theme
+    timewarrior
 
-    pkgs.php82
-    pkgs.php82Packages.composer
+    php82
+    php82Packages.composer
+
+    # LSP packages
+    phpactor
   ];
 
   home.file = {

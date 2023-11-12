@@ -81,6 +81,25 @@
             }
             nvim-ts-context-commentstring
             nvim-treesitter-textobjects
+            
+            # LSPs
+            {
+                plugin = nvim-lspconfig;
+                type = "lua";
+                config = lib.fileContents ./config/neovim/lsp-config.lua;
+            }
+            {
+                plugin = nvim-cmp;
+                type = "lua";
+                config = lib.fileContents ./config/neovim/cmp.lua;
+            }
+            cmp-nvim-lsp # lsp completion
+            cmp-nvim-lsp-signature-help # function signature for completion
+            cmp-buffer # completion for buffer words
+            cmp-path # completion for path
+            luasnip
+            cmp_luasnip # completion for luasnip
+            lspkind-nvim # icons for completion
 
             # TODO not implemented yet:
             # vim-heritage
