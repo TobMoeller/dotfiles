@@ -1,8 +1,8 @@
 { config, pkgs, ... }:
 
 {
-  home.username = "tobiasmoeller";
-  home.homeDirectory = "/Users/tobiasmoeller";
+  home.username = "tmoeller";
+  home.homeDirectory = "/home/tmoeller";
 
   home.stateVersion = "23.05";
 
@@ -23,4 +23,9 @@
   };
 
   programs.home-manager.enable = true;
+
+  programs.git = {
+    userName = "eptmoeller";
+    userEmail = "tobias.moeller@ecoplan.de";
+  };
 }

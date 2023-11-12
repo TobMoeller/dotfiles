@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   imports = [
@@ -7,8 +7,11 @@
   ];
 
   home.packages = [
-    pkgs.meslo-lgs-nf
+    pkgs.meslo-lgs-nf # nerd font for powerlevel10k theme
     pkgs.timewarrior
+
+    pkgs.php82
+    pkgs.php82Packages.composer
   ];
 
   home.file = {
@@ -21,7 +24,22 @@
 
   programs.git = {
     enable = true;
-    # includes = [{ path = "./gitconfig"; }];
+    userName = lib.mkDefault "TobMoeller";
+    userEmail = lib.mkDefault "tobiasmoellerw@t-online.de";
+    aliases = {
+      s = "status -sb";
+      st = "status";
+      ci = "commit";
+      co = "checkout";
+      nah = "!git reset --hard && git clean -df";
+      alias = "! git config --get-regexp ^alias\. | sed -e s/^alias\.// -e s/\ /\ =\ /";
+    };
+  };
+
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = true;
+    nix-direnv.enable = true;
   };
 
   # programs.fzf = {
