@@ -14,6 +14,8 @@
     php82
     php82Packages.composer
 
+    nodejs_20
+
     # LSP packages
     phpactor
   ];
