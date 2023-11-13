@@ -10,8 +10,9 @@
     ./packages/commons.nix
   ];
 
-  home.packages = [
+  home.packages = with pkgs; [
     # pkgs.hello
+    podman # requires uidmap on ubuntu
   ];
 
   home.file = {
