@@ -16,6 +16,7 @@
 
   home.file = {
     # ".screenrc".source = dotfiles/screenrc;
+    ".ideavimrc".source = ./packages/config/ideavimrc;
   };
 
   home.sessionVariables = {
