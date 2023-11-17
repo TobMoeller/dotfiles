@@ -53,6 +53,10 @@
     nix-direnv.enable = true;
   };
 
+  programs.ripgrep = {
+    enable = true;
+  };
+
   # programs.fzf = {
   #   enable = true;
   # };

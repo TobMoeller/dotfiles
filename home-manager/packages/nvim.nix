@@ -59,6 +59,14 @@
                 config = "vim.keymap.set('n', '<Leader>q', ':Bdelete<CR>')";
             }
             {
+                plugin = telescope-nvim;
+                type = "lua";
+                config = lib.fileContents ./config/neovim/telescope.lua;
+            }
+            plenary-nvim
+            telescope-live-grep-args-nvim
+            telescope-fzf-native-nvim
+            {
                 plugin = nvim-tree-lua;
                 type = "lua";
                 config = lib.fileContents ./config/neovim/nvim-tree.lua;
