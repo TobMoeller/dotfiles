@@ -11,7 +11,8 @@ set scrolloff=8
 set relativenumber
 set number
 
-set clipboard+=unnamed
+" explanation of current behavior: https://youtrack.jetbrains.com/issue/VIM-3074/Paste-into-visual-selection-broken-in-2.5.1#focus=Comments-27-8126700.0-0
+set clipboard^=unnamed
 
 " Do incremental searching.
 set incsearch
@@ -49,7 +50,7 @@ map ,, <Esc>A,
 vmap < <gv
 vmap > >gv
 
-"vmap p "_dP<Esc>"
+" vmap p "_dP<Esc>"
 
 "vmap y myy`y
 "vmap Y myy`Y
