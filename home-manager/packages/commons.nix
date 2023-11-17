@@ -11,7 +11,12 @@
     meslo-lgs-nf # nerd font for powerlevel10k theme
     timewarrior
 
-    php82
+    # config options: https://nixos.wiki/wiki/PHP
+    (php82.buildEnv {
+      extraConfig = ''
+        memory_limit = 500M
+      '';
+    })
     php82Packages.composer
 
     nodejs_20
