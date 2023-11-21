@@ -13,6 +13,9 @@
 
     # config options: https://nixos.wiki/wiki/PHP
     (php82.buildEnv {
+      extensions = ({ enabled, all }: enabled ++ (with all; [
+        redis
+      ]));
       extraConfig = ''
         memory_limit = 500M
       '';
