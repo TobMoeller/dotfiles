@@ -5,13 +5,14 @@
         enable = true;
 
         shellAliases = {
-            # @TODO change to nvim after nvim config
-            vim = "vim";
-            vi = "vim";
-
             ll = "ls -alF";
             la = "ls -A";
             l = "ls -CF";
+
+            ".." = "cd ..";
+            "..." = "cd ../..";
+            "...." = "cd ../../..";
+            "....." = "cd ../../../..";
 
             pa = "php artisan";
             sail = "./vendor/bin/sail";

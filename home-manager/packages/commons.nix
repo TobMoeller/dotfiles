@@ -4,14 +4,29 @@
   imports = [
     ./tmux.nix
     ./zsh.nix
+    ./nvim.nix
   ];
 
-  home.packages = [
-    pkgs.meslo-lgs-nf # nerd font for powerlevel10k theme
-    pkgs.timewarrior
+  home.packages = with pkgs; [
+    meslo-lgs-nf # nerd font for powerlevel10k theme
+    timewarrior
 
-    pkgs.php82
-    pkgs.php82Packages.composer
+    # config options: https://nixos.wiki/wiki/PHP
+    (php82.buildEnv {
+      extensions = ({ enabled, all }: enabled ++ (with all; [
+        redis
+        imagick
+      ]));
+      extraConfig = ''
+        memory_limit = 500M
+      '';
+    })
+    php82Packages.composer
+
+    nodejs_20
+
+    # LSP packages
+    phpactor
   ];
 
   home.file = {
@@ -40,6 +55,10 @@
     enable = true;
     enableZshIntegration = true;
     nix-direnv.enable = true;
+  };
+
+  programs.ripgrep = {
+    enable = true;
   };
 
   # programs.fzf = {

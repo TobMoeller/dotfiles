@@ -9,6 +9,7 @@
     baseIndex = 1;
     historyLimit = 10000;
     aggressiveResize = true;
+    terminal = "screen-256color";
 
 
     # The configurations below aren't available natively, so we use extraConfig.
@@ -17,7 +18,7 @@
         set-option -g renumber-windows on
 
         # colors
-        set -g default-terminal "''${TERM}"
+        # set -g default-terminal "''${TERM}"
 
         # Enable undercurl
         set -as terminal-overrides ',*:Smulx=\E[4::%p1%dm'
@@ -119,11 +120,9 @@
         # Switch between two most recently used sessions
         bind ^ switch-client -l
 
-        # use PREFIX+| (or PREFIX+\) to split window horizontally and PREFIX+- or
-        # (PREFIX+_) to split vertically also use the current pane path to define the
-        # new pane path
-        #bind | split-window -h -c "#{pane_current_path}"
-        #bind - split-window -v -c "#{pane_current_path}"
+        # split with path
+        bind % split-window -h -c "#{pane_current_path}"
+        bind '"' split-window -v -c "#{pane_current_path}"
 
         # Change the path for newly created windows
         bind c new-window -c "#{pane_current_path}"
