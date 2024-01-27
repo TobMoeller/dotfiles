@@ -13,6 +13,10 @@
   home.packages = with pkgs; [
     # pkgs.hello
     podman # requires uidmap on ubuntu
+    podman-compose
+
+    chromium
+    ghostscript
   ];
 
   home.file = {
