@@ -59,6 +59,10 @@ tmux new-session -c $selected -d -s $dirname && tmux switch-client -t $dirname |
     # ".screenrc".source = dotfiles/screenrc;
   };
 
+  home.sessionPath = [
+    "$HOME/.composer/vendor/bin"
+  ];
+
   home.sessionVariables = {
     # EDITOR = "emacs";
   };

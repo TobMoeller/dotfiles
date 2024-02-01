@@ -30,7 +30,16 @@
         set-window-option -g mode-keys vi
         bind-key -T copy-mode-vi v send -X begin-selection
         bind-key -T copy-mode-vi V send -X select-line
-        bind-key -T copy-mode-vi y send -X copy-pipe-and-cancel 'xclip -in -selection clipboard'
+
+        # macOS-specific commands
+        if-shell "[ -x $(command -v sw_vers) ]" {
+          bind-key -T copy-mode-vi y send -X copy-pipe-and-cancel 'pbcopy'
+        }
+
+        # Linux-specific commands
+        if-shell "[ ! -x $(command -v sw_vers) ]" {
+          bind-key -T copy-mode-vi y send -X copy-pipe-and-cancel 'xclip -in -selection clipboard'
+        }
 
         # Allow tmux to set the terminal title
         set -g set-titles on

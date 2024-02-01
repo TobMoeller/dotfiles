@@ -24,6 +24,10 @@
     ".ideavimrc".source = ./packages/config/ideavimrc;
   };
 
+  home.sessionPath = [
+    "/snap/bin"
+  ];
+
   home.sessionVariables = {
     # EDITOR = "emacs";
   };
