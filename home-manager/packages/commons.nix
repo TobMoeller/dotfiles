@@ -10,6 +10,7 @@
   home.packages = with pkgs; [
     meslo-lgs-nf # nerd font for powerlevel10k theme
     timewarrior
+    jq # command line json processor
 
     # config options: https://nixos.wiki/wiki/PHP
     (php82.buildEnv {
