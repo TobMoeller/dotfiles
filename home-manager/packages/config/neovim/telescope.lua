@@ -39,12 +39,12 @@ require('telescope').setup({
     find_files = {
       hidden = true,
     },
-    buffers = {
-      previewer = false,
-      layout_config = {
-        width = 80,
-      },
-    },
+    -- buffers = {
+    --   previewer = false,
+    --   layout_config = {
+    --     width = 80,
+    --   },
+    -- },
     oldfiles = {
       prompt_title = 'History',
     },

@@ -7,9 +7,15 @@
     ./nvim.nix
   ];
 
+  # https://nixos.org/manual/nixpkgs/stable/#sec-allow-unfree
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+    "intelephense"
+  ];
+
   home.packages = with pkgs; [
     meslo-lgs-nf # nerd font for powerlevel10k theme
     timewarrior
+    jq # command line json processor
 
     # config options: https://nixos.wiki/wiki/PHP
     (php82.buildEnv {
@@ -24,14 +30,25 @@
     php82Packages.composer
 
     nodejs_20
+    python3
 
     # LSP packages
     phpactor
+    nodePackages.volar
+    nodePackages.intelephense
+    nodePackages.pyright
+    nodePackages."@tailwindcss/language-server" # (not found in nix packages: https://github.com/NixOS/nixpkgs/issues/200244)
+
+    (pkgs.writeShellScriptBin "t" (builtins.readFile ./scripts/t))
   ];
 
   home.file = {
     # ".screenrc".source = dotfiles/screenrc;
   };
+
+  home.sessionPath = [
+    "$HOME/.composer/vendor/bin"
+  ];
 
   home.sessionVariables = {
     # EDITOR = "emacs";
@@ -41,6 +58,10 @@
     enable = true;
     userName = lib.mkDefault "TobMoeller";
     userEmail = lib.mkDefault "tobiasmoellerw@t-online.de";
+    extraConfig = {
+      init.defaultBranch = "main";
+      push.autoSetupRemote = true;
+    };
     aliases = {
       s = "status -sb";
       st = "status";
@@ -61,8 +82,7 @@
     enable = true;
   };
 
-  # programs.fzf = {
-  #   enable = true;
-  # };
-
+  programs.fzf = {
+    enable = true;
+  };
 }
