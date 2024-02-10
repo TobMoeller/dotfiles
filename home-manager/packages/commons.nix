@@ -7,6 +7,11 @@
     ./nvim.nix
   ];
 
+  # https://nixos.org/manual/nixpkgs/stable/#sec-allow-unfree
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+    "intelephense"
+  ];
+
   home.packages = with pkgs; [
     meslo-lgs-nf # nerd font for powerlevel10k theme
     timewarrior
@@ -25,9 +30,14 @@
     php82Packages.composer
 
     nodejs_20
+    python3
 
     # LSP packages
     phpactor
+    nodePackages.volar
+    nodePackages.intelephense
+    nodePackages.pyright
+    nodePackages."@tailwindcss/language-server" # (not found in nix packages: https://github.com/NixOS/nixpkgs/issues/200244)
 
     (pkgs.writeShellScriptBin "t" (builtins.readFile ./scripts/t))
   ];
@@ -48,6 +58,10 @@
     enable = true;
     userName = lib.mkDefault "TobMoeller";
     userEmail = lib.mkDefault "tobiasmoellerw@t-online.de";
+    extraConfig = {
+      init.defaultBranch = "main";
+      push.autoSetupRemote = true;
+    };
     aliases = {
       s = "status -sb";
       st = "status";

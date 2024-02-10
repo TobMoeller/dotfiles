@@ -2,19 +2,23 @@ local capabilities = require('cmp_nvim_lsp').default_capabilities()
 local lspconfig = require('lspconfig')
 
 -- PHP
--- require('lspconfig').intelephense.setup({ capabilities = capabilities })
-lspconfig.phpactor.setup({ capabilities = capabilities })
+lspconfig.intelephense.setup({ capabilities = capabilities })
+-- lspconfig.phpactor.setup({ capabilities = capabilities })
 
 -- Vue, JavaScript, TypeScript
--- require('lspconfig').volar.setup({
---   capabilities = capabilities,
---   -- Enable "Take Over Mode" where volar will provide all JS/TS LSP services
---   -- This drastically improves the responsiveness of diagnostic updates on change
---   filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
--- })
+lspconfig.volar.setup({
+  capabilities = capabilities,
+  -- Enable "Take Over Mode" where volar will provide all JS/TS LSP services
+  -- This drastically improves the responsiveness of diagnostic updates on change
+  filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
+})
+
+-- Python
+lspconfig.pyright.setup({ capabilities = capabilities })
+
 
 -- Tailwind CSS
--- require('lspconfig').tailwindcss.setup({ capabilities = capabilities })
+lspconfig.tailwindcss.setup({ capabilities = capabilities })
 
 -- JSON
 -- require('lspconfig').jsonls.setup({
@@ -50,6 +54,7 @@ vim.keymap.set('n', 'gi', ':Telescope lsp_implementations<CR>')
 vim.keymap.set('n', 'gr', ':Telescope lsp_references<CR>')
 vim.keymap.set('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>')
 vim.keymap.set('n', '<Leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>')
+vim.keymap.set({ 'n', 'v' }, '<space>ca', vim.lsp.buf.code_action, opts)
 
 -- Diagnostic configuration
 vim.diagnostic.config({
