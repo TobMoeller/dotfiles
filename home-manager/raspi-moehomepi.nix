@@ -52,6 +52,6 @@
     viAlias = true;
     vimAlias = true;
 
-    extraLuaConfig = lib.fileContents ./config/neovim/config.lua;
+    extraLuaConfig = lib.fileContents ./packages/config/neovim/config.lua;
   };
 }
