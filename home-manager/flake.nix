@@ -13,10 +13,10 @@
     let
       pkgs = nixpkgs.legacyPackages;
     in {
-      defaulPackage = {
-        aarch64-darwin = home-manager.defaulPackage.aarch64-darwin;
-        x86_64-linux = home-manager.defaulPackage.x86_64-linux;
-        aarch64-linux = home-manager.defaulPackage.aarch64-linux;
+      defaultPackage = {
+        aarch64-darwin = home-manager.defaultPackage.aarch64-darwin;
+        x86_64-linux = home-manager.defaultPackage.x86_64-linux;
+        aarch64-linux = home-manager.defaultPackage.aarch64-linux;
       };
 
       homeConfigurations = {
