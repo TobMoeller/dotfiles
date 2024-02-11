@@ -21,7 +21,6 @@
       '';
     })
     php82Packages.composer
-    mysql80
     # nodejs_20
     python3
   ];
