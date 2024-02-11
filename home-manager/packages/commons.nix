@@ -70,6 +70,10 @@
       nah = "!git reset --hard && git clean -df";
       alias = "! git config --get-regexp ^alias\. | sed -e s/^alias\.// -e s/\ /\ =\ /";
     };
+    ignores = [
+      "_ide_*"
+      ".phpstorm*"
+    ];
   };
 
   programs.direnv = {
