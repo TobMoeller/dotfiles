@@ -5,8 +5,9 @@
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
-    items+=`find ~/code -maxdepth 2 -mindepth 1 -type d`
-    items+=`echo -e "\n$(find ~/portal -maxdepth 2 -mindepth 1 -type d)"`
+    items+=`find ~/code -maxdepth 2 -mindepth 1 -type d ! -wholename '*/ecoplan-crm*'`
+    items+=`echo -e "\n$(find ~/code/ecoplan-crm -maxdepth 2 -mindepth 1 -type d)"`
+    # items+=`echo -e "\n$(find ~/portal -maxdepth 2 -mindepth 1 -type d)"`
     items+=`echo -e "\n/tmp"`
     selected=`echo "$items" | fzf`
     # echo "$items"
