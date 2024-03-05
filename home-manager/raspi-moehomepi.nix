@@ -13,9 +13,9 @@
 
   home.packages = with pkgs; [
     (php82.buildEnv {
-      # extensions = ({ enabled, all }: enabled ++ (with all; [
-      #   redis
-      # ]));
+      extensions = ({ enabled, all }: enabled ++ (with all; [
+        redis
+      ]));
       extraConfig = ''
         memory_limit = 500M
       '';
