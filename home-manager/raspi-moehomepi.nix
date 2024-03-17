@@ -4,7 +4,7 @@
   home.username = "moehomepi";
   home.homeDirectory = "/home/moehomepi";
 
-  home.stateVersion = "23.05";
+  home.stateVersion = "23.11";
 
   imports = [
     ./packages/tmux.nix

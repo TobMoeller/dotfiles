@@ -4,7 +4,7 @@
   home.username = "tobiasmoeller";
   home.homeDirectory = "/Users/tobiasmoeller";
 
-  home.stateVersion = "23.05";
+  home.stateVersion = "23.11";
 
   imports = [
     ./packages/commons.nix
