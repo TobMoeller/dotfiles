@@ -23,6 +23,11 @@
     php82Packages.composer
     # nodejs_20
     python3
+
+    # wip: apt install script, looking for a better way to do this
+    (pkgs.writeShellScriptBin "install-home" ''
+      sudo apt update && sudo apt install mariadb-server redis supervisor
+    '')
   ];
 
   home.file = {
