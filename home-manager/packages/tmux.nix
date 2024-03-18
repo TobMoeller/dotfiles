@@ -9,7 +9,7 @@
     baseIndex = 1;
     historyLimit = 10000;
     aggressiveResize = true;
-    terminal = "screen-256color";
+    terminal = "tmux-256color";
 
 
     # The configurations below aren't available natively, so we use extraConfig.
@@ -18,7 +18,8 @@
         set-option -g renumber-windows on
 
         # colors
-        # set -g default-terminal "''${TERM}"
+        # https://gist.github.com/andersevenrud/015e61af2fd264371032763d4ed965b6
+        set -ag terminal-overrides ",$TERM:RGB"
 
         # Enable undercurl
         set -as terminal-overrides ',*:Smulx=\E[4::%p1%dm'
