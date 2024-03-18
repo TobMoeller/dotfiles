@@ -14,6 +14,7 @@
                 plugin = catppuccin-nvim;
                 type = "lua";
                 config = ''
+                    vim.opt.termguicolors = true
                     vim.cmd.colorscheme "catppuccin-mocha"
                 '';
             }

@@ -8,6 +8,7 @@
 
   imports = [
     ./packages/commons.nix
+    ./packages/alacritty.nix
   ];
 
   home.packages = [

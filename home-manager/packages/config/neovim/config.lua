@@ -20,8 +20,6 @@ vim.opt.completeopt = 'menuone,longest,preview'
 vim.opt.title = true
 vim.opt.mouse = 'a' -- all mode
 
-vim.opt.termguicolors = true
-
 vim.opt.spell = true
 
 vim.opt.ignorecase = true
