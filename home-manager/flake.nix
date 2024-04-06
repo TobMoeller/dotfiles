@@ -7,9 +7,13 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    cmp-ai = {
+      url = "github:tzachar/cmp-ai";
+      flake = false;
+    };
   };
 
-  outputs = { nixpkgs, home-manager, ... }:
+  outputs = { nixpkgs, home-manager, cmp-ai, ... }:
     let
       pkgs = nixpkgs.legacyPackages;
     in {
@@ -25,6 +29,8 @@
 
           modules = [ ./mbp-tobiasmoeller.nix ];
 
+          extraSpecialArgs = { inherit cmp-ai; };
+
           # Optionally use extraSpecialArgs
           # to pass through arguments to home.nix
         };
@@ -33,6 +39,8 @@
           pkgs = pkgs.x86_64-linux;
 
           modules = [ ./ep-wsl-tmoeller.nix ];
+
+          extraSpecialArgs = { inherit cmp-ai; };
         };
 
         "moehomepi@moehomepi" = home-manager.lib.homeManagerConfiguration {

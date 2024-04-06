@@ -40,8 +40,19 @@ cmp.setup({
       end
     end, { "i", "s" }),
     ['<CR>'] = cmp.mapping.confirm({ select = true }),
+    ['<C-x>'] = cmp.mapping(
+      cmp.mapping.complete({
+        config = {
+          sources = cmp.config.sources({
+            { name = 'cmp_ai' },
+          }),
+        },
+      }),
+      { 'i' }
+    ),
   },
   sources = {
+    { name = 'cmp_ai' },
     { name = 'nvim_lsp' },
     { name = 'nvim_lsp_signature_help' },
     { name = 'luasnip' },

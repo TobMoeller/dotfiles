@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "cmp-ai": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1710504430,
+        "narHash": "sha256-bzF2G888Q/euR8Xnhgp3M4zWXODw4rMojR71yeUSROE=",
+        "owner": "tzachar",
+        "repo": "cmp-ai",
+        "rev": "70ab6d97110224c1ed1a023cd5f18efcaeefb1df",
+        "type": "github"
+      },
+      "original": {
+        "owner": "tzachar",
+        "repo": "cmp-ai",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -38,6 +54,7 @@
     },
     "root": {
       "inputs": {
+        "cmp-ai": "cmp-ai",
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs"
       }
