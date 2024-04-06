@@ -38,15 +38,20 @@
             vim-lastplace
             # Enable * searching with visually selected text.
             vim-visual-star-search
-            # TODO temporary disabled, slow startup
-            # {
-            #     plugin = vim-rooter;
-            #     type = "lua";
-            #     config = ''
-            #         vim.g.rooter_manual_only = 1
-            #         vim.cmd.Rooter
-            #     '';
-            # }
+            # sets cwd to project root, ran only on nvim startup
+            {
+                plugin = vim-rooter;
+                type = "lua";
+                config = ''
+                    vim.g.rooter_manual_only = 1
+                    vim.api.nvim_create_autocmd("VimEnter", {
+                        pattern = "*",
+                        callback = function()
+                            vim.cmd('Rooter')
+                        end
+                    })
+                '';
+            }
             {
                 plugin = nvim-autopairs;
                 type = "lua";
