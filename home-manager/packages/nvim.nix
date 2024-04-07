@@ -71,6 +71,15 @@
                 config = "vim.keymap.set('n', '<Leader>q', ':Bdelete<CR>')";
             }
             {
+                plugin = splitjoin-vim;
+                type = "lua";
+                config = ''
+                    vim.g.splitjoin_html_attributes_hanging = 1
+                    vim.g.splitjoin_trailing_comma = 1
+                    vim.g.splitjoin_php_method_chain_full = 1
+                '';
+            }
+            {
                 plugin = telescope-nvim;
                 type = "lua";
                 config = lib.fileContents ./config/neovim/telescope.lua;
