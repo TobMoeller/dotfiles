@@ -28,6 +28,12 @@
             vim-unimpaired
             # Indent autodetection with editorconfig support.
             vim-sleuth
+            # indentation lines
+            {
+                plugin = indent-blankline-nvim;
+                type = "lua";
+                config = lib.fileContents ./config/neovim/indent-blankline.lua;
+            }
             # Allow plugins to enable repeating of commands with "."
             vim-repeat
             # Add more languages.
