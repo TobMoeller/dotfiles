@@ -100,8 +100,8 @@ if (vim.loop.os_uname().sysname == "Darwin")
 end
 
 -- tab/buffer navigation
-vim.keymap.set('n', '<Leader><Tab>', vim.cmd.bn)
-vim.keymap.set('n', '<Leader><S-Tab>', vim.cmd.bp)
+-- vim.keymap.set('n', '<Leader><Tab>', vim.cmd.bn)
+-- vim.keymap.set('n', '<Leader><S-Tab>', vim.cmd.bp)
 
 -- exit terminal mode
 vim.keymap.set('t', '<ESC>', '<C-\\><C-N>')
