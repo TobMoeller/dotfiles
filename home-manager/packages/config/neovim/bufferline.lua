@@ -29,8 +29,10 @@ require('bufferline').setup({
 })
 
 
-vim.keymap.set('n', '<Leader><Tab>', ':BufferLineMoveNext<CR>', { silent = true })
-vim.keymap.set('n', '<Leader><S-Tab>', ':BufferLineMovePrev<CR>', { silent = true })
+vim.keymap.set('n', 'mn', ':BufferLineMoveNext<CR>', { silent = true })
+vim.keymap.set('n', 'mp', ':BufferLineMovePrev<CR>', { silent = true })
+vim.keymap.set('n', '<Leader><Tab>', ':BufferLineCycleNext<CR>', { silent = true })
+vim.keymap.set('n', '<Leader><S-Tab>', ':BufferLineCyclePrev<CR>', { silent = true })
 vim.keymap.set('n', '<C-N>', ':BufferLineCycleNext<CR>', { silent = true })
 vim.keymap.set('n', '<C-P>', ':BufferLineCyclePrev<CR>', { silent = true })
 

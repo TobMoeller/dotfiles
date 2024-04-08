@@ -76,7 +76,7 @@ vim.keymap.set({'i', 'n'}, ';;', '<Esc>A;')
 vim.keymap.set({'i', 'n'}, ',,', '<Esc>A,')
 
 -- remove search highlighting
-vim.keymap.set('n', '<Leader>k', ':nohlsearch<CR>')
+-- vim.keymap.set('n', '<Leader>k', ':nohlsearch<CR>')
 
 -- open file with default os program
 vim.keymap.set('n', '<Leader>x', ':!xdg-open %<CR><CR>')
