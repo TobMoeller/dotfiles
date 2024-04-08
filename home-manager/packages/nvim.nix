@@ -125,6 +125,12 @@
                 type = "lua";
                 config = "require('gitsigns').setup()";
             }
+            diffview-nvim
+            {
+                plugin = neogit;
+                type = "lua";
+                config = "require('neogit').setup()";
+            }
             
             # LSPs
             {
