@@ -140,15 +140,15 @@
             cmp_luasnip # completion for luasnip
             lspkind-nvim # icons for completion
 
-            {
-                plugin =
-                  (pkgs.vimUtils.buildVimPlugin {
-                    name = "cmp-ai";
-                    src = cmp-ai;
-                  });
-                type = "lua";
-                config = lib.fileContents ./config/neovim/cmp-ai.lua;
-            }
+            # {
+            #     plugin =
+            #       (pkgs.vimUtils.buildVimPlugin {
+            #         name = "cmp-ai";
+            #         src = cmp-ai;
+            #       });
+            #     type = "lua";
+            #     config = lib.fileContents ./config/neovim/cmp-ai.lua;
+            # }
 
             # TODO not implemented yet:
             # vim-heritage
