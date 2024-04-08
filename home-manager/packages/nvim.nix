@@ -120,6 +120,11 @@
             }
             nvim-ts-context-commentstring
             nvim-treesitter-textobjects
+            {
+                plugin = gitsigns-nvim;
+                type = "lua";
+                config = "require('gitsigns').setup()";
+            }
             
             # LSPs
             {
