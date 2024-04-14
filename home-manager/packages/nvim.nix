@@ -131,6 +131,26 @@
                 type = "lua";
                 config = "require('neogit').setup()";
             }
+
+            # Test execution
+            {
+                plugin = vimux;
+                type = "lua";
+                config = ''
+                    vim.g.VimuxHeight = '50'
+                    vim.g.VimuxOrientation = 'h'
+                '';
+            }
+            {
+                plugin = vim-test;
+                type = "lua";
+                config = ''
+                    vim.keymap.set('n', '<Leader>tn', ':TestNearest<CR>')
+                    vim.keymap.set('n', '<Leader>tf', ':TestFile<CR>')
+                    vim.keymap.set('n', '<Leader>tl', ':TestLast<CR>')
+                    vim.g['test#strategy'] = 'vimux'
+                '';
+            }
             
             # LSPs
             {
