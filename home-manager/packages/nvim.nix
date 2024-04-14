@@ -123,13 +123,16 @@
             {
                 plugin = gitsigns-nvim;
                 type = "lua";
-                config = "require('gitsigns').setup()";
+                config = lib.fileContents ./config/neovim/gitsigns.lua;
             }
             diffview-nvim
             {
                 plugin = neogit;
                 type = "lua";
-                config = "require('neogit').setup()";
+                config = ''
+                    require('neogit').setup()
+                    vim.keymap.set('n', '<Leader>g', ':Neogit<CR>')
+                '';
             }
 
             # Test execution
