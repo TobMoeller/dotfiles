@@ -15,6 +15,7 @@
     (php82.buildEnv {
       extensions = ({ enabled, all }: enabled ++ (with all; [
         redis
+        smbclient
       ]));
       extraConfig = ''
         memory_limit = 500M
