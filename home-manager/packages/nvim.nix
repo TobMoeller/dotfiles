@@ -54,6 +54,14 @@
             vim-lastplace
             # Enable * searching with visually selected text.
             vim-visual-star-search
+            # highlight yanked text
+            {
+                plugin = vim-highlightedyank;
+                type = "lua";
+                config = ''
+                    vim.g.highlightedyank_highlight_duration = 400
+                '';
+            }
             # sets cwd to project root, ran only on nvim startup
             {
                 plugin = vim-rooter;
@@ -81,12 +89,13 @@
                 config = "vim.keymap.set('n', '<Leader>q', ':Bdelete<CR>')";
             }
             {
-                plugin = splitjoin-vim;
+                plugin = treesj;
                 type = "lua";
                 config = ''
-                    vim.g.splitjoin_html_attributes_hanging = 1
-                    vim.g.splitjoin_trailing_comma = 1
-                    vim.g.splitjoin_php_method_chain_full = 1
+                    local treesj = require('treesj')
+                    treesj.setup({use_default_keymaps = false})
+                    vim.keymap.set('n', 'gJ', treesj.join)
+                    vim.keymap.set('n', 'gS', treesj.split)
                 '';
             }
             {
@@ -135,7 +144,7 @@
                 '';
             }
 
-            # Test execution
+            # interact with tmux from vim
             {
                 plugin = vimux;
                 type = "lua";
@@ -144,6 +153,7 @@
                     vim.g.VimuxOrientation = 'h'
                 '';
             }
+            # Test execution
             {
                 plugin = vim-test;
                 type = "lua";
@@ -155,7 +165,9 @@
                 '';
             }
             
+            # ------------------
             # LSPs
+            # ------------------
             {
                 plugin = nvim-lspconfig;
                 type = "lua";
@@ -170,6 +182,7 @@
             cmp-nvim-lsp-signature-help # function signature for completion
             cmp-buffer # completion for buffer words
             cmp-path # completion for path
+            friendly-snippets
             luasnip
             cmp_luasnip # completion for luasnip
             lspkind-nvim # icons for completion
