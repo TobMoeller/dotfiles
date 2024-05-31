@@ -73,7 +73,9 @@ in {
 
   home.activation = {
     installNpmPackages = ''
+      export NPM_CONFIG_PREFIX=${config.home.homeDirectory}/.npm-global
       export PATH=${nodejs}/bin:$PATH
+
       check_and_install() {
         local package=$1
         local version=$2
