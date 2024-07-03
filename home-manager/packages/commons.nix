@@ -50,7 +50,7 @@ in {
     # extraNodePackages."@vue/typescript-plugin"
     # nodePackages.volar
     nodePackages.intelephense
-    nodePackages.pyright
+    pyright
     nodePackages."@tailwindcss/language-server" # (not found in nix packages: https://github.com/NixOS/nixpkgs/issues/200244)
 
     (pkgs.writeShellScriptBin "t" (builtins.readFile ./scripts/t))
