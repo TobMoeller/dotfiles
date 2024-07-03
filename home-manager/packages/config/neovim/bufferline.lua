@@ -38,3 +38,7 @@ vim.keymap.set('n', '<C-P>', ':BufferLineCyclePrev<CR>', { silent = true })
 
 vim.keymap.set('n', '<Leader>^', '<cmd>lua require("bufferline").go_to(1, true)<CR>', { silent = true })
 vim.keymap.set('n', '<Leader>$', '<cmd>lua require("bufferline").go_to(-1, true)<CR>', { silent = true })
+
+vim.keymap.set('n', '<Leader>br', ':BufferLineCloseRight<CR>', { silent = true })
+vim.keymap.set('n', '<Leader>bl', ':BufferLineCloseLeft<CR>', { silent = true })
+vim.keymap.set('n', '<Leader>bo', ':BufferLineCloseOthers<CR>', { silent = true })
