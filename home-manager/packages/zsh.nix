@@ -31,6 +31,12 @@
                 src = lib.cleanSource ./config;
                 file = "p10k.zsh";
             }
+            # https://github.com/jeffreytse/zsh-vi-mode
+            {
+                name = "vi-mode";
+                src = pkgs.zsh-vi-mode;
+                file = "share/zsh-vi-mode/zsh-vi-mode.plugin.zsh";
+            }
         ];
     };
 }
