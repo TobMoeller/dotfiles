@@ -11,8 +11,10 @@
     ./packages/alacritty.nix
   ];
 
-  home.packages = [
+  home.packages = with pkgs; [
     # pkgs.hello
+    zig_0_13
+    zls
   ];
 
   home.file = {
