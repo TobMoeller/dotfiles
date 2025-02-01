@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, cmp-ai, ... }:
 
 {
     programs.neovim = {
@@ -14,6 +14,17 @@
                 plugin = catppuccin-nvim;
                 type = "lua";
                 config = ''
+                    vim.opt.termguicolors = true
+                    require("catppuccin").setup({
+                        flavour = "mocha",
+                        integrations = {
+                            cmp = true,
+                            nvimtree = true,
+                            telescope = {
+                                enabled = true,
+                            },
+                        }
+                    })
                     vim.cmd.colorscheme "catppuccin-mocha"
                 '';
             }
@@ -27,6 +38,12 @@
             vim-unimpaired
             # Indent autodetection with editorconfig support.
             vim-sleuth
+            # indentation lines
+            {
+                plugin = indent-blankline-nvim;
+                type = "lua";
+                config = lib.fileContents ./config/neovim/indent-blankline.lua;
+            }
             # Allow plugins to enable repeating of commands with "."
             vim-repeat
             # Add more languages.
@@ -37,15 +54,28 @@
             vim-lastplace
             # Enable * searching with visually selected text.
             vim-visual-star-search
-            # TODO temporary disabled, slow startup
-            # {
-            #     plugin = vim-rooter;
-            #     type = "lua";
-            #     config = ''
-            #         vim.g.rooter_manual_only = 1
-            #         vim.cmd.Rooter
-            #     '';
-            # }
+            # highlight yanked text
+            {
+                plugin = vim-highlightedyank;
+                type = "lua";
+                config = ''
+                    vim.g.highlightedyank_highlight_duration = 400
+                '';
+            }
+            # sets cwd to project root, ran only on nvim startup
+            {
+                plugin = vim-rooter;
+                type = "lua";
+                config = ''
+                    vim.g.rooter_manual_only = 1
+                    vim.api.nvim_create_autocmd("VimEnter", {
+                        pattern = "*",
+                        callback = function()
+                            vim.cmd('Rooter')
+                        end
+                    })
+                '';
+            }
             {
                 plugin = nvim-autopairs;
                 type = "lua";
@@ -57,6 +87,16 @@
                 plugin = bufdelete-nvim;
                 type = "lua";
                 config = "vim.keymap.set('n', '<Leader>q', ':Bdelete<CR>')";
+            }
+            {
+                plugin = treesj;
+                type = "lua";
+                config = ''
+                    local treesj = require('treesj')
+                    treesj.setup({use_default_keymaps = false})
+                    vim.keymap.set('n', 'gJ', treesj.join)
+                    vim.keymap.set('n', 'gS', treesj.split)
+                '';
             }
             {
                 plugin = telescope-nvim;
@@ -89,8 +129,45 @@
             }
             nvim-ts-context-commentstring
             nvim-treesitter-textobjects
+            {
+                plugin = gitsigns-nvim;
+                type = "lua";
+                config = lib.fileContents ./config/neovim/gitsigns.lua;
+            }
+            diffview-nvim
+            {
+                plugin = neogit;
+                type = "lua";
+                config = ''
+                    require('neogit').setup()
+                    vim.keymap.set('n', '<Leader>g', ':Neogit<CR>')
+                '';
+            }
+
+            # interact with tmux from vim
+            {
+                plugin = vimux;
+                type = "lua";
+                config = ''
+                    vim.g.VimuxHeight = '50'
+                    vim.g.VimuxOrientation = 'h'
+                '';
+            }
+            # Test execution
+            {
+                plugin = vim-test;
+                type = "lua";
+                config = ''
+                    vim.keymap.set('n', '<Leader>tn', ':TestNearest<CR>')
+                    vim.keymap.set('n', '<Leader>tf', ':TestFile<CR>')
+                    vim.keymap.set('n', '<Leader>tl', ':TestLast<CR>')
+                    vim.g['test#strategy'] = 'vimux'
+                '';
+            }
             
+            # ------------------
             # LSPs
+            # ------------------
             {
                 plugin = nvim-lspconfig;
                 type = "lua";
@@ -105,9 +182,20 @@
             cmp-nvim-lsp-signature-help # function signature for completion
             cmp-buffer # completion for buffer words
             cmp-path # completion for path
+            friendly-snippets
             luasnip
             cmp_luasnip # completion for luasnip
             lspkind-nvim # icons for completion
+
+            # {
+            #     plugin =
+            #       (pkgs.vimUtils.buildVimPlugin {
+            #         name = "cmp-ai";
+            #         src = cmp-ai;
+            #       });
+            #     type = "lua";
+            #     config = lib.fileContents ./config/neovim/cmp-ai.lua;
+            # }
 
             # TODO not implemented yet:
             # vim-heritage

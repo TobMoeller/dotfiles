@@ -20,8 +20,6 @@ vim.opt.completeopt = 'menuone,longest,preview'
 vim.opt.title = true
 vim.opt.mouse = 'a' -- all mode
 
-vim.opt.termguicolors = true
-
 vim.opt.spell = true
 
 vim.opt.ignorecase = true
@@ -78,7 +76,7 @@ vim.keymap.set({'i', 'n'}, ';;', '<Esc>A;')
 vim.keymap.set({'i', 'n'}, ',,', '<Esc>A,')
 
 -- remove search highlighting
-vim.keymap.set('n', '<Leader>k', ':nohlsearch<CR>')
+-- vim.keymap.set('n', '<Leader>k', ':nohlsearch<CR>')
 
 -- open file with default os program
 vim.keymap.set('n', '<Leader>x', ':!xdg-open %<CR><CR>')
@@ -102,8 +100,8 @@ if (vim.loop.os_uname().sysname == "Darwin")
 end
 
 -- tab/buffer navigation
-vim.keymap.set('n', '<Leader><Tab>', vim.cmd.bn)
-vim.keymap.set('n', '<Leader><S-Tab>', vim.cmd.bp)
+-- vim.keymap.set('n', '<Leader><Tab>', vim.cmd.bn)
+-- vim.keymap.set('n', '<Leader><S-Tab>', vim.cmd.bp)
 
 -- exit terminal mode
 vim.keymap.set('t', '<ESC>', '<C-\\><C-N>')

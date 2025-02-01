@@ -1,8 +1,9 @@
 require('bufferline').setup({
   options = {
-    indicator = {
-      icon = ' ',
-    },
+    -- indicator = {
+    --   -- icon = ' ',
+    --   style = 'underline',
+    -- },
     show_close_icon = false,
     tab_size = 0,
     max_name_length = 25,
@@ -14,7 +15,7 @@ require('bufferline').setup({
         text_align = 'left',
       },
     },
-    separator_style = 'slant',
+    -- separator_style = 'slant',
     modified_icon = '',
     custom_areas = {
       left = function()
@@ -24,56 +25,20 @@ require('bufferline').setup({
       end,
     },
   },
-  highlights = {
-    fill = {
-      bg = { attribute = 'bg', highlight = 'StatusLine' },
-    },
-    background = {
-      bg = { attribute = 'bg', highlight = 'StatusLine' },
-    },
-    tab = {
-      bg = { attribute = 'bg', highlight = 'StatusLine' },
-    },
-    tab_close = {
-      bg = { attribute = 'bg', highlight = 'StatusLine' },
-    },
-    close_button = {
-      bg = { attribute = 'bg', highlight = 'StatusLine' },
-      fg = { attribute = 'fg', highlight = 'StatusLineNonText' },
-    },
-    close_button_visible = {
-      bg = { attribute = 'bg', highlight = 'StatusLine' },
-      fg = { attribute = 'fg', highlight = 'StatusLineNonText' },
-    },
-    close_button_selected = {
-      fg = { attribute = 'fg', highlight = 'StatusLineNonText' },
-    },
-    buffer_visible = {
-      bg = { attribute = 'bg', highlight = 'StatusLine' },
-    },
-    modified = {
-      bg = { attribute = 'bg', highlight = 'StatusLine' },
-    },
-    modified_visible = {
-      bg = { attribute = 'bg', highlight = 'StatusLine' },
-    },
-    duplicate = {
-      bg = { attribute = 'bg', highlight = 'StatusLine' },
-    },
-    duplicate_visible = {
-      bg = { attribute = 'bg', highlight = 'StatusLine' },
-    },
-    separator = {
-      fg = { attribute = 'bg', highlight = 'StatusLine' },
-      bg = { attribute = 'bg', highlight = 'StatusLine' },
-    },
-    separator_selected = {
-      fg = { attribute = 'bg', highlight = 'StatusLine' },
-      bg = { attribute = 'bg', highlight = 'Normal' }
-    },
-    separator_visible = {
-      fg = { attribute = 'bg', highlight = 'StatusLine' },
-      bg = { attribute = 'bg', highlight = 'StatusLine' },
-    },
-  },
+  highlights = require("catppuccin.groups.integrations.bufferline").get(),
 })
+
+
+vim.keymap.set('n', 'mn', ':BufferLineMoveNext<CR>', { silent = true })
+vim.keymap.set('n', 'mp', ':BufferLineMovePrev<CR>', { silent = true })
+vim.keymap.set('n', '<Leader><Tab>', ':BufferLineCycleNext<CR>', { silent = true })
+vim.keymap.set('n', '<Leader><S-Tab>', ':BufferLineCyclePrev<CR>', { silent = true })
+vim.keymap.set('n', '<C-N>', ':BufferLineCycleNext<CR>', { silent = true })
+vim.keymap.set('n', '<C-P>', ':BufferLineCyclePrev<CR>', { silent = true })
+
+vim.keymap.set('n', '<Leader>^', '<cmd>lua require("bufferline").go_to(1, true)<CR>', { silent = true })
+vim.keymap.set('n', '<Leader>$', '<cmd>lua require("bufferline").go_to(-1, true)<CR>', { silent = true })
+
+vim.keymap.set('n', '<Leader>br', ':BufferLineCloseRight<CR>', { silent = true })
+vim.keymap.set('n', '<Leader>bl', ':BufferLineCloseLeft<CR>', { silent = true })
+vim.keymap.set('n', '<Leader>bo', ':BufferLineCloseOthers<CR>', { silent = true })
