@@ -64,7 +64,9 @@ in {
 
   home.sessionPath = [
     "$HOME/.composer/vendor/bin"
+    "$HOME/.config/composer/vendor/bin"
     "$HOME/.npm-global/bin"
+    "$HOME/bin"
   ];
 
   home.sessionVariables = {
