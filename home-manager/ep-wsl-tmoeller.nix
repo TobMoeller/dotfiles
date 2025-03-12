@@ -14,6 +14,7 @@
     # pkgs.hello
     podman # requires uidmap on ubuntu
     podman-compose
+    slirp4netns # required for podman networking
 
     chromium
     ghostscript

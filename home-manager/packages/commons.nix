@@ -1,14 +1,6 @@
 { config, pkgs, lib, ... }:
 
-let
-  # node2nix to install custom npm packages, tho it does not work for volar as not all sub dependencies get linked
-  # TODO remove custom npm packages once all volar dependencies get resolved as nix packages
-  # extraNodePackages = import ./node/default.nix {
-  #   inherit pkgs;
-  #   nodejs = pkgs.nodejs_20;
-  # };
-  nodejs = pkgs.nodejs_20;
-in {
+{
   imports = [
     ./tmux.nix
     ./zsh.nix
@@ -26,35 +18,31 @@ in {
     jq # command line json processor
 
     # config options: https://nixos.wiki/wiki/PHP
-    (php82.buildEnv {
+    (php84.buildEnv {
       extensions = ({ enabled, all }: enabled ++ (with all; [
         redis
         imagick
+        # pcov
       ]));
       extraConfig = ''
         memory_limit = 500M
       '';
     })
-    php82Packages.composer
+    php84Packages.composer
 
-    # nodejs_20
-    nodejs
+    nodejs_20
     python3
 
     # LSP packages
     phpactor
-    # typescript
-    # vscode-langservers-extracted
-    # nodePackages.typescript-language-server
-    # extraNodePackages."@vue/language-server"
-    # extraNodePackages."@vue/typescript-plugin"
-    # nodePackages.volar
-    nodePackages.intelephense
+    typescript
+    typescript-language-server
+    vue-language-server
+    tailwindcss-language-server
+    intelephense
     pyright
-    nodePackages."@tailwindcss/language-server" # (not found in nix packages: https://github.com/NixOS/nixpkgs/issues/200244)
 
     (pkgs.writeShellScriptBin "t" (builtins.readFile ./scripts/t))
-    (pkgs.writeShellScriptBin "updateExtraNodePackages" "nix-shell -p nodePackages.node2nix --command 'node2nix -i ./node-packages.json -o node-packages.nix'")
   ];
 
   home.file = {
@@ -70,27 +58,8 @@ in {
   ];
 
   home.sessionVariables = {
+    VUE_PLUGIN_PATH = "${pkgs.vue-language-server}/lib/node_modules/@vue/language-server";
     # EDITOR = "emacs";
-  };
-
-  home.activation = {
-    installNpmPackages = ''
-      export NPM_CONFIG_PREFIX=${config.home.homeDirectory}/.npm-global
-      export PATH=${nodejs}/bin:$PATH
-
-      check_and_install() {
-        local package=$1
-        local version=$2
-        if ! npm list -g --depth=0 | grep -q "''${package}@''${version}"; then
-          npm install -g "''${package}@''${version}"
-        fi
-      }
-
-      check_and_install "typescript" "5.4.5"
-      check_and_install "typescript-language-server" "4.3.3"
-      check_and_install "@vue/language-server" "2.0.19"
-      check_and_install "@vue/typescript-plugin" "2.0.19"
-    '';
   };
 
   programs.git = {
