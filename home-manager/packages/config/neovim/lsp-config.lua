@@ -1,34 +1,34 @@
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
-local lspconfig = require('lspconfig')
-
+local defaultCapabilities = require('cmp_nvim_lsp').default_capabilities()
+vim.lsp.config('*', {
+  capabilities = defaultCapabilities
+})
 -- PHP
-lspconfig.intelephense.setup({ capabilities = capabilities })
--- lspconfig.phpactor.setup({ capabilities = capabilities })
+vim.lsp.enable('intelephense')
+-- vim.lsp.enable('phpactor')
 
 -- Vue, JavaScript, TypeScript
-lspconfig.ts_ls.setup({
-  capabilities = capabilities,
-  init_options = {
-    plugins = {
-      {
-        name = '@vue/typescript-plugin',
-        -- location = os.getenv('HOME') .. '/.nix-profile/bin/vue-language-server',
-        location = os.getenv('VUE_PLUGIN_PATH'),
-        languages = { 'vue' },
-      },
-    },
-  },
-  filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
+vim.lsp.enable('ts_ls', {
+  -- init_options = {
+  --   plugins = {
+  --     {
+  --       name = '@vue/typescript-plugin',
+  --       -- location = os.getenv('HOME') .. '/.nix-profile/bin/vue-language-server',
+  --       location = os.getenv('VUE_PLUGIN_PATH'),
+  --       languages = { 'vue' },
+  --     },
+  --   },
+  -- },
+  filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact' },
 })
 
-lspconfig.volar.setup({ capabilities = capabilities })
+-- vim.lsp.enable('vue_ls')
 
 -- Python
-lspconfig.pyright.setup({ capabilities = capabilities })
+vim.lsp.enable('pyright')
 
 
 -- Tailwind CSS
-lspconfig.tailwindcss.setup({ capabilities = capabilities })
+vim.lsp.enable('tailwindcss')
 
 -- JSON
 -- require('lspconfig').jsonls.setup({
@@ -56,8 +56,7 @@ lspconfig.tailwindcss.setup({ capabilities = capabilities })
 -- })
 
 -- zig
-lspconfig.zls.setup({
-  capabilities = capabilities,
+vim.lsp.enable('zls', {
   filetypes = { "zig", "zir" },
 })
 

@@ -47,8 +47,10 @@
 
   programs.git = {
     enable = true;
-    userName = "TobMoeller";
-    userEmail = "tobiasmoellerw@t-online.de";
+    settings = {
+      user.name = "TobMoeller";
+      user.email = "tobiasmoellerw@t-online.de";
+    };
   };
 
   programs.neovim = {

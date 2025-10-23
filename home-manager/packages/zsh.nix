@@ -18,6 +18,12 @@
             sail = "./vendor/bin/sail";
 
             ide = "php artisan ide-helper:generate && php artisan ide-helper:models -N && php artisan ide-helper:meta";
+
+            kubectl = "minikube kubectl --";
+            k = "kubectl";
+
+            d = "podman";
+            dc = "podman-compose";
         };
         
         plugins = [

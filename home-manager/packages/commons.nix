@@ -16,12 +16,14 @@
     meslo-lgs-nf # nerd font for powerlevel10k theme
     timewarrior
     jq # command line json processor
+    minikube
 
     # config options: https://nixos.wiki/wiki/PHP
     (php84.buildEnv {
       extensions = ({ enabled, all }: enabled ++ (with all; [
         redis
         imagick
+        rdkafka
         # pcov
       ]));
       extraConfig = ''
@@ -64,19 +66,23 @@
 
   programs.git = {
     enable = true;
-    userName = lib.mkDefault "TobMoeller";
-    userEmail = lib.mkDefault "tobiasmoellerw@t-online.de";
-    extraConfig = {
-      init.defaultBranch = "main";
-      push.autoSetupRemote = true;
-    };
-    aliases = {
-      s = "status -sb";
-      st = "status";
-      ci = "commit";
-      co = "checkout";
-      nah = "!git reset --hard && git clean -df";
-      alias = "! git config --get-regexp ^alias\. | sed -e s/^alias\.// -e s/\ /\ =\ /";
+    settings = {
+      user.name = lib.mkDefault "TobMoeller";
+      user.email = lib.mkDefault "tobiasmoellerw@t-online.de";
+
+      aliases = {
+        s = "status -sb";
+        st = "status";
+        ci = "commit";
+        co = "checkout";
+        nah = "!git reset --hard && git clean -df";
+        alias = "! git config --get-regexp ^alias\. | sed -e s/^alias\.// -e s/\ /\ =\ /";
+      };
+
+      extraConfig = {
+        init.defaultBranch = "main";
+        push.autoSetupRemote = true;
+      };
     };
     ignores = [
       "_ide_*"

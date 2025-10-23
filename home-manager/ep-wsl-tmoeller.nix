@@ -35,8 +35,8 @@
 
   programs.home-manager.enable = true;
 
-  programs.git = {
-    userName = "eptmoeller";
-    userEmail = "tobias.moeller@ecoplan.de";
+  programs.git.settings = {
+    user.name = "eptmoeller";
+    user.email = "tobias.moeller@ecoplan.de";
   };
 }
