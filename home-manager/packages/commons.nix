@@ -66,23 +66,20 @@
 
   programs.git = {
     enable = true;
+    aliases = {
+      s = "status -sb";
+      st = "status";
+      ci = "commit";
+      co = "checkout";
+      nah = "!git reset --hard && git clean -df";
+      alias = "! git config --get-regexp ^alias\. | sed -e s/^alias\.// -e s/\ /\ =\ /";
+    };
     settings = {
       user.name = lib.mkDefault "TobMoeller";
       user.email = lib.mkDefault "tobiasmoellerw@t-online.de";
 
-      aliases = {
-        s = "status -sb";
-        st = "status";
-        ci = "commit";
-        co = "checkout";
-        nah = "!git reset --hard && git clean -df";
-        alias = "! git config --get-regexp ^alias\. | sed -e s/^alias\.// -e s/\ /\ =\ /";
-      };
-
-      extraConfig = {
-        init.defaultBranch = "main";
-        push.autoSetupRemote = true;
-      };
+      push.autoSetupRemote = true;
+      init.defaultBranch = "main";
     };
     ignores = [
       "_ide_*"

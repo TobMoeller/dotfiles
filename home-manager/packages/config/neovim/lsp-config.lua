@@ -5,6 +5,8 @@ vim.lsp.config('*', {
 -- PHP
 vim.lsp.enable('intelephense')
 -- vim.lsp.enable('phpactor')
+vim.lsp.enable('dartls')
+vim.lsp.enable('sourcekit')
 
 -- Vue, JavaScript, TypeScript
 vim.lsp.enable('ts_ls', {
