@@ -13,6 +13,7 @@
   ];
 
   home.packages = with pkgs; [
+    hyperfine
     meslo-lgs-nf # nerd font for powerlevel10k theme
     timewarrior
     jq # command line json processor
@@ -87,11 +88,11 @@
     ];
   };
 
-  programs.direnv = {
-    enable = true;
-    enableZshIntegration = true;
-    nix-direnv.enable = true;
-  };
+  # programs.direnv = {
+  #   enable = true;
+  #   enableZshIntegration = true;
+  #   nix-direnv.enable = true;
+  # };
 
   programs.ripgrep = {
     enable = true;

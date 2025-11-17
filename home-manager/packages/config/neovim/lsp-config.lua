@@ -58,9 +58,7 @@ vim.lsp.enable('tailwindcss')
 -- })
 
 -- zig
-vim.lsp.enable('zls', {
-  filetypes = { "zig", "zir" },
-})
+vim.lsp.enable('zls');
 
 
 -- Keymaps

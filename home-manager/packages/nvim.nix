@@ -47,7 +47,7 @@
             # Allow plugins to enable repeating of commands with "."
             vim-repeat
             # Add more languages.
-            vim-polyglot
+            # vim-polyglot
             # Navigate seamlessly between Vim windows and Tmux panes.
             vim-tmux-navigator
             # Jump to the last location when opening a file.
