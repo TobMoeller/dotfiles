@@ -10,6 +10,7 @@
   # https://nixos.org/manual/nixpkgs/stable/#sec-allow-unfree
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "intelephense"
+    "ngrok"
   ];
 
   home.packages = with pkgs; [
@@ -24,8 +25,9 @@
       extensions = ({ enabled, all }: enabled ++ (with all; [
         redis
         imagick
-        rdkafka
         # pcov
+        # rdkafka
+        # mongodb
       ]));
       extraConfig = ''
         memory_limit = 500M
