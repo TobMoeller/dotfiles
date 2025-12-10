@@ -35,7 +35,7 @@
     })
     php84Packages.composer
 
-    nodejs_20
+    nodejs_24
     python3
 
     # LSP packages
