@@ -35,12 +35,12 @@
           # to pass through arguments to home.nix
         };
 
-        "tmoeller@EPNB83" = home-manager.lib.homeManagerConfiguration {
+        "tobias@INV02748" = home-manager.lib.homeManagerConfiguration {
           pkgs = pkgs.x86_64-linux;
 
-          modules = [ ./ep-wsl-tmoeller.nix ];
+          modules = [ ./red-tobias.nix ];
 
-          extraSpecialArgs = { inherit cmp-ai; };
+          # extraSpecialArgs = { inherit cmp-ai; };
         };
 
         "moehomepi@moehomepi" = home-manager.lib.homeManagerConfiguration {

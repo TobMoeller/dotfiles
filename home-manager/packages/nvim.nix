@@ -7,7 +7,7 @@
         viAlias = true;
         vimAlias = true;
 
-        extraLuaConfig = lib.fileContents ./config/neovim/config.lua;
+        initLua = lib.fileContents ./config/neovim/config.lua;
 
         plugins = with pkgs.vimPlugins; [
             {

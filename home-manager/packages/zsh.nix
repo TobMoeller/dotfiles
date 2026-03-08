@@ -22,8 +22,10 @@
             kubectl = "minikube kubectl --";
             k = "kubectl";
 
-            d = "podman";
-            dc = "podman-compose";
+            p = "podman";
+            pc = "podman-compose";
+            d = "docker";
+            dc = "docker compose";
         };
         
         plugins = [
