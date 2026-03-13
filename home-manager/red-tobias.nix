@@ -19,6 +19,7 @@
     # chromium
     # ghostscript
     openfortivpn
+    github-copilot-cli
   ];
 
   home.file = {
@@ -27,7 +28,7 @@
   };
 
   home.sessionPath = [
-    # "/snap/bin"
+    "$HOME/.local/share/JetBrains/Toolbox/scripts"
   ];
 
   home.sessionVariables = {

@@ -6,6 +6,7 @@ let
       redis
       gnupg
       yaml
+      xdebug
       # imagick
       # pcov
       # rdkafka
@@ -13,6 +14,7 @@ let
     ]));
     extraConfig = ''
       memory_limit = 500M
+      xdebug.mode=coverage
     '';
   };
 in {
@@ -25,6 +27,7 @@ in {
   # https://nixos.org/manual/nixpkgs/stable/#sec-allow-unfree
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "intelephense"
+    "github-copilot-cli"
     # "ngrok"
   ];
 
@@ -34,6 +37,7 @@ in {
     # timewarrior
     jq # command line json processor
     # minikube
+    codex
 
     php
     php.packages.composer
