@@ -19,11 +19,13 @@
 
             ide = "php artisan ide-helper:generate && php artisan ide-helper:models -N && php artisan ide-helper:meta";
 
-            kubectl = "minikube kubectl --";
             k = "kubectl";
 
-            d = "podman";
-            dc = "podman-compose";
+            p = "podman";
+            pc = "podman-compose";
+            d = "docker";
+            dc = "docker compose";
+            phpdbg = "XDEBUG_CONFIG=\"idekey=PHPSTORM\" php -dxdebug.mode=debug $@";
         };
         
         plugins = [

@@ -1,6 +1,23 @@
 { config, pkgs, lib, ... }:
 
-{
+let
+  php = pkgs.php85.buildEnv {
+    extensions = ({ enabled, all}: enabled ++ (with all; [
+      redis
+      gnupg
+      yaml
+      xdebug
+      # imagick
+      # pcov
+      # rdkafka
+      # mongodb
+    ]));
+    extraConfig = ''
+      memory_limit = 500M
+      xdebug.mode=coverage
+    '';
+  };
+in {
   imports = [
     ./tmux.nix
     ./zsh.nix
@@ -10,30 +27,20 @@
   # https://nixos.org/manual/nixpkgs/stable/#sec-allow-unfree
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "intelephense"
-    "ngrok"
+    "github-copilot-cli"
+    # "ngrok"
   ];
 
   home.packages = with pkgs; [
     hyperfine
     meslo-lgs-nf # nerd font for powerlevel10k theme
-    timewarrior
+    # timewarrior
     jq # command line json processor
-    minikube
+    # minikube
+    codex
 
-    # config options: https://nixos.wiki/wiki/PHP
-    (php84.buildEnv {
-      extensions = ({ enabled, all }: enabled ++ (with all; [
-        redis
-        imagick
-        # pcov
-        # rdkafka
-        # mongodb
-      ]));
-      extraConfig = ''
-        memory_limit = 500M
-      '';
-    })
-    php84Packages.composer
+    php
+    php.packages.composer
 
     nodejs_24
     python3
@@ -69,15 +76,15 @@
 
   programs.git = {
     enable = true;
-    aliases = {
-      s = "status -sb";
-      st = "status";
-      ci = "commit";
-      co = "checkout";
-      nah = "!git reset --hard && git clean -df";
-      alias = "! git config --get-regexp ^alias\. | sed -e s/^alias\.// -e s/\ /\ =\ /";
-    };
     settings = {
+      alias = {
+        s = "status -sb";
+        st = "status";
+        ci = "commit";
+        co = "checkout";
+        nah = "!git reset --hard && git clean -df";
+        alias = "! git config --get-regexp ^alias\. | sed -e s/^alias\.// -e s/\ /\ =\ /";
+      };
       user.name = lib.mkDefault "TobMoeller";
       user.email = lib.mkDefault "tobiasmoellerw@t-online.de";
 
