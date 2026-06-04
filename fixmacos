@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+
+file=/etc/zshrc
+hook=/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+
+grep -Fq "$hook" "$file" && exit 0
+
+sudo tee -a "$file" >/dev/null <<'EOF'
+
+# Nix
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
+# End Nix
+EOF

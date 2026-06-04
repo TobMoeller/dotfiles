@@ -19,7 +19,6 @@
     # chromium
     # ghostscript
     openfortivpn
-    github-copilot-cli
   ];
 
   home.file = {
