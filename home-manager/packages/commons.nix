@@ -28,6 +28,8 @@ in {
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "intelephense"
     # "ngrok"
+    "vim-visual-star-search"
+    "vim-highlightedyank"
   ];
 
   home.packages = with pkgs; [
