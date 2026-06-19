@@ -26,10 +26,9 @@
 
 set -euo pipefail
 
-WT_ROOT="${WT_ROOT:-$HOME/worktrees}"
 CODE_DIR="${WT_CODE_DIR:-$HOME/code}"
+WT_ROOT="${WT_ROOT:-$CODE_DIR/worktrees}"
 PORT_OFFSET_STEP=10
-AGENT_CMD="${WT_AGENT_CMD:-claude}"
 
 die() { echo "wt: $*" >&2; exit 1; }
 
@@ -52,18 +51,16 @@ attach_session() {
     fi
 }
 
-# ensure a session exists for worktree path $2 with name $1, then attach
+# ensure a session exists for worktree path $2 with name $1, then attach.
+# A single window at the worktree root - windows are yours to arrange.
 ensure_session() {
     local session=$1 path=$2 setup=${3:-}
 
     if ! tmux has-session -t "=$session" 2>/dev/null; then
-        tmux new-session -d -s "$session" -c "$path" -n main
+        tmux new-session -d -s "$session" -c "$path"
         if [[ -n "$setup" ]]; then
-            tmux send-keys -t "=$session:main" "$setup" C-m
+            tmux send-keys -t "=$session" "$setup" C-m
         fi
-        tmux new-window -t "=$session" -c "$path" -n agent
-        tmux send-keys -t "=$session:agent" "$AGENT_CMD" C-m
-        tmux select-window -t "=$session:main"
     fi
 
     attach_session "$session"
@@ -122,6 +119,7 @@ cmd_add() {
 
     if [[ -z "$repo" ]]; then
         repo=$(find "$CODE_DIR" -mindepth 2 -maxdepth 3 -name .git -prune \
+            -not -path "$WT_ROOT/*" \
             | sed 's|/\.git$||' | sort | fzf --prompt='repo> ') || exit 0
     fi
     [[ -d "$repo/.git" || -f "$repo/.git" ]] || die "not a git repository: $repo"

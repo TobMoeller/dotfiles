@@ -5,7 +5,7 @@
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
-    items+=`find ~/code -maxdepth 2 -mindepth 1 -type d ! -wholename '*/RED-telematik-manager*'`
+    items+=`find ~/code -maxdepth 2 -mindepth 1 -type d ! -wholename '*/RED-telematik-manager*' ! -path '*/code/worktrees*'`
     items+=`echo -e "\n$(find ~/code/RED-telematik-manager -maxdepth 2 -mindepth 1 -type d)"`
     # items+=`echo -e "\n$(find ~/portal -maxdepth 2 -mindepth 1 -type d)"`
     items+=`echo -e "\n/tmp"`

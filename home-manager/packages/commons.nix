@@ -60,12 +60,13 @@ in {
     # ".screenrc".source = dotfiles/screenrc;
     ".npmrc".text = "prefix=${config.home.homeDirectory}/.npm-global";
 
-    # Scripts are symlinked out of the nix store so edits in the repo apply
-    # immediately without a home-manager switch.
     ".local/bin/t".source =
       config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home-manager/packages/scripts/t";
     ".local/bin/wt".source =
       config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home-manager/packages/scripts/wt";
+
+    ".claude/skills".source =
+      config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home-manager/packages/config/claude/skills";
   };
 
   home.sessionPath = [
