@@ -1,0 +1,230 @@
+#!/usr/bin/env bash
+
+# wt - git worktrees as tmux sessions, for running multiple agents in parallel
+#
+#   wt              fzf over existing worktrees, switch/attach (creates the
+#                   session again if it is gone, e.g. after a reboot)
+#   wt add          pick a repo from ~/code, then pick an existing branch or
+#                   type a new name; creates worktree + tmux session
+#   wt rm           pick a worktree, tear it down (tmux session, docker
+#                   compose stack incl. volumes, git worktree)
+#   wt ls           list existing worktrees
+#
+# Worktrees live under $WT_ROOT/<repo>/<branch>, separate from ~/code.
+#
+# Per-repo conventions (all optional, checked in the main checkout):
+#   .env             copied into the worktree, then COMPOSE_PROJECT_NAME is
+#                    set and host ports (APP_PORT, VITE_PORT, FORWARD_*_PORT)
+#                    are shifted by a per-worktree offset
+#   .worktree-files  additional git-ignored paths to copy, one per line
+#   .worktree-setup.sh  executed inside the first tmux window after creation
+#                    (composer install, sail up, artisan migrate, ...)
+#
+# vendor/ and node_modules/ are copied with --reflink when the filesystem
+# supports it, so a 'composer install'/'npm install' in the setup script only
+# has to fix up the diff to the branch.
+
+set -euo pipefail
+
+WT_ROOT="${WT_ROOT:-$HOME/worktrees}"
+CODE_DIR="${WT_CODE_DIR:-$HOME/code}"
+PORT_OFFSET_STEP=10
+AGENT_CMD="${WT_AGENT_CMD:-claude}"
+
+die() { echo "wt: $*" >&2; exit 1; }
+
+# repo/branch -> tmux session name (no '.' or ':' allowed)
+session_name() {
+    echo "$1--$2" | tr './:' '___'
+}
+
+# list existing worktrees as "repo/branch" lines
+list_worktrees() {
+    [[ -d "$WT_ROOT" ]] || return 0
+    find "$WT_ROOT" -mindepth 2 -maxdepth 2 -type d | sed "s|^$WT_ROOT/||" | sort
+}
+
+attach_session() {
+    if [[ -n "${TMUX:-}" ]]; then
+        tmux switch-client -t "=$1"
+    else
+        tmux new-session -A -s "$1"
+    fi
+}
+
+# ensure a session exists for worktree path $2 with name $1, then attach
+ensure_session() {
+    local session=$1 path=$2 setup=${3:-}
+
+    if ! tmux has-session -t "=$session" 2>/dev/null; then
+        tmux new-session -d -s "$session" -c "$path" -n main
+        if [[ -n "$setup" ]]; then
+            tmux send-keys -t "=$session:main" "$setup" C-m
+        fi
+        tmux new-window -t "=$session" -c "$path" -n agent
+        tmux send-keys -t "=$session:agent" "$AGENT_CMD" C-m
+        tmux select-window -t "=$session:main"
+    fi
+
+    attach_session "$session"
+}
+
+cmd_ls() {
+    list_worktrees
+}
+
+cmd_switch() {
+    local selected repo branch
+    selected=$(list_worktrees | fzf --prompt='worktree> ') || exit 0
+    [[ -n "$selected" ]] || exit 0
+    repo=${selected%%/*}
+    branch=${selected#*/}
+    ensure_session "$(session_name "$repo" "$branch")" "$WT_ROOT/$selected"
+}
+
+# copy a git-ignored file/dir from the main checkout into the worktree
+copy_item() {
+    local repo=$1 path=$2 item=$3
+    [[ -e "$repo/$item" ]] || return 0
+    mkdir -p "$(dirname "$path/$item")"
+    cp -a "$repo/$item" "$path/$item"
+}
+
+# copy dependency dirs with copy-on-write when available
+copy_deps() {
+    local src=$1 dst=$2
+    cp -a --reflink=auto "$src" "$dst" 2>/dev/null && return 0
+    rm -rf "$dst"
+    cp -ca "$src" "$dst" 2>/dev/null && return 0 # macOS clonefile
+    rm -rf "$dst"
+    cp -a "$src" "$dst"
+}
+
+# make the copied .env safe to run next to the other stacks
+patch_env() {
+    local env_file=$1 project=$2 offset=$3
+
+    if grep -q '^COMPOSE_PROJECT_NAME=' "$env_file"; then
+        sed "s/^COMPOSE_PROJECT_NAME=.*/COMPOSE_PROJECT_NAME=$project/" "$env_file" > "$env_file.tmp"
+    else
+        cat "$env_file" > "$env_file.tmp"
+        printf '\nCOMPOSE_PROJECT_NAME=%s\n' "$project" >> "$env_file.tmp"
+    fi
+
+    awk -v off="$offset" 'BEGIN { FS = OFS = "=" }
+        /^(APP_PORT|VITE_PORT|FORWARD_[A-Z_]+_PORT)=[0-9]+[[:space:]]*$/ { $2 = $2 + off }
+        { print }' "$env_file.tmp" > "$env_file"
+    rm -f "$env_file.tmp"
+}
+
+cmd_add() {
+    local repo=${1:-} branch=${2:-}
+
+    if [[ -z "$repo" ]]; then
+        repo=$(find "$CODE_DIR" -mindepth 2 -maxdepth 3 -name .git -prune \
+            | sed 's|/\.git$||' | sort | fzf --prompt='repo> ') || exit 0
+    fi
+    [[ -d "$repo/.git" || -f "$repo/.git" ]] || die "not a git repository: $repo"
+    local repo_name
+    repo_name=$(basename "$repo")
+
+    if [[ -z "$branch" ]]; then
+        # pick an existing branch or type a new name (fzf --print-query)
+        local out="" status=0
+        out=$(git -C "$repo" branch --all --format='%(refname:short)' \
+            | sed 's|^origin/||' | grep -vx 'HEAD' | sort -u \
+            | fzf --print-query --prompt='branch> ') || status=$?
+        [[ $status -gt 1 ]] && exit 0 # aborted (ESC), fzf still prints the query
+        branch=$(tail -1 <<< "$out")
+    fi
+    [[ -n "$branch" ]] || exit 0
+
+    local branch_dir session path
+    branch_dir=$(echo "$branch" | tr '/.' '--')
+    session=$(session_name "$repo_name" "$branch_dir")
+    path="$WT_ROOT/$repo_name/$branch_dir"
+
+    # already there? just go to it
+    if [[ -d "$path" ]]; then
+        ensure_session "$session" "$path"
+        exit 0
+    fi
+
+    mkdir -p "$WT_ROOT/$repo_name"
+    if git -C "$repo" show-ref --verify --quiet "refs/heads/$branch"; then
+        git -C "$repo" worktree add "$path" "$branch"
+    elif git -C "$repo" show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+        git -C "$repo" worktree add --track -b "$branch" "$path" "origin/$branch"
+    else
+        git -C "$repo" worktree add -b "$branch" "$path"
+    fi
+
+    copy_item "$repo" "$path" .env
+    if [[ -f "$repo/.worktree-files" ]]; then
+        while IFS= read -r item; do
+            [[ -n "$item" && "${item:0:1}" != "#" ]] && copy_item "$repo" "$path" "$item"
+        done < "$repo/.worktree-files"
+    fi
+
+    if [[ -f "$path/.env" ]]; then
+        local index offset project
+        index=$(find "$WT_ROOT/$repo_name" -mindepth 1 -maxdepth 1 -type d | wc -l)
+        offset=$((index * PORT_OFFSET_STEP))
+        project=$(printf '%s' "$repo_name-$branch_dir" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9_-' '-')
+        patch_env "$path/.env" "$project" "$offset"
+        echo "wt: patched .env (COMPOSE_PROJECT_NAME=$project, port offset +$offset)"
+    fi
+
+    local dep
+    for dep in vendor node_modules; do
+        if [[ -d "$repo/$dep" ]]; then
+            echo "wt: copying $dep ..."
+            copy_deps "$repo/$dep" "$path/$dep"
+        fi
+    done
+
+    local setup=""
+    [[ -x "$path/.worktree-setup.sh" ]] && setup="./.worktree-setup.sh"
+    ensure_session "$session" "$path" "$setup"
+}
+
+cmd_rm() {
+    local selected=${1:-}
+    if [[ -z "$selected" ]]; then
+        selected=$(list_worktrees | fzf --prompt='remove worktree> ') || exit 0
+    fi
+    [[ -n "$selected" ]] || exit 0
+
+    local repo_name=${selected%%/*} branch_dir=${selected#*/}
+    local path="$WT_ROOT/$repo_name/$branch_dir"
+    [[ -d "$path" ]] || die "no such worktree: $path"
+
+    tmux kill-session -t "=$(session_name "$repo_name" "$branch_dir")" 2>/dev/null || true
+
+    if [[ -f "$path/docker-compose.yml" || -f "$path/compose.yaml" || -f "$path/docker-compose.yaml" ]]; then
+        echo "wt: tearing down docker compose stack ..."
+        (cd "$path" && docker compose down --volumes --remove-orphans) || true
+    fi
+
+    local main_repo
+    main_repo=$(dirname "$(git -C "$path" rev-parse --path-format=absolute --git-common-dir)")
+    if ! git -C "$main_repo" worktree remove "$path" 2>/dev/null; then
+        # untracked files (.env, vendor, ...) always make the worktree "dirty",
+        # so confirm before forcing in case there are real uncommitted changes
+        git -C "$path" status --short
+        read -rp "wt: worktree is not clean, remove anyway? [y/N] " answer
+        [[ "$answer" == "y" || "$answer" == "Y" ]] || exit 1
+        git -C "$main_repo" worktree remove --force "$path"
+    fi
+    rmdir "$WT_ROOT/$repo_name" 2>/dev/null || true
+    echo "wt: removed $selected (its branch was kept)"
+}
+
+case "${1:-}" in
+    add) shift; cmd_add "$@" ;;
+    rm) shift; cmd_rm "$@" ;;
+    ls) cmd_ls ;;
+    "") cmd_switch ;;
+    -h|--help) sed -n '3,25p' "$0" | sed 's/^# \{0,1\}//' ;;
+    *) die "unknown command: $1 (use add, rm, ls or no argument)" ;;
+esac

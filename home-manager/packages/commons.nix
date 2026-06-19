@@ -1,6 +1,7 @@
 { config, pkgs, lib, ... }:
 
 let
+  dotfiles = "${config.home.homeDirectory}/code/tobmoeller/dotfiles";
   php = pkgs.php85.buildEnv {
     extensions = ({ enabled, all}: enabled ++ (with all; [
       redis
@@ -53,16 +54,22 @@ in {
     tailwindcss-language-server
     intelephense
     pyright
-
-    (pkgs.writeShellScriptBin "t" (builtins.readFile ./scripts/t))
   ];
 
   home.file = {
     # ".screenrc".source = dotfiles/screenrc;
     ".npmrc".text = "prefix=${config.home.homeDirectory}/.npm-global";
+
+    # Scripts are symlinked out of the nix store so edits in the repo apply
+    # immediately without a home-manager switch.
+    ".local/bin/t".source =
+      config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home-manager/packages/scripts/t";
+    ".local/bin/wt".source =
+      config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home-manager/packages/scripts/wt";
   };
 
   home.sessionPath = [
+    "$HOME/.local/bin"
     "$HOME/.composer/vendor/bin"
     "$HOME/.config/composer/vendor/bin"
     "$HOME/.npm-global/bin"
