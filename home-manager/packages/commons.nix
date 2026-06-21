@@ -23,6 +23,7 @@ in {
     ./tmux.nix
     ./zsh.nix
     ./nvim.nix
+    ./claude-skills.nix
   ];
 
   # https://nixos.org/manual/nixpkgs/stable/#sec-allow-unfree
@@ -65,9 +66,18 @@ in {
     ".local/bin/wt".source =
       config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home-manager/packages/scripts/wt";
 
-    ".claude/skills".source =
-      config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home-manager/packages/config/claude/skills";
+    ".claude/settings.json".source =
+      config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home-manager/packages/config/claude/settings.json";
+    ".claude/CLAUDE.md".source =
+      config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home-manager/packages/config/claude/CLAUDE.md";
+    ".claude/hooks/bash-guard.sh".source =
+      config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home-manager/packages/config/claude/hooks/bash-guard.sh";
   };
+
+  # Claude Code skills are linked per-skill by ./claude-skills.nix. Every host
+  # gets the "common" group by default; hosts add their own group on top, e.g.:
+  #   claudeSkillGroups = [ "common" "red" ];   # red's skills override common's
+  claudeSkillGroups = [ "common" ];
 
   home.sessionPath = [
     "$HOME/.local/bin"

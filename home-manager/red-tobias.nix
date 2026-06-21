@@ -10,6 +10,9 @@
     ./packages/commons.nix
   ];
 
+  # Shared skills plus red-specific ones; red overrides common on a name clash.
+  claudeSkillGroups = [ "common" "red" ];
+
   home.packages = with pkgs; [
     # ghostty
     # podman # requires uidmap on ubuntu

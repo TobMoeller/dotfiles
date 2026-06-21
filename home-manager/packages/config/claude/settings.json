@@ -1,0 +1,47 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(~/.claude/**)",
+      "Glob",
+      "Grep",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(ls:*)",
+      "Bash(pwd)",
+      "Bash(which:*)"
+    ],
+    "deny": [
+      "Read(~/.ssh/**)",
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Bash(sudo:*)"
+    ],
+    "ask": [
+      "Bash(rm:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/bash-guard.sh\""
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "php-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true
+  },
+  "effortLevel": "high",
+  "theme": "dark"
+}

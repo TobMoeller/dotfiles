@@ -4,6 +4,14 @@
     programs.zsh = {
         enable = true;
 
+        # Source machine-local secrets (API keys, tokens) that must never be
+        # committed. Create ~/.secrets.env yourself (chmod 600); exported vars
+        # become available to anything launched from the shell, e.g. Claude
+        # Code MCP servers that reference ${CONTEXT7_API_KEY} in their config.
+        initContent = lib.mkOrder 550 ''
+            [ -f "$HOME/.secrets.env" ] && source "$HOME/.secrets.env"
+        '';
+
         shellAliases = {
             ll = "ls -alF";
             la = "ls -A";
