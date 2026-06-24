@@ -19,10 +19,13 @@
       "Read(.env.*)",
       "Read(**/.env)",
       "Read(**/.env.*)",
-      "Bash(sudo:*)"
+      "Bash(sudo:*)",
+      "Bash(find * -exec *)",
+      "Bash(find * -execdir *)"
     ],
     "ask": [
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(find * -delete*)"
     ]
   },
   "hooks": {

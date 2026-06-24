@@ -1,7 +1,7 @@
 ---
 name: review
-description: Review a Gitea PR or the commits for a ticket — gathering context from Gitea, Jira (and Confluence when needed) — and write findings to .reviews/, each with a ready-to-paste friendly German PR comment plus a detailed rationale. Use when the user asks to review a PR, a ticket's changes, or commits (e.g. "review PR 1818", "review RTM-3122", "review the changes for RTM-3444").
-allowed-tools: Read Grep Glob Bash(git log:*) Bash(git diff:*) Bash(git show:*) Bash(git branch:*) Bash(vendor/bin/phpunit:*) Bash(vendor/bin/phpstan:*) Bash(vendor/bin/pint:*) mcp__devtools-mcp__get_gitea_pull_request mcp__devtools-mcp__get_gitea_pull_request_diff mcp__devtools-mcp__list_gitea_pull_request_files mcp__devtools-mcp__list_gitea_pull_request_commits mcp__devtools-mcp__list_gitea_pull_request_comments mcp__devtools-mcp__read_jira_issue mcp__devtools-mcp__search_jira mcp__devtools-mcp__search_confluence mcp__devtools-mcp__read_confluence_page mcp__devtools-mcp__get_confluence_page_by_title
+description: Review a Gitea PR or the commits for a ticket — gathering context from Gitea, Jira (and Confluence when needed) — and write findings to the central reviews store (~/code/reviews/), each with a ready-to-paste friendly German PR comment plus a detailed rationale. Use when the user asks to review a PR, a ticket's changes, or commits (e.g. "review PR 1818", "review RTM-3122", "review the changes for RTM-3444").
+allowed-tools: Read Grep Glob Bash(git log:*) Bash(git diff:*) Bash(git show:*) Bash(git branch:*) Bash(git rev-parse:*) Bash(mkdir:*) Bash(vendor/bin/phpunit:*) Bash(vendor/bin/phpstan:*) Bash(vendor/bin/pint:*) mcp__devtools-mcp__get_gitea_pull_request mcp__devtools-mcp__get_gitea_pull_request_diff mcp__devtools-mcp__list_gitea_pull_request_files mcp__devtools-mcp__list_gitea_pull_request_commits mcp__devtools-mcp__list_gitea_pull_request_comments mcp__devtools-mcp__read_jira_issue mcp__devtools-mcp__search_jira mcp__devtools-mcp__search_confluence mcp__devtools-mcp__read_confluence_page mcp__devtools-mcp__get_confluence_page_by_title
 ---
 
 # Code review (red / work)
@@ -52,7 +52,14 @@ Report the result of each. A failing test, a PHPStan error, or a Pint style viol
 
 ## 5. Write the review
 
-Write to `.reviews/<ticket>.md` (or `.reviews/PR-<id>.md` when there's no ticket). Start with a short summary: what the change does, and whether it meets the DoD (note gaps).
+Write to the central reviews store, **not** into the checkout (a `.reviews/` inside a worktree is destroyed by `wt rm`). The target is `~/code/reviews/<repo>/<ticket>.md` (or `.../PR-<id>.md` when there's no ticket), where `<repo>` is the main repository name — stable across the main checkout and all its worktrees. Resolve and create it with:
+
+```bash
+repo=$(basename "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")")
+mkdir -p ~/code/reviews/"$repo"
+```
+
+Then write to `~/code/reviews/$repo/<ticket>.md`. Start with a short summary: what the change does, and whether it meets the DoD (note gaps).
 
 Then one section per finding, in this exact shape:
 
@@ -77,4 +84,4 @@ End with an **Offene Fragen** section for anything you couldn't confirm.
 
 ## Stay in scope
 
-This is analysis, not a fix. Don't edit source files and don't post anything to Gitea yourself — the German comments are for the user to paste. Only write the `.reviews/` file.
+This is analysis, not a fix. Don't edit source files and don't post anything to Gitea yourself — the German comments are for the user to paste. Only write the review file under `~/code/reviews/`.
