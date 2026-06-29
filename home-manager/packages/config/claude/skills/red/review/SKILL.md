@@ -1,6 +1,6 @@
 ---
 name: review
-description: Review a Gitea PR or the commits for a ticket — gathering context from Gitea, Jira (and Confluence when needed) — and write findings to the central reviews store (~/code/reviews/), each with a ready-to-paste friendly German PR comment plus a detailed rationale. Use when the user asks to review a PR, a ticket's changes, or commits (e.g. "review PR 1818", "review RTM-3122", "review the changes for RTM-3444").
+description: Review a Gitea PR or the commits for a ticket — gathering context from Gitea, Jira (and Confluence when needed) — and write findings to the central reviews store (~/code/reviews/), each with a ready-to-paste friendly German PR comment plus a detailed rationale. Use when the user asks to review a PR, a ticket's changes, or commits (e.g. "review PR 1818", "review RTM-3122", "review the changes for RTM-3444"). Reviews backend (PHP) code by default; only inspects frontend code when the user explicitly asks for a frontend or full-stack review.
 allowed-tools: Read Grep Glob Bash(git log:*) Bash(git diff:*) Bash(git show:*) Bash(git branch:*) Bash(git rev-parse:*) Bash(mkdir:*) Bash(vendor/bin/phpunit:*) Bash(vendor/bin/phpstan:*) Bash(vendor/bin/pint:*) mcp__devtools-mcp__get_gitea_pull_request mcp__devtools-mcp__get_gitea_pull_request_diff mcp__devtools-mcp__list_gitea_pull_request_files mcp__devtools-mcp__list_gitea_pull_request_commits mcp__devtools-mcp__list_gitea_pull_request_comments mcp__devtools-mcp__read_jira_issue mcp__devtools-mcp__search_jira mcp__devtools-mcp__search_confluence mcp__devtools-mcp__read_confluence_page mcp__devtools-mcp__get_confluence_page_by_title
 ---
 
@@ -31,8 +31,14 @@ If it's ambiguous which mode applies (or which PR/commits), **ask** before proce
 
 ## 3. Review against the real code
 
+- **Scope: backend only by default.** Review backend code (PHP — `app/`, `routes/`, `database/`, `config/`, `tests/`, …). Do **not** raise findings on frontend code (`resources/client/js/**`, `.vue`, `.ts`) unless the user explicitly asks for a frontend or full-stack review. When you skip frontend changes, note it in one line in the summary so it's clear the FE side was out of scope and can be requested separately.
 - Verify every finding against the actual codebase — open the surrounding code, follow the call paths, confirm behavior. **Never speculate.** If you cannot confirm something (failure handling, a deploy path, reachability of an edge case), say so explicitly rather than asserting it.
 - Check the change against the ticket's DoD and call out any gaps.
+- **Be selective.** Prefer high-confidence correctness, architectural/structural, and convention issues over enumerating every minor style nit. A couple of `nit`s are fine — don't pad the review with low-value trivia.
+- **Apply a structural/architectural lens, not just a "is it mechanically detectable" lens** — this is where the highest-value findings hide:
+  - Action/service classes that mix DB writes with notifications/dispatch → check transaction boundaries, ordering of irreversible side effects (e.g. broadcasts/webhooks before commit), partial-write / orphan-record safety, and whether async work belongs in the scheduler rather than dispatched inline.
+  - New DB columns holding an external-system reference → check whether the name signals that, vs. looking like a local FK.
+  - Route names ↔ permission keys ↔ URL paths → check they stay consistent with each other and with sibling endpoints.
 - Keep findings tight and idiomatic to the codebase's conventions; flag over-engineering rather than introducing it.
 
 ## 4. Verify with tests and static checks
@@ -66,19 +72,26 @@ Then one section per finding, in this exact shape:
 ```
 ### [blocker|major|minor|nit] Kurzer Titel — `path/to/File.php:42`
 
-**Gitea-Kommentar (zum Kopieren):**
-> <freundlicher, kurzer Kommentar auf Deutsch — direkt, nicht geschwollen,
-> als konkreter Vorschlag oder Frage formuliert>
+(Das Severity-Tag bleibt NUR hier im Titel — als Bewertung/Triage. Es kommt NICHT in den Gitea-Kommentar.)
 
-**Warum das ein Problem ist:**
-<ausführliche Erklärung auf Deutsch: die Ursache, die konkrete Auswirkung,
-und der empfohlene Fix — mit Verweis auf file:line und ggf. Confluence-Doku>
+**Gitea-Kommentar (zum Kopieren):**
+> <kurz (1–4 Sätze), kollegial, tentativ — hedgend ("Ich glaube …", "vermutlich", "eventuell");
+> als konkreter Vorschlag ODER ehrliche Frage; nenne konkrete Alternative(n) bzw. eine bestehende
+> Lösung im Code beim Namen; Trivia mit "nit:" beginnen; Optionales/Außer-Scope explizit als
+> "kein Muss" markieren und ggf. ein Ticket vorschlagen; Dubletten per Link auf den ersten
+> Kommentar statt Wiederholung. KEINE [major]/[minor]-Klammern im Kommentar.>
+
+**Kontext (für dich, nicht zum Posten):**
+<knapp: Ursache, konkrete Auswirkung, empfohlener Fix — mit file:line und ggf. Confluence-Doku;
+nur so lang wie nötig>
 ```
 
 Guidance for the two parts:
 
-- **Gitea-Kommentar** — friendly, concise, non-verbose German, phrased the way a respectful colleague leaves a PR comment: a concrete suggestion or an honest question, not a lecture. One short paragraph at most. This is the copy-paste deliverable.
-- **Warum das ein Problem ist** — the depth: root cause, concrete impact (bug, security, performance, maintainability), and the recommended fix, grounded in `file:line` and any relevant Confluence doc.
+- **Gitea-Kommentar** — the copy-paste deliverable, and it must read like *this reviewer's* voice: short (1–4 sentences), collegial, tentative. Hedge ("Ich glaube …", "vermutlich", "eventuell"), offer concrete options ("Eventuell X? Oder Y."), and name existing code/solutions by their real path (e.g. `App\Service\Firmware\Sorts\VersionSort`). Prefix trivia with `nit:`. For optional or out-of-scope points, say so explicitly ("kein Muss") and suggest opening a ticket. Cross-reference a duplicate with a link to the first comment instead of repeating it. Never put a `[major]`/`[minor]` tag in the comment — the severity lives only in the finding title.
+- **Kontext** — for the user's understanding, not for posting: root cause, concrete impact (bug, security, performance, maintainability), recommended fix, grounded in `file:line` and any relevant Confluence doc. Keep it as short as the point allows.
+
+The severity tag (`[blocker|major|minor|nit]`) stays in the finding **title** as the rating — only keep it out of the pasted comment.
 
 End with an **Offene Fragen** section for anything you couldn't confirm.
 
