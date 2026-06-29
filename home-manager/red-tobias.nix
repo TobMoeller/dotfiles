@@ -26,6 +26,7 @@
     # chromium
     # ghostscript
     openfortivpn
+    ffmpeg
   ];
 
   home.file = {
