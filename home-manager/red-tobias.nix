@@ -13,6 +13,10 @@
   # Shared skills plus red-specific ones; red overrides common on a name clash.
   claudeSkillGroups = [ "common" "red" ];
 
+  # Read-only devtools-mcp permissions (Jira/Gitea/Confluence/TeamCity) merged
+  # into ~/.claude/settings.json on this host only. Modifying tools still prompt.
+  claudePermissionGroups = [ "red" ];
+
   home.packages = with pkgs; [
     # ghostty
     # podman # requires uidmap on ubuntu

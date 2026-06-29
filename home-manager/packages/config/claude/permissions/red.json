@@ -1,0 +1,39 @@
+{
+  "allow": [
+    "mcp__devtools-mcp__ping",
+    "mcp__devtools-mcp__get_config_url",
+    "mcp__devtools-mcp__get_current_user",
+    "mcp__devtools-mcp__get_datetime",
+
+    "mcp__devtools-mcp__read_jira_issue",
+    "mcp__devtools-mcp__search_jira",
+    "mcp__devtools-mcp__search_jira_users",
+    "mcp__devtools-mcp__list_jira_fields",
+    "mcp__devtools-mcp__get_jira_sprint",
+    "mcp__devtools-mcp__get_jira_attachment",
+
+    "mcp__devtools-mcp__read_confluence_page",
+    "mcp__devtools-mcp__get_confluence_page_by_title",
+    "mcp__devtools-mcp__search_confluence",
+
+    "mcp__devtools-mcp__get_gitea_pull_request",
+    "mcp__devtools-mcp__get_gitea_pull_request_diff",
+    "mcp__devtools-mcp__get_gitea_user",
+    "mcp__devtools-mcp__list_gitea_pull_request_comments",
+    "mcp__devtools-mcp__list_gitea_pull_request_commits",
+    "mcp__devtools-mcp__list_gitea_pull_request_files",
+    "mcp__devtools-mcp__list_gitea_pull_request_reviews",
+
+    "mcp__devtools-mcp__read_pull_request",
+    "mcp__devtools-mcp__get_pull_request_diff",
+    "mcp__devtools-mcp__list_pull_request_comments",
+    "mcp__devtools-mcp__list_pull_request_files",
+    "mcp__devtools-mcp__search_pull_requests",
+
+    "mcp__devtools-mcp__get_repo_file_contents",
+
+    "mcp__devtools-mcp__get_team_city_build",
+    "mcp__devtools-mcp__get_team_city_build_log",
+    "mcp__devtools-mcp__search_team_city_builds"
+  ]
+}
