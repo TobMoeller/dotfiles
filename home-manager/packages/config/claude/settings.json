@@ -11,7 +11,10 @@
       "Bash(git branch:*)",
       "Bash(ls:*)",
       "Bash(pwd)",
-      "Bash(which:*)"
+      "Bash(which:*)",
+      "Read(~/code/brain/**)",
+      "Edit(~/code/brain/**)",
+      "Write(~/code/brain/**)"
     ],
     "deny": [
       "Read(~/.ssh/**)",
