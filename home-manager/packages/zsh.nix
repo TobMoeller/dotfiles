@@ -4,13 +4,25 @@
     programs.zsh = {
         enable = true;
 
-        # Source machine-local secrets (API keys, tokens) that must never be
-        # committed. Create ~/.secrets.env yourself (chmod 600); exported vars
-        # become available to anything launched from the shell, e.g. Claude
-        # Code MCP servers that reference ${CONTEXT7_API_KEY} in their config.
-        initContent = lib.mkOrder 550 ''
-            [ -f "$HOME/.secrets.env" ] && source "$HOME/.secrets.env"
-        '';
+        initContent = lib.mkMerge [
+            # Source machine-local secrets (API keys, tokens) that must never be
+            # committed. Create ~/.secrets.env yourself (chmod 600); exported vars
+            # become available to anything launched from the shell, e.g. Claude
+            # Code MCP servers that reference ${CONTEXT7_API_KEY} in their config.
+            (lib.mkOrder 550 ''
+                [ -f "$HOME/.secrets.env" ] && source "$HOME/.secrets.env"
+            '')
+
+            # Additions kept out of the (mostly pure) zsh.nix. custom.zsh is
+            # tracked in git and symlinked from the working tree (see home.file
+            # below), so edits apply in any new shell without a home-manager
+            # switch. local.zsh is untracked, machine-specific, and optional;
+            # sourced last so it can override anything above.
+            (lib.mkOrder 1000 ''
+                [ -f "$HOME/.zsh/custom.zsh" ] && source "$HOME/.zsh/custom.zsh"
+                [ -f "$HOME/.zsh/local.zsh" ] && source "$HOME/.zsh/local.zsh"
+            '')
+        ];
 
         shellAliases = {
             ll = "ls -alF";
@@ -55,4 +67,11 @@
             }
         ];
     };
+
+    # Symlink custom.zsh to the file in the working tree (not the nix store), so
+    # editing it takes effect immediately without a home-manager switch. The
+    # target path must exist on the machine for the symlink to resolve.
+    home.file.".zsh/custom.zsh".source =
+        config.lib.file.mkOutOfStoreSymlink
+            "${config.home.homeDirectory}/code/tobmoeller/dotfiles/home-manager/packages/config/zsh/custom.zsh";
 }
