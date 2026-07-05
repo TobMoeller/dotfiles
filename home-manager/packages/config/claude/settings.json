@@ -14,7 +14,14 @@
       "Bash(which:*)",
       "Read(~/code/brain/**)",
       "Edit(~/code/brain/**)",
-      "Write(~/code/brain/**)"
+      "Write(~/code/brain/**)",
+      "Bash(phpunit:*)",
+      "Bash(vendor/bin/phpunit:*)",
+      "Bash(./vendor/bin/phpunit:*)",
+      "Bash(php artisan test:*)",
+      "Bash(pint:*)",
+      "Bash(vendor/bin/pint:*)",
+      "Bash(./vendor/bin/pint:*)"
     ],
     "deny": [
       "Read(~/.ssh/**)",
