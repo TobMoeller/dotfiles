@@ -1,8 +1,12 @@
 {
   "allow": [
-    "Read(~/code/work-brain/**)",
-    "Edit(~/code/work-brain/**)",
-    "Write(~/code/work-brain/**)",
+    "Read(~/code/knowledge/work-brain/**)",
+    "Edit(~/code/knowledge/work-brain/**)",
+    "Write(~/code/knowledge/work-brain/**)",
+
+    "Read(~/code/knowledge/work-log/**)",
+    "Edit(~/code/knowledge/work-log/**)",
+    "Write(~/code/knowledge/work-log/**)",
 
     "mcp__devtools-mcp__ping",
     "mcp__devtools-mcp__get_config_url",

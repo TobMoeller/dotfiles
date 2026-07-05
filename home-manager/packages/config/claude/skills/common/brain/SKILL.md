@@ -5,11 +5,13 @@ description: Read from or write to the personal/work AI second brain (Open Knowl
 
 # Second brain (OKF)
 
-Two markdown knowledge stores, each governed by its own `SCHEMA.md`:
+Two markdown knowledge stores, each governed by its own `SCHEMA.md`, living side by side under the `~/code/knowledge/` Obsidian vault:
 
-- **`~/code/brain`** — personal / non-confidential (reference, snippets, practices).
-- **`~/code/work-brain`** — work / RED Medical (APIs, runbooks, domain, practices).
+- **`~/code/knowledge/brain`** — personal / non-confidential (reference, snippets, practices). Its `notes/` subfolder is a **freeform, human-only** zone — don't maintain it or index it here; only work in `notes/` if the user explicitly asks.
+- **`~/code/knowledge/work-brain`** — work / RED Medical (APIs, runbooks, domain, practices).
   Confidential: never store secrets or customer data; never push to a personal remote.
+
+This skill is for **durable, recall-oriented knowledge** only. Per-ticket task artifacts (code reviews, specs) are not knowledge — they live in the sibling `~/code/knowledge/work-log/` store, written by the `review` / `spec` skills. A learning distilled *from* such an artifact can be ingested here; the artifact itself stays in work-log.
 
 **Always read the target store's `SCHEMA.md` first** — it holds the authoritative
 format, folder layout, and commit policy. This skill is the entry point; SCHEMA.md

@@ -11,18 +11,25 @@ project's own CLAUDE.md instead.
 # Global instructions
 
 ## Workflow
-- Commit or push only when I explicitly ask. (Exception: the second-brain stores
-  below are auto-committed — never auto-pushed.)
+- Commit or push only when I explicitly ask. (Exception: the two brain knowledge
+  stores below are auto-committed — never auto-pushed. `work-log` is not: commit
+  it only when I ask.)
 
-## Second brain
-- Knowledge stores in Open Knowledge Format live at `~/code/brain` (personal) and
-  `~/code/work-brain` (work/RED, confidential). Each has a `SCHEMA.md` that governs it.
+## Knowledge vault
+- Everything lives under the `~/code/knowledge/` Obsidian vault, as three separate
+  git repos: `brain/` (personal), `work-brain/` (work/RED, confidential) — both
+  Open Knowledge Format knowledge stores, each governed by its own `SCHEMA.md` —
+  and `work-log/` (work/RED, confidential) for per-ticket task artifacts.
+- **Knowledge vs artifacts:** the brain stores hold durable, recall-oriented
+  knowledge. Reviews and specs are per-ticket artifacts, not knowledge — they go
+  in `work-log/<repo>/<TICKET>/`, written by the `/review` and `/spec` skills.
 - **Read:** before answering questions about external APIs, our domain, dev
   practices, or stored reference/snippets, grep the relevant store's `index.md` first.
 - **Capture:** when we solve something non-trivial, or I state a durable fact or
   convention worth keeping, **proactively offer to file it** (don't auto-write).
   Use the `/brain` skill. Route work/RED knowledge to work-brain, personal to
-  brain; if ambiguous, ask. Never store secrets or customer data.
+  brain; if ambiguous, ask. Never store secrets or customer data. `brain/notes/`
+  is a freeform human-only zone — leave it alone unless I ask.
 
 ## Conventions
 <!-- Add cross-project preferences here as they come up. -->
