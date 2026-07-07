@@ -66,33 +66,72 @@ repo=$(basename "$(dirname "$(git rev-parse --path-format=absolute --git-common-
 mkdir -p ~/code/knowledge/work-log/"$repo"/<TICKET>
 ```
 
-Then write to `~/code/knowledge/work-log/$repo/<TICKET>/review.md`. Start with a short summary: what the change does, and whether it meets the DoD (note gaps).
+Then write to `~/code/knowledge/work-log/$repo/<TICKET>/review.md`.
 
-Then one section per finding, in this exact shape:
+### 5a. Start with the overall review comment
+
+Begin the file with a short **status block** for yourself (what the change does; DoD met / gaps; PHPStan/Pint/test results) — this stays in the file.
+
+Then, under a **`## Gesamt-Kommentar (zum Kopieren)`** heading, write a **paste-ready top-level PR review comment in the reviewer's voice** — this is what gets posted as the overall review, separate from the line comments. Model it on how this reviewer actually opens a review:
+
+1. **Genuine praise first**, and confirm the ticket goal is met ("Das sieht prinzipiell alles schonmal ganz gut aus und die Ticket-Probleme dürften damit behoben sein …").
+2. If applicable, honestly name that some things were hard to follow ("allerdings ist es mir beim Durchgehen schwergefallen, ein paar Dingen zu folgen").
+3. The **2–4 biggest architectural/structural impressions as a numbered list** with **bold one-line headers**, each written in the first person ("Es fiel mir schwer …", "Mich stört dabei weniger, *dass* …, als dass …", "Am meisten wünsche ich mir …"). These are the high-value themes — cross-cutting design, naming collisions, over-complex indirection, a missed abstraction — not line nits.
+4. Close by **de-escalating**: state plainly that none of it is a hard blocker if that's true ("Nichts davon ist für mich ein harter Blocker.").
+
+If you leaned on the AI to structure this, it's fine to say so in the reviewer's actual style ("hab das mal von der KI zusammenfassen lassen 😄") — this reviewer does that openly.
+
+### 5b. Then one section per finding, in this exact shape
 
 ```
-### [blocker|major|minor|nit] Kurzer Titel — `path/to/File.php:42`
+### [blocker|major|minor|nit] Kurzer Titel
+
+📍 **`path/to/File.php:42`** · `methodOrSymbolName()` <— zur Orientierung, wo der Kommentar hingehört
 
 (Das Severity-Tag bleibt NUR hier im Titel — als Bewertung/Triage. Es kommt NICHT in den Gitea-Kommentar.)
 
 **Gitea-Kommentar (zum Kopieren):**
-> <kurz (1–4 Sätze), kollegial, tentativ — hedgend ("Ich glaube …", "vermutlich", "eventuell");
-> als konkreter Vorschlag ODER ehrliche Frage; nenne konkrete Alternative(n) bzw. eine bestehende
-> Lösung im Code beim Namen; Trivia mit "nit:" beginnen; Optionales/Außer-Scope explizit als
-> "kein Muss" markieren und ggf. ein Ticket vorschlagen; Dubletten per Link auf den ersten
-> Kommentar statt Wiederholung. KEINE [major]/[minor]-Klammern im Kommentar.>
+> <SEHR kurz — in der Regel 1–2 Sätze, hart bei max. 4. Am liebsten eine ehrliche Frage
+> ("Brauchen wir …?", "Sind die Tests bewusst …?") ODER ein konkreter Vorschlag mit benannter
+> Alternative ("Alternativer Namensvorschlag: `konnektor_routes_faulty`. Und dann auch wieder
+> ohne `status` Label."). Erste Person, kollegial, hedgend ("Ich glaube …", "vermutlich",
+> "eventuell", "oder?"), Emoji sparsam ok (😄). Trivia mit "nit:". Optionales/Außer-Scope
+> explizit entschärfen ("kein Muss", "können wir auch in einem anderen Ticket"). Dubletten per
+> Link auf den ersten Kommentar statt Wiederholung. KEINE [major]/[minor]-Klammern.>
+
+<NUR wenn eine tiefere/längere Analyse dahinter steckt (Cardinality, PromQL, Trade-offs …):
+NICHT in die kurze Zeile oben pressen. Stattdessen den kurzen menschlichen Kommentar behalten
+UND die Detailanalyse als klar ALS KI-Vorschlag ausgewiesenen, ausdrücklich optionalen Block
+anhängen — so postet dieser Reviewer das tatsächlich:>
+
+> Die KI hat hier noch einen (mMn.) interessanten Vorschlag gemacht. Muss man nicht aufnehmen,
+> fand's nur spannend:
+> <hier der Detailblock — gern mit Code/PromQL-Beispiel>
 
 **Kontext (für dich, nicht zum Posten):**
 <knapp: Ursache, konkrete Auswirkung, empfohlener Fix — mit file:line und ggf. Confluence-Doku;
 nur so lang wie nötig>
 ```
 
-Guidance for the two parts:
+Guidance for the parts:
 
-- **Gitea-Kommentar** — the copy-paste deliverable, and it must read like *this reviewer's* voice: short (1–4 sentences), collegial, tentative. Hedge ("Ich glaube …", "vermutlich", "eventuell"), offer concrete options ("Eventuell X? Oder Y."), and name existing code/solutions by their real path (e.g. `App\Service\Firmware\Sorts\VersionSort`). Prefix trivia with `nit:`. For optional or out-of-scope points, say so explicitly ("kein Muss") and suggest opening a ticket. Cross-reference a duplicate with a link to the first comment instead of repeating it. Never put a `[major]`/`[minor]` tag in the comment — the severity lives only in the finding title.
+- **Location line (📍)** — put it on its **own line directly under the title**, not buried in the title. Bold `path:line` plus the enclosing method/class/symbol so the reviewer can find the exact spot to attach the comment in Gitea at a glance. Every finding gets one.
+- **Gitea-Kommentar** — the copy-paste deliverable, and it must read like *this reviewer's* voice, which is **shorter than you think**: usually **one or two sentences**, often just a genuine question or one concrete rename/alternative. Look at the calibration examples below and match that length and tone. Hedge, name existing code/solutions by their real path (e.g. `App\Service\Firmware\Sorts\VersionSort`), prefix trivia with `nit:`, mark optional/out-of-scope explicitly ("kein Muss"), and suggest a follow-up ticket where it fits. Cross-reference duplicates with a link. Never a `[major]`/`[minor]` tag in the comment.
+- **Deeper analysis → attributed optional block.** Do **not** inflate the reviewer's own short comment with a wall of technical reasoning. Keep the human comment tight, then, if the point rests on deeper analysis, append it as a clearly **AI-attributed, explicitly optional** block ("Laut KI …", "Die KI plädiert hier relativ stark für ein Histogram 😄", "Muss man nicht aufnehmen, fands nur spannend:"). This two-tier split — short human ask + attributed optional deep-dive — is exactly how this reviewer posts.
 - **Kontext** — for the user's understanding, not for posting: root cause, concrete impact (bug, security, performance, maintainability), recommended fix, grounded in `file:line` and any relevant Confluence doc. Keep it as short as the point allows.
 
 The severity tag (`[blocker|major|minor|nit]`) stays in the finding **title** as the rating — only keep it out of the pasted comment.
+
+### 5c. Voice calibration — real examples of this reviewer's comments
+
+Match this register and length. These are the target; the wall-of-text paragraph is the anti-pattern.
+
+- Middleware/config no-op → *"Brauchen wir diese Middleware und den dazugehörigen Config Eintrag? In der Config ist es eine statische leere Liste, das hat also keinen Effekt."*
+- Duplicated construction → *"Die `CollectorRegistry` wird im `MessageBrokerServiceProvider` quasi identisch nochmal gebaut. Vielleicht wäre es besser, diese nur einmal als Singleton zu definieren anstatt sie hier an die ServiceProvider-Instanz zu hängen."*
+- Naming + concrete alternative → *"Wäre als Name nicht etwas wie `konnektor_registration_card_missing` besser? Hier werden ja nicht mehr unterschiedliche Status über das Label abgebildet … Das `status` Label wäre dann auch obsolet."*
+- Test placement question → *"Sind die Tests bewusst in dem `Unit` Verzeichnis gelandet? Ich glaube die Trennung wurde bisher nicht absolut konsistent durchgezogen …"*
+- nit → *"nit: Hier wäre eventuell auch ein Name mit `_count` passender, oder?"*
+- Deep AI suggestion (attributed, optional) → *"Die KI plädiert hier relativ stark für ein Histogram 😄:"* followed by the detailed block.
 
 End with an **Offene Fragen** section for anything you couldn't confirm.
 
