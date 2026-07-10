@@ -114,6 +114,19 @@ patch_env() {
     rm -f "$env_file.tmp"
 }
 
+# pick the base for a new branch: remote branches, default branch preselected
+pick_base_branch() {
+    local repo=$1 branch=$2 default
+    default=$(git -C "$repo" symbolic-ref --quiet --short refs/remotes/origin/HEAD || true)
+    default=${default:-origin/develop}
+
+    {
+        echo "$default"
+        git -C "$repo" branch --remotes --format='%(refname:short)' \
+            | grep -vx -e 'origin' -e 'origin/HEAD' -e "$default" | sort
+    } | fzf --prompt='base> ' --header="base for new branch $branch"
+}
+
 cmd_add() {
     local repo=${1:-} branch=${2:-}
 
@@ -148,13 +161,19 @@ cmd_add() {
         exit 0
     fi
 
+    echo "wt: fetching origin ..."
+    git -C "$repo" fetch --prune origin || echo "wt: fetch failed, using local refs" >&2
+
     mkdir -p "$WT_ROOT/$repo_name"
     if git -C "$repo" show-ref --verify --quiet "refs/heads/$branch"; then
         git -C "$repo" worktree add "$path" "$branch"
     elif git -C "$repo" show-ref --verify --quiet "refs/remotes/origin/$branch"; then
         git -C "$repo" worktree add --track -b "$branch" "$path" "origin/$branch"
     else
-        git -C "$repo" worktree add -b "$branch" "$path"
+        local base
+        base=$(pick_base_branch "$repo" "$branch") || exit 0
+        [[ -n "$base" ]] || exit 0
+        git -C "$repo" worktree add --no-track -b "$branch" "$path" "$base"
     fi
 
     copy_item "$repo" "$path" .env
