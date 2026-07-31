@@ -21,6 +21,7 @@ let
 in {
   imports = [
     ./tmux.nix
+    ./herdr.nix
     ./zsh.nix
     ./nvim.nix
     ./claude-skills.nix
@@ -48,6 +49,8 @@ in {
     nodejs_24
     python3
 
+    herdr
+
     # LSP packages
     phpactor
     typescript
@@ -56,6 +59,14 @@ in {
     tailwindcss-language-server
     intelephense
     pyright
+  ] ++ lib.optionals stdenv.isLinux [
+    # Clipboard backends. herdr, tmux and Claude Code all copy via a native
+    # tool (wl-copy on Wayland, xclip on X11/XWayland) before any OSC 52
+    # fallback — without one, copy fails silently. Linux-only (these packages
+    # don't exist on darwin). NOTE: herdr and Claude Code cache clipboard-tool
+    # detection at startup, so restart both after first installing these.
+    wl-clipboard   # wl-copy/wl-paste — Wayland (your current session)
+    xclip          # X11/XWayland fallback; also what tmux.conf's copy-yank uses
   ];
 
   home.file = {
@@ -73,6 +84,10 @@ in {
       config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home-manager/packages/config/claude/CLAUDE.md";
     ".claude/hooks/bash-guard.sh".source =
       config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home-manager/packages/config/claude/hooks/bash-guard.sh";
+    ".claude/hooks/canary-check.sh".source =
+      config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home-manager/packages/config/claude/hooks/canary-check.sh";
+    ".claude/statusline.sh".source =
+      config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home-manager/packages/config/claude/statusline.sh";
   };
 
   # Claude Code skills are linked per-skill by ./claude-skills.nix. Every host

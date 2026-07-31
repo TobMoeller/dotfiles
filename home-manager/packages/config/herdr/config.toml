@@ -1,0 +1,135 @@
+onboarding = false
+# Symlinked out of the nix store (mkOutOfStoreSymlink), so edits here apply
+# without a home-manager switch. Dump every available option with:
+#   herdr --default-config
+#
+# herdr is an *agent* multiplexer, but its panes/tabs/splits map closely onto
+# tmux. This mirrors ~/.config/tmux/tmux.conf as far as herdr allows.
+# NOTE: herdr is mouse-first — you can also drag pane/tab/split borders.
+
+[terminal]
+default_shell = "zsh"   # ensure our zsh + p10k config loads in new panes
+shell_mode = "auto"     # Linux: non-login interactive (p10k lives in .zshrc)
+new_cwd = "follow"      # new panes/tabs inherit the current pane's cwd
+
+[keys]
+# Same prefix as tmux (Ctrl-y). "prefix+x" = press prefix, release, then x.
+prefix = "ctrl+y"
+
+detach = "prefix+d"     # tmux uses 'd'; herdr default is prefix+q
+
+# Tabs  == tmux "windows"
+new_tab      = "prefix+c"
+next_tab     = "prefix+n"
+previous_tab = "prefix+p"
+
+# Splits. herdr only accepts named punctuation minus/comma/ampersand/plus/
+# backtick, so tmux's % and " tokens are not usable here — these are herdr's
+# defaults. prefix+v = side-by-side, prefix+- = stacked. Swap if orientation
+# feels reversed.
+split_vertical   = "prefix+v"
+split_horizontal = "prefix+minus"
+
+# Pane focus. Ctrl+hjkl is handled by the local vim-nav plugin (plugin_action
+# bindings below) so it stays seamless with Neovim splits and fzf lists. These
+# prefix bindings are the built-in fallback (also active if the plugin isn't
+# linked on this machine).
+focus_pane_left  = "prefix+h"
+focus_pane_down  = "prefix+j"
+focus_pane_up    = "prefix+k"
+focus_pane_right = "prefix+l"
+
+# Spaces (== workspaces / tmux sessions). Cycle directly with wrap-around, no
+# prefix and no navigate mode. Vertical j/k = down/up the space list.
+# NOTE: alt+ (not ctrl+shift+) because gnome-terminal (VTE) lacks the Kitty
+# keyboard protocol and cannot deliver ctrl+shift+<letter> to herdr. Ctrl+hjkl
+# = panes, Alt+hjkl = spaces/agents. If Alt+ opens gnome-terminal's menu
+# instead, disable Preferences > General > "Enable mnemonics".
+previous_workspace = "alt+k"
+next_workspace     = "alt+j"
+
+# Free prefix+shift+w (default rename_workspace) for the wt worktree launcher in
+# the [[keys.command]] section below. Rename a space via the picker (prefix+w)
+# or `herdr workspace rename`.
+rename_workspace = ""
+
+# Agents. Cycle the attention queue directly, no prefix. l/h = next/previous —
+# consistent with spaces: forward keys j/l = next, back keys k/h = previous.
+previous_agent = "alt+h"
+next_agent     = "alt+l"
+
+# Navigate mode is now space-only: j/k switch SPACES (workspaces). Pane nav is
+# unneeded here since Ctrl+hjkl moves panes in normal mode. Pane letter bindings
+# are cleared so they don't shadow j/k. (Left/right arrows still focus panes —
+# herdr hardcodes those — but that's harmless.)
+navigate_pane_left      = ""
+navigate_pane_right     = ""
+navigate_pane_down      = ""
+navigate_pane_up        = ""
+navigate_workspace_down = "j"
+navigate_workspace_up   = "k"
+
+# Project launcher (fzf), the herdr twin of tmux 'PREFIX F -> t'. Opens a temp
+# pane; 't' detects HERDR_ENV and focuses/creates the matching workspace.
+# NOTE: array-of-tables must come after all bare [keys] entries above, or it
+# would silently swallow them into this table.
+[[keys.command]]
+key = "prefix+f"
+type = "pane"
+command = "t"
+
+# Worktree ops via the wt script, as pop-up panes — the herdr twin of tmux's
+# 'prefix W' worktree table. herdr has NO multi-key tables, so these are flat
+# prefix chords (not 'prefix W then w/a/r'). wt detects HERDR_ENV and uses herdr
+# spaces. prefix+shift+w reuses the tmux 'W = worktrees' muscle memory.
+[[keys.command]]
+key = "prefix+shift+w"   # wt: fzf existing worktrees, switch/attach
+type = "pane"
+command = "wt"
+
+[[keys.command]]
+key = "prefix+shift+a"   # wt add: pick repo + branch, create worktree + space
+type = "pane"
+command = "wt add"
+
+[[keys.command]]
+key = "prefix+shift+k"   # wt rm: pick a worktree, tear it down (space + docker + git)
+type = "pane"
+command = "wt rm"
+
+# Seamless Ctrl+hjkl via the local vim-nav plugin: forwards the key to Neovim/
+# fzf when the focused pane runs them (so vim splits and fzf lists navigate),
+# otherwise moves the herdr pane. Needs the plugin linked once per machine:
+#   herdr plugin link <dotfiles>/home-manager/packages/config/herdr/plugins/vim-nav
+[[keys.command]]
+key = "ctrl+h"
+type = "plugin_action"
+command = "vim-nav.left"
+
+[[keys.command]]
+key = "ctrl+j"
+type = "plugin_action"
+command = "vim-nav.down"
+
+[[keys.command]]
+key = "ctrl+k"
+type = "plugin_action"
+command = "vim-nav.up"
+
+[[keys.command]]
+key = "ctrl+l"
+type = "plugin_action"
+command = "vim-nav.right"
+
+[ui]
+pane_borders = true
+pane_gaps    = true
+confirm_close = true
+agent_panel_sort = "spaces"
+
+show_agent_labels_on_pane_borders = false
+[ui.toast]
+delivery = "system"
+
+[experimental]
+pane_history = false

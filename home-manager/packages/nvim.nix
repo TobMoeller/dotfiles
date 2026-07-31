@@ -48,8 +48,40 @@
             vim-repeat
             # Add more languages.
             # vim-polyglot
-            # Navigate seamlessly between Vim windows and Tmux panes.
-            vim-tmux-navigator
+            # Seamless <C-hjkl> between Neovim splits and herdr panes (our herdr
+            # port; still falls back to tmux when not inside herdr). Disables the
+            # plugin's own tmux mappings and installs mappings that wincmd within
+            # nvim, then cross into the multiplexer at a split edge. The herdr
+            # side (vim-nav plugin) forwards the key here when nvim/fzf is focused.
+            {
+                plugin = vim-tmux-navigator;
+                type = "lua";
+                config = ''
+                    vim.g.tmux_navigator_no_mappings = 1
+                    local function nav(wincmd, dir)
+                        local prev = vim.api.nvim_get_current_win()
+                        vim.cmd("wincmd " .. wincmd)
+                        if vim.api.nvim_get_current_win() ~= prev then return end
+                        -- at a split edge: cross into the surrounding multiplexer
+                        if vim.env.HERDR_PANE_ID and vim.env.HERDR_PANE_ID ~= "" then
+                            local herdr = vim.env.HERDR_BIN_PATH
+                            if herdr == nil or herdr == "" then herdr = "herdr" end
+                            vim.fn.system({ herdr, "pane", "focus", "--direction", dir, "--current" })
+                        elseif vim.env.TMUX and vim.env.TMUX ~= "" then
+                            local t = { left = "Left", down = "Down", up = "Up", right = "Right" }
+                            pcall(vim.cmd, "TmuxNavigate" .. t[dir])
+                        end
+                    end
+                    local function map(lhs, wincmd, dir)
+                        vim.keymap.set("n", lhs, function() nav(wincmd, dir) end,
+                            { silent = true, desc = "Navigate " .. dir .. " (vim/herdr)" })
+                    end
+                    map("<C-h>", "h", "left")
+                    map("<C-j>", "j", "down")
+                    map("<C-k>", "k", "up")
+                    map("<C-l>", "l", "right")
+                '';
+            }
             # Jump to the last location when opening a file.
             vim-lastplace
             # Enable * searching with visually selected text.

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-# wt - git worktrees as tmux sessions, for running multiple agents in parallel
+# wt - git worktrees as tmux/herdr sessions, for running multiple agents in parallel
+#
+# Inside herdr (HERDR_ENV set) each worktree becomes a herdr *space* (workspace);
+# otherwise a tmux session. All the env/port/docker/dep bootstrapping is identical
+# — only the session layer differs.
 #
 #   wt              fzf over existing worktrees, switch/attach (creates the
 #                   session again if it is gone, e.g. after a reboot)
@@ -19,6 +23,10 @@
 #   .worktree-files  additional git-ignored paths to copy, one per line
 #   .worktree-setup.sh  executed inside the first tmux window after creation
 #                    (composer install, sail up, artisan migrate, ...)
+#   tools/setup-worktree.sh  if present & executable, owns env setup (env files,
+#                    host ports, compose project name); wt runs it in the
+#                    foreground instead of its own .env copy + port shift, so
+#                    .env/.env.testing exist as soon as `wt add` returns
 #
 # vendor/ and node_modules/ are copied with --reflink when the filesystem
 # supports it, so a 'composer install'/'npm install' in the setup script only
@@ -32,9 +40,16 @@ PORT_OFFSET_STEP=10
 
 die() { echo "wt: $*" >&2; exit 1; }
 
-# repo/branch -> tmux session name (no '.' or ':' allowed)
+# repo/branch -> session/space name (no '.' or ':' allowed; used as tmux session
+# name or herdr workspace label)
 session_name() {
     echo "$1--$2" | tr './:' '___'
+}
+
+# herdr workspace_id for a given label, empty if none exists
+herdr_ws_id() {
+    herdr workspace list \
+        | jq -r --arg l "$1" 'first(.result.workspaces[] | select(.label==$l) | .workspace_id) // empty'
 }
 
 # list existing worktrees as "repo/branch" lines
@@ -55,6 +70,21 @@ attach_session() {
 # A single window at the worktree root - windows are yours to arrange.
 ensure_session() {
     local session=$1 path=$2 setup=${3:-}
+
+    if [[ -n "${HERDR_ENV:-}" ]]; then
+        local id
+        id=$(herdr_ws_id "$session")
+        if [[ -n "$id" ]]; then
+            herdr workspace focus "$id"
+        else
+            local root
+            root=$(herdr workspace create --cwd "$path" --label "$session" --focus \
+                | jq -r '.result.root_pane.pane_id // empty')
+            # run the setup command in the new space's root pane (text + Enter)
+            [[ -n "$setup" && -n "$root" ]] && herdr pane run "$root" "$setup"
+        fi
+        return
+    fi
 
     if ! tmux has-session -t "=$session" 2>/dev/null; then
         tmux new-session -d -s "$session" -c "$path"
@@ -127,6 +157,24 @@ pick_base_branch() {
     } | fzf --prompt='base> ' --header="base for new branch $branch"
 }
 
+# Slow worktree bootstrap: copy vendor/node_modules, then run a generic
+# .worktree-setup.sh build step (composer/npm install) which needs those deps
+# present. Invoked inside the worktree's own session (see cmd_add) so it never
+# blocks `wt add` or your current window. Env setup already ran in cmd_add.
+cmd_bootstrap() {
+    local repo=$1 path=$2
+
+    local dep
+    for dep in vendor node_modules; do
+        if [[ -d "$repo/$dep" && ! -e "$path/$dep" ]]; then
+            echo "wt: copying $dep ..."
+            copy_deps "$repo/$dep" "$path/$dep"
+        fi
+    done
+
+    [[ -x "$path/.worktree-setup.sh" ]] && ( cd "$path" && exec ./.worktree-setup.sh )
+}
+
 cmd_add() {
     local repo=${1:-} branch=${2:-}
 
@@ -176,32 +224,39 @@ cmd_add() {
         git -C "$repo" worktree add --no-track -b "$branch" "$path" "$base"
     fi
 
-    copy_item "$repo" "$path" .env
+    # --- Env setup: fast, and done in the foreground so .env/.env.testing exist
+    #     the moment `wt add` returns (docker compose interpolates them). A repo
+    #     can own this via tools/setup-worktree.sh (env files + host ports +
+    #     compose project name); otherwise wt copies + patches .env itself. -----
+    if [[ -x "$path/tools/setup-worktree.sh" ]]; then
+        echo "wt: running tools/setup-worktree.sh ..."
+        ( cd "$path" && ./tools/setup-worktree.sh ) \
+            || echo "wt: tools/setup-worktree.sh failed -- opening the session anyway" >&2
+    else
+        copy_item "$repo" "$path" .env
+        if [[ -f "$path/.env" ]]; then
+            local index offset project
+            index=$(find "$WT_ROOT/$repo_name" -mindepth 1 -maxdepth 1 -type d | wc -l)
+            offset=$((index * PORT_OFFSET_STEP))
+            project=$(printf '%s' "$repo_name-$branch_dir" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9_-' '-')
+            patch_env "$path/.env" "$project" "$offset"
+            echo "wt: patched .env (COMPOSE_PROJECT_NAME=$project, port offset +$offset)"
+        fi
+    fi
+
     if [[ -f "$repo/.worktree-files" ]]; then
         while IFS= read -r item; do
             [[ -n "$item" && "${item:0:1}" != "#" ]] && copy_item "$repo" "$path" "$item"
         done < "$repo/.worktree-files"
     fi
 
-    if [[ -f "$path/.env" ]]; then
-        local index offset project
-        index=$(find "$WT_ROOT/$repo_name" -mindepth 1 -maxdepth 1 -type d | wc -l)
-        offset=$((index * PORT_OFFSET_STEP))
-        project=$(printf '%s' "$repo_name-$branch_dir" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9_-' '-')
-        patch_env "$path/.env" "$project" "$offset"
-        echo "wt: patched .env (COMPOSE_PROJECT_NAME=$project, port offset +$offset)"
-    fi
-
-    local dep
-    for dep in vendor node_modules; do
-        if [[ -d "$repo/$dep" ]]; then
-            echo "wt: copying $dep ..."
-            copy_deps "$repo/$dep" "$path/$dep"
-        fi
-    done
-
+    # --- Slow work (reflink dep copy + any .worktree-setup.sh build step) runs
+    #     *inside* the new session, so `wt add` returns at once -- jump back to
+    #     your previous window and let it finish in the background. ------------
     local setup=""
-    [[ -x "$path/.worktree-setup.sh" ]] && setup="./.worktree-setup.sh"
+    if [[ -x "$path/.worktree-setup.sh" || -d "$repo/vendor" || -d "$repo/node_modules" ]]; then
+        setup="wt _bootstrap $(printf '%q' "$repo") $(printf '%q' "$path")"
+    fi
     ensure_session "$session" "$path" "$setup"
 }
 
@@ -216,7 +271,13 @@ cmd_rm() {
     local path="$WT_ROOT/$repo_name/$branch_dir"
     [[ -d "$path" ]] || die "no such worktree: $path"
 
-    tmux kill-session -t "=$(session_name "$repo_name" "$branch_dir")" 2>/dev/null || true
+    if [[ -n "${HERDR_ENV:-}" ]]; then
+        local ws_id
+        ws_id=$(herdr_ws_id "$(session_name "$repo_name" "$branch_dir")" || true)
+        [[ -n "$ws_id" ]] && herdr workspace close "$ws_id" 2>/dev/null || true
+    else
+        tmux kill-session -t "=$(session_name "$repo_name" "$branch_dir")" 2>/dev/null || true
+    fi
 
     if [[ -f "$path/docker-compose.yml" || -f "$path/compose.yaml" || -f "$path/docker-compose.yaml" ]]; then
         echo "wt: tearing down docker compose stack ..."
@@ -239,9 +300,10 @@ cmd_rm() {
 
 case "${1:-}" in
     add) shift; cmd_add "$@" ;;
+    _bootstrap) shift; cmd_bootstrap "$@" ;;
     rm) shift; cmd_rm "$@" ;;
     ls) cmd_ls ;;
     "") cmd_switch ;;
-    -h|--help) sed -n '3,25p' "$0" | sed 's/^# \{0,1\}//' ;;
+    -h|--help) sed -n '3,29p' "$0" | sed 's/^# \{0,1\}//' ;;
     *) die "unknown command: $1 (use add, rm, ls or no argument)" ;;
 esac

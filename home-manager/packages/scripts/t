@@ -13,8 +13,24 @@ else
     # echo "$items"
 fi
 
+[[ -z "$selected" ]] && exit 0   # fzf aborted (Esc/Ctrl-C)
+
 dirname=`basename $selected | sed 's/\./_/g'`
 
+# herdr: a "space" is a workspace. Focus the one whose label matches, else
+# create it at the selected dir. Mirrors the tmux switch-or-create below.
+if [[ -n "$HERDR_ENV" ]]; then
+    existing=`herdr workspace list | jq -r --arg l "$dirname" \
+        '.result.workspaces[] | select(.label==$l) | .workspace_id' | head -n1`
+    if [[ -n "$existing" ]]; then
+        herdr workspace focus "$existing"
+    else
+        herdr workspace create --cwd "$selected" --label "$dirname" --focus
+    fi
+    exit $?
+fi
+
+# tmux
 tmux switch-client -t =$dirname
 if [[ $? -eq 0 ]]; then
     exit 0

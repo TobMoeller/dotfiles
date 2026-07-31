@@ -1,0 +1,34 @@
+# Local herdr plugin: our own vim-tmux-navigator port for herdr, extended to
+# also treat fzf as "owns Ctrl+hjkl". Register it once per machine with:
+#   herdr plugin link <this directory>   (then `herdr server reload-config`)
+# Bound to ctrl+hjkl via the plugin_action entries in ../../config.toml.
+id = "vim-nav"
+name = "Vim/fzf-aware pane navigation"
+version = "0.1.0"
+min_herdr_version = "0.7.0"
+description = "Ctrl+h/j/k/l moves Neovim splits / fzf lists when focused, else herdr panes"
+platforms = ["linux", "macos"]
+
+[[actions]]
+id = "left"
+title = "Navigate left (vim/fzf/herdr)"
+contexts = ["global"]
+command = ["bash", "navigate.sh", "left"]
+
+[[actions]]
+id = "down"
+title = "Navigate down (vim/fzf/herdr)"
+contexts = ["global"]
+command = ["bash", "navigate.sh", "down"]
+
+[[actions]]
+id = "up"
+title = "Navigate up (vim/fzf/herdr)"
+contexts = ["global"]
+command = ["bash", "navigate.sh", "up"]
+
+[[actions]]
+id = "right"
+title = "Navigate right (vim/fzf/herdr)"
+contexts = ["global"]
+command = ["bash", "navigate.sh", "right"]
