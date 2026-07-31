@@ -81,7 +81,34 @@ Then, under a **`## Gesamt-Kommentar (zum Kopieren)`** heading, write a **paste-
 
 If you leaned on the AI to structure this, it's fine to say so in the reviewer's actual style ("hab das mal von der KI zusammenfassen lassen 😄") — this reviewer does that openly.
 
-### 5b. Then one section per finding, in this exact shape
+### 5b. Order the findings by the Gitea diff — NEVER by severity
+
+The file is a **walking aid for the Gitea diff view**: the user opens the PR, goes file by file, and pastes the comments as they pass each spot. So the order of the findings must match the order Gitea shows the files in — anything else forces them to jump back and forth and makes the file unusable.
+
+- **Primary sort: the file order returned by `list_gitea_pull_request_files`.** That is exactly the order the Gitea diff view renders (path-alphabetical). Do not re-sort it, do not put "important" files first. In ticket/commit mode, use the file order of `git diff --stat <base>..<head>` instead.
+- **Secondary sort: ascending line number** within one file.
+- **Group findings under one `## \`path/to/File.php\`` heading per file**, in that order, with the findings as `###` sections underneath. One heading per file even when it holds only one finding — the user scrolls to the heading that matches the file they have open.
+- **Severity is triage metadata, not a sort key.** It stays in the finding title (`### [major] …`) so the user can judge what matters, but it never influences position. A `nit` in the first file comes before a `major` in the fifth.
+- **Findings with no anchor in the diff go last**, under a final `## Ohne Diff-Bezug` heading — e.g. a point about a file the PR does not touch (a sibling endpoint that *should* have been changed too), or a repo-wide observation. Gitea cannot attach a line comment to an unchanged file, so say in the comment text itself where it belongs (usually: fold it into the overall comment, or attach it to the closest changed line and name the other file). Never bury such a finding in the middle of the file order — it breaks the walk.
+- **Right after the status block, add a `## Reihenfolge (Gitea-Diff)` index**: one line per file in diff order, each listing its findings as `[severity] Kurztitel`. This is the checklist the user ticks off while walking the diff. Files without findings are omitted.
+
+Example skeleton:
+
+```
+## Reihenfolge (Gitea-Diff)
+
+1. `app/Http/Controllers/.../FooController.php` — [nit] Meldung im Konjunktiv
+2. `app/Service/Foo/Actions/BarAction.php` — [major] Kein Broadcast · [minor] Falsche Begründung
+3. `tests/Feature/Service/Foo/BazTest.php` — [minor] Test im falschen Verzeichnis
+   → Ohne Diff-Bezug: [minor] Schwester-Endpoint ohne Guard
+
+## `app/Http/Controllers/.../FooController.php`
+
+### [nit] Meldung im Konjunktiv
+…
+```
+
+### 5c. Then one section per finding, in this exact shape
 
 ```
 ### [blocker|major|minor|nit] Kurzer Titel
@@ -115,14 +142,14 @@ nur so lang wie nötig>
 
 Guidance for the parts:
 
-- **Location line (📍)** — put it on its **own line directly under the title**, not buried in the title. Bold `path:line` plus the enclosing method/class/symbol so the reviewer can find the exact spot to attach the comment in Gitea at a glance. Every finding gets one.
+- **Location line (📍)** — put it on its **own line directly under the title**, not buried in the title. Bold `path:line` plus the enclosing method/class/symbol so the reviewer can find the exact spot to attach the comment in Gitea at a glance. Every finding gets one — also under a `## <path>` heading, since the exact line is what the user needs there (the heading only gets them to the right file).
 - **Gitea-Kommentar** — the copy-paste deliverable, and it must read like *this reviewer's* voice, which is **shorter than you think**: usually **one or two sentences**, often just a genuine question or one concrete rename/alternative. Look at the calibration examples below and match that length and tone. Hedge, name existing code/solutions by their real path (e.g. `App\Service\Firmware\Sorts\VersionSort`), prefix trivia with `nit:`, mark optional/out-of-scope explicitly ("kein Muss"), and suggest a follow-up ticket where it fits. Cross-reference duplicates with a link. Never a `[major]`/`[minor]` tag in the comment.
 - **Deeper analysis → attributed optional block.** Do **not** inflate the reviewer's own short comment with a wall of technical reasoning. Keep the human comment tight, then, if the point rests on deeper analysis, append it as a clearly **AI-attributed, explicitly optional** block ("Laut KI …", "Die KI plädiert hier relativ stark für ein Histogram 😄", "Muss man nicht aufnehmen, fands nur spannend:"). This two-tier split — short human ask + attributed optional deep-dive — is exactly how this reviewer posts.
 - **Kontext** — for the user's understanding, not for posting: root cause, concrete impact (bug, security, performance, maintainability), recommended fix, grounded in `file:line` and any relevant Confluence doc. Keep it as short as the point allows.
 
 The severity tag (`[blocker|major|minor|nit]`) stays in the finding **title** as the rating — only keep it out of the pasted comment.
 
-### 5c. Voice calibration — real examples of this reviewer's comments
+### 5d. Voice calibration — real examples of this reviewer's comments
 
 Match this register and length. These are the target; the wall-of-text paragraph is the anti-pattern.
 
@@ -133,7 +160,9 @@ Match this register and length. These are the target; the wall-of-text paragraph
 - nit → *"nit: Hier wäre eventuell auch ein Name mit `_count` passender, oder?"*
 - Deep AI suggestion (attributed, optional) → *"Die KI plädiert hier relativ stark für ein Histogram 😄:"* followed by the detailed block.
 
-End with an **Offene Fragen** section for anything you couldn't confirm.
+End with an **Offene Fragen** section for anything you couldn't confirm — after the per-file sections and the `## Ohne Diff-Bezug` section, at the very bottom of the file.
+
+So the final file layout is: status block → `## Reihenfolge (Gitea-Diff)` → `## Gesamt-Kommentar (zum Kopieren)` → one `## <path>` section per changed file in diff order → `## Ohne Diff-Bezug` → `## Offene Fragen`.
 
 ## Stay in scope
 

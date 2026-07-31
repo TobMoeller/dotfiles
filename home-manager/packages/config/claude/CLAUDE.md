@@ -43,3 +43,14 @@ project's own CLAUDE.md instead.
   command (e.g. `git status`) auto-approves; a composed one almost always prompts.
 - Avoid `sed`/`awk` for editing files — use the Edit tool. If you must read a slice,
   use Read with offset/limit rather than `sed -n`.
+
+<!--
+Context-degradation canary. Deliberately the last, most deeply buried rule in
+this file: instruction-following decays silently in long sessions, and small
+nested rules are what the model drops first — usually a turn or two before it
+starts getting real work wrong. If the marker disappears, distrust the last few
+answers and /clear. The Stop hook hooks/canary-check.sh watches for it; change
+the marker in both places or they stop matching.
+-->
+## Canary
+- Start every response with 🐤 — nothing before it.
