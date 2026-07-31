@@ -11,9 +11,12 @@
       url = "github:tzachar/cmp-ai";
       flake = false;
     };
+    # OpenGL/Vulkan wrapper for running nixpkgs GUI apps (Ghostty) on non-NixOS
+    # distros, where GPU drivers live outside the nix store. Linux-only concern.
+    nixgl.url = "github:nix-community/nixGL";
   };
 
-  outputs = { nixpkgs, home-manager, cmp-ai, ... }:
+  outputs = { nixpkgs, home-manager, cmp-ai, nixgl, ... }:
     let
       pkgs = nixpkgs.legacyPackages;
     in {
@@ -40,7 +43,7 @@
 
           modules = [ ./red-tobias.nix ];
 
-          # extraSpecialArgs = { inherit cmp-ai; };
+          extraSpecialArgs = { inherit nixgl; };
         };
 
         "moehomepi@moehomepi" = home-manager.lib.homeManagerConfiguration {

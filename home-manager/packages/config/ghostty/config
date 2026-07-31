@@ -1,0 +1,26 @@
+# Ghostty config — shared by the mac (mbp) and red (linux) home-manager hosts.
+# Wired in per-host (mbp-tobiasmoeller.nix + red-tobias.nix), not commons.nix,
+# so the raspi host stays untouched. Ghostty reads ~/.config/ghostty/config on
+# both Linux and macOS. This is a plain store copy (like alacritty), so a
+# 'home-manager switch' is needed after edits.
+#
+# Why Ghostty: it speaks the Kitty keyboard protocol, so Ctrl+Shift+<letter>
+# chords actually reach apps like herdr (gnome-terminal cannot deliver those).
+# If you migrate, you can move herdr's space/agent cycling off Alt onto reliable
+# Ctrl+Shift+... chords that work identically on Linux and macOS.
+
+# Appearance — matches the Alacritty setup. Theme names are the bundled file
+# names (capitalized, spaced), not the slug: `ghostty +list-themes` to browse.
+theme = Catppuccin Mocha
+font-family = MesloLGS NF
+font-size = 14
+
+# macOS: make Option send Alt/Meta (needed for herdr's Alt+hjkl bindings).
+# Ignored on Linux.
+macos-option-as-alt = true
+
+# Let terminal apps (herdr, tmux, Claude Code) set the system clipboard via
+# OSC 52 without a prompt. This is the fallback path when no wl-copy/xclip is
+# available and keeps copy working across the multiplexer.
+clipboard-write = allow
+# clipboard-read = allow   # uncomment to also allow OSC 52 paste without a prompt

@@ -9,6 +9,9 @@
   imports = [
     ./packages/commons.nix
     ./packages/alacritty.nix
+    # Ghostty config only. Install the app itself on macOS via Homebrew:
+    #   brew install --cask ghostty
+    ./packages/ghostty.nix
   ];
 
   home.packages = with pkgs; [

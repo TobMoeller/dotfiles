@@ -1,4 +1,20 @@
-{ config, pkgs, ... }:
+{ config, pkgs, nixgl, ... }:
+
+let
+  # This machine is a Ryzen APU (AMD Phoenix3, amdgpu/Mesa). nixGLIntel is
+  # nixGL's Mesa wrapper and covers Intel *and* AMD — no driver-version pinning
+  # (that pain is NVIDIA-only). It provides the OpenGL stack that a nixpkgs GUI
+  # app needs on Ubuntu, where the system drivers live outside the nix store.
+  nixGL = nixgl.packages.${pkgs.stdenv.hostPlatform.system}.nixGLIntel;
+
+  # Terminal-launchable `ghostty` that runs under nixGL. NOTE: this wraps the
+  # CLI only; the GNOME app-grid .desktop entry is not wrapped. If you want to
+  # launch Ghostty from the GNOME dash, ask and I'll switch to a fuller wrap
+  # that also patches the desktop entry.
+  ghostty-nixgl = pkgs.writeShellScriptBin "ghostty" ''
+    exec ${nixGL}/bin/nixGLIntel ${pkgs.ghostty}/bin/ghostty "$@"
+  '';
+in
 
 {
   home.username = "tobias";
@@ -8,6 +24,7 @@
 
   imports = [
     ./packages/commons.nix
+    ./packages/ghostty.nix
   ];
 
   # Shared skills plus red-specific ones; red overrides common on a name clash.
@@ -18,7 +35,7 @@
   claudePermissionGroups = [ "red" ];
 
   home.packages = with pkgs; [
-    # ghostty
+    ghostty-nixgl   # nixpkgs Ghostty wrapped with nixGL (see let block above)
     # podman # requires uidmap on ubuntu
     # podman-compose
     # slirp4netns # required for podman networking
@@ -33,6 +50,28 @@
     # ".screenrc".source = dotfiles/screenrc;
     ".ideavimrc".source = ./packages/config/ideavimrc;
   };
+
+  # GNOME app-search launcher for Ghostty. NOTE: `xdg.desktopEntries` installs
+  # into the nix profile (~/.nix-profile/share/applications), which GNOME on
+  # non-NixOS Ubuntu does NOT scan — so we write the .desktop straight into
+  # ~/.local/share/applications, which GNOME always scans. Exec points at the
+  # nixGL-wrapped binary and the icon at an absolute store path (both refreshed
+  # on every switch); no DBusActivatable, so it launches through the wrapper.
+  home.file.".local/share/applications/ghostty.desktop".text = ''
+    [Desktop Entry]
+    Version=1.0
+    Name=Ghostty
+    Type=Application
+    Comment=A terminal emulator
+    TryExec=${ghostty-nixgl}/bin/ghostty
+    Exec=${ghostty-nixgl}/bin/ghostty --gtk-single-instance=true
+    Icon=${pkgs.ghostty}/share/icons/hicolor/512x512/apps/com.mitchellh.ghostty.png
+    Categories=System;TerminalEmulator;
+    Keywords=terminal;tty;pty;
+    StartupNotify=true
+    StartupWMClass=com.mitchellh.ghostty
+    Terminal=false
+  '';
 
   home.sessionPath = [
     "$HOME/.local/share/JetBrains/Toolbox/scripts"

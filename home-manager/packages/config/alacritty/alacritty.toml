@@ -3,6 +3,11 @@ general.import = [
     "$HOME/.config/alacritty/catppuccin-mocha.toml"
 ]
 
+[window]
+# macOS only (ignored elsewhere): make the Option key send Alt/Meta instead of
+# typing special characters, so herdr's Alt+hjkl space/agent bindings work.
+option_as_alt = "Both"
+
 [env]
 # TERM = "xterm-256color"
 
