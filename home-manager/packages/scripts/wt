@@ -17,16 +17,18 @@
 # Worktrees live under $WT_ROOT/<repo>/<branch>, separate from ~/code.
 #
 # Per-repo conventions (all optional, checked in the main checkout):
-#   .env             copied into the worktree, then COMPOSE_PROJECT_NAME is
-#                    set and host ports (APP_PORT, VITE_PORT, FORWARD_*_PORT)
-#                    are shifted by a per-worktree offset
+#   .env             copied into the worktree, then COMPOSE_PROJECT_NAME is set
+#                    so the stack gets its own containers and volumes
 #   .worktree-files  additional git-ignored paths to copy, one per line
-#   .worktree-setup.sh  executed inside the first tmux window after creation
+#   .worktree-setup.sh  executed inside the new session after creation
 #                    (composer install, sail up, artisan migrate, ...)
 #   tools/setup-worktree.sh  if present & executable, owns env setup (env files,
-#                    host ports, compose project name); wt runs it in the
-#                    foreground instead of its own .env copy + port shift, so
-#                    .env/.env.testing exist as soon as `wt add` returns
+#                    host ports, compose project name) and replaces wt's own
+#                    .env copy
+#
+# Only the git plumbing (fetch, worktree add) runs in the calling pane; env
+# setup, file copies and the build step all run inside the new session, so
+# `wt add` returns at once and every failure stays on screen where you work.
 #
 # vendor/ and node_modules/ are copied with --reflink when the filesystem
 # supports it, so a 'composer install'/'npm install' in the setup script only
@@ -36,7 +38,6 @@ set -euo pipefail
 
 CODE_DIR="${WT_CODE_DIR:-$HOME/code}"
 WT_ROOT="${WT_ROOT:-$CODE_DIR/worktrees}"
-PORT_OFFSET_STEP=10
 
 die() { echo "wt: $*" >&2; exit 1; }
 
@@ -127,21 +128,38 @@ copy_deps() {
     cp -a "$src" "$dst"
 }
 
-# make the copied .env safe to run next to the other stacks
+# give the copied .env its own compose project, so the stack does not collide
+# with the main checkout's containers and volumes
 patch_env() {
-    local env_file=$1 project=$2 offset=$3
+    local env_file=$1 project=$2
 
     if grep -q '^COMPOSE_PROJECT_NAME=' "$env_file"; then
         sed "s/^COMPOSE_PROJECT_NAME=.*/COMPOSE_PROJECT_NAME=$project/" "$env_file" > "$env_file.tmp"
+        mv "$env_file.tmp" "$env_file"
     else
-        cat "$env_file" > "$env_file.tmp"
-        printf '\nCOMPOSE_PROJECT_NAME=%s\n' "$project" >> "$env_file.tmp"
+        printf '\nCOMPOSE_PROJECT_NAME=%s\n' "$project" >> "$env_file"
+    fi
+}
+
+# A repo can own its env setup via tools/setup-worktree.sh (env files, host
+# ports, compose project name); otherwise wt copies and patches .env itself.
+setup_env() {
+    local repo=$1 path=$2
+
+    if [[ -x "$path/tools/setup-worktree.sh" ]]; then
+        echo "wt: running tools/setup-worktree.sh ..."
+        ( cd "$path" && ./tools/setup-worktree.sh )
+        return
     fi
 
-    awk -v off="$offset" 'BEGIN { FS = OFS = "=" }
-        /^(APP_PORT|VITE_PORT|FORWARD_[A-Z_]+_PORT)=[0-9]+[[:space:]]*$/ { $2 = $2 + off }
-        { print }' "$env_file.tmp" > "$env_file"
-    rm -f "$env_file.tmp"
+    copy_item "$repo" "$path" .env
+    [[ -f "$path/.env" ]] || return 0
+
+    local project
+    project=$(printf '%s' "$(basename "$repo")-$(basename "$path")" \
+        | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9_-' '-')
+    patch_env "$path/.env" "$project"
+    echo "wt: patched .env (COMPOSE_PROJECT_NAME=$project)"
 }
 
 # pick the base for a new branch: remote branches, default branch preselected
@@ -157,12 +175,22 @@ pick_base_branch() {
     } | fzf --prompt='base> ' --header="base for new branch $branch"
 }
 
-# Slow worktree bootstrap: copy vendor/node_modules, then run a generic
-# .worktree-setup.sh build step (composer/npm install) which needs those deps
-# present. Invoked inside the worktree's own session (see cmd_add) so it never
-# blocks `wt add` or your current window. Env setup already ran in cmd_add.
+# Worktree bootstrap: env setup, git-ignored file copies, vendor/node_modules,
+# then a generic .worktree-setup.sh build step (composer/npm install) which
+# needs those deps present. Invoked inside the worktree's own session (see
+# cmd_add) so it never blocks `wt add` and so its output -- especially a failing
+# env setup -- stays visible in the pane you are going to work in.
 cmd_bootstrap() {
     local repo=$1 path=$2
+    local env_failed=0
+
+    setup_env "$repo" "$path" || env_failed=1
+
+    if [[ -f "$repo/.worktree-files" ]]; then
+        while IFS= read -r item; do
+            [[ -n "$item" && "${item:0:1}" != "#" ]] && copy_item "$repo" "$path" "$item"
+        done < "$repo/.worktree-files"
+    fi
 
     local dep
     for dep in vendor node_modules; do
@@ -172,7 +200,10 @@ cmd_bootstrap() {
         fi
     done
 
-    [[ -x "$path/.worktree-setup.sh" ]] && ( cd "$path" && exec ./.worktree-setup.sh )
+    [[ -x "$path/.worktree-setup.sh" ]] && ( cd "$path" && ./.worktree-setup.sh )
+
+    (( env_failed )) && echo "wt: env setup FAILED (see above) -- no usable .env, fix it before starting the stack" >&2
+    return 0
 }
 
 cmd_add() {
@@ -224,40 +255,11 @@ cmd_add() {
         git -C "$repo" worktree add --no-track -b "$branch" "$path" "$base"
     fi
 
-    # --- Env setup: fast, and done in the foreground so .env/.env.testing exist
-    #     the moment `wt add` returns (docker compose interpolates them). A repo
-    #     can own this via tools/setup-worktree.sh (env files + host ports +
-    #     compose project name); otherwise wt copies + patches .env itself. -----
-    if [[ -x "$path/tools/setup-worktree.sh" ]]; then
-        echo "wt: running tools/setup-worktree.sh ..."
-        ( cd "$path" && ./tools/setup-worktree.sh ) \
-            || echo "wt: tools/setup-worktree.sh failed -- opening the session anyway" >&2
-    else
-        copy_item "$repo" "$path" .env
-        if [[ -f "$path/.env" ]]; then
-            local index offset project
-            index=$(find "$WT_ROOT/$repo_name" -mindepth 1 -maxdepth 1 -type d | wc -l)
-            offset=$((index * PORT_OFFSET_STEP))
-            project=$(printf '%s' "$repo_name-$branch_dir" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9_-' '-')
-            patch_env "$path/.env" "$project" "$offset"
-            echo "wt: patched .env (COMPOSE_PROJECT_NAME=$project, port offset +$offset)"
-        fi
-    fi
-
-    if [[ -f "$repo/.worktree-files" ]]; then
-        while IFS= read -r item; do
-            [[ -n "$item" && "${item:0:1}" != "#" ]] && copy_item "$repo" "$path" "$item"
-        done < "$repo/.worktree-files"
-    fi
-
-    # --- Slow work (reflink dep copy + any .worktree-setup.sh build step) runs
-    #     *inside* the new session, so `wt add` returns at once -- jump back to
-    #     your previous window and let it finish in the background. ------------
-    local setup=""
-    if [[ -x "$path/.worktree-setup.sh" || -d "$repo/vendor" || -d "$repo/node_modules" ]]; then
-        setup="wt _bootstrap $(printf '%q' "$repo") $(printf '%q' "$path")"
-    fi
-    ensure_session "$session" "$path" "$setup"
+    # --- Everything else (env setup, git-ignored file copies, reflink dep copy,
+    #     any .worktree-setup.sh build step) runs *inside* the new session, so
+    #     `wt add` returns at once and nothing fails out of sight. -------------
+    ensure_session "$session" "$path" \
+        "wt _bootstrap $(printf '%q' "$repo") $(printf '%q' "$path")"
 }
 
 cmd_rm() {
