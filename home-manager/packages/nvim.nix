@@ -176,7 +176,7 @@
                 '';
             }
 
-            # interact with tmux from vim
+            # interact with tmux from vim (vim-test's fallback strategy outside herdr)
             {
                 plugin = vimux;
                 type = "lua";
@@ -185,16 +185,11 @@
                     vim.g.VimuxOrientation = 'h'
                 '';
             }
-            # Test execution
+            # Test execution — strategy picked at startup: herdr / vimux / :terminal
             {
                 plugin = vim-test;
                 type = "lua";
-                config = ''
-                    vim.keymap.set('n', '<Leader>tn', ':TestNearest<CR>')
-                    vim.keymap.set('n', '<Leader>tf', ':TestFile<CR>')
-                    vim.keymap.set('n', '<Leader>tl', ':TestLast<CR>')
-                    vim.g['test#strategy'] = 'vimux'
-                '';
+                config = lib.fileContents ./config/neovim/vim-test.lua;
             }
             
             # ------------------
