@@ -12,6 +12,9 @@
     # Ghostty config only. Install the app itself on macOS via Homebrew:
     #   brew install --cask ghostty
     ./packages/ghostty.nix
+    # Same deal: docs and .stignore only, the app comes from Homebrew:
+    #   brew install --cask syncthing-app
+    ./packages/syncthing.nix
   ];
 
   home.packages = with pkgs; [

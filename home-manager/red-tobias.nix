@@ -25,6 +25,7 @@ in
   imports = [
     ./packages/commons.nix
     ./packages/ghostty.nix
+    ./packages/syncthing.nix
   ];
 
   # Shared skills plus red-specific ones; red overrides common on a name clash.
