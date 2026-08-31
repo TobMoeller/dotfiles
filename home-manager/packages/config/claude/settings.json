@@ -70,5 +70,6 @@
     "typescript-lsp@claude-plugins-official": true
   },
   "effortLevel": "high",
-  "theme": "dark"
+  "theme": "dark",
+  "voiceEnabled": true
 }
