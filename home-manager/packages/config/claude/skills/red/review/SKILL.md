@@ -1,12 +1,12 @@
 ---
 name: review
-description: Review a Gitea PR or the commits for a ticket — gathering context from Gitea, Jira (and Confluence when needed) — and write findings to the central work-log store (~/code/knowledge/work-log/), each with a ready-to-paste friendly German PR comment plus a detailed rationale. Use when the user asks to review a PR, a ticket's changes, or commits (e.g. "review PR 1818", "review RTM-3122", "review the changes for RTM-3444"). Reviews backend (PHP) code by default; only inspects frontend code when the user explicitly asks for a frontend or full-stack review.
+description: Review a Gitea PR or the commits for a ticket — gathering context from Gitea, Jira (and Confluence when needed) — and write findings to the central work-log store (~/code/knowledge/work-log/), each with a ready-to-paste short, sober German PR comment (voice per the comment skill) plus a detailed rationale. Use when the user asks to review a PR, a ticket's changes, or commits (e.g. "review PR 1818", "review RTM-3122", "review the changes for RTM-3444"). Reviews backend (PHP) code by default; only inspects frontend code when the user explicitly asks for a frontend or full-stack review.
 allowed-tools: Read Grep Glob Bash(git log:*) Bash(git diff:*) Bash(git show:*) Bash(git branch:*) Bash(git rev-parse:*) Bash(mkdir:*) Bash(vendor/bin/phpunit:*) Bash(vendor/bin/phpstan:*) Bash(vendor/bin/pint:*) mcp__devtools-mcp__get_gitea_pull_request mcp__devtools-mcp__get_gitea_pull_request_diff mcp__devtools-mcp__list_gitea_pull_request_files mcp__devtools-mcp__list_gitea_pull_request_commits mcp__devtools-mcp__list_gitea_pull_request_comments mcp__devtools-mcp__read_jira_issue mcp__devtools-mcp__search_jira mcp__devtools-mcp__search_confluence mcp__devtools-mcp__read_confluence_page mcp__devtools-mcp__get_confluence_page_by_title
 ---
 
 # Code review (red / work)
 
-Produce a codebase-grounded review written to the central `work-log` store, where every finding ships with a friendly German comment to paste into the Gitea PR and a detailed rationale.
+Produce a codebase-grounded review written to the central `work-log` store, where every finding ships with a short, sober German comment to paste into the Gitea PR (written per the `/comment` skill in `paste` mode) and a detailed rationale.
 
 ## 1. Determine what to review
 
@@ -124,21 +124,17 @@ Example skeleton:
 Bewertung/Triage für uns. Beides kommt NICHT in den Gitea-Kommentar.)
 
 **Gitea-Kommentar (zum Kopieren):**
-> <SEHR kurz — in der Regel 1–2 Sätze, hart bei max. 4. Am liebsten eine ehrliche Frage
-> ("Brauchen wir …?", "Sind die Tests bewusst …?") ODER ein konkreter Vorschlag mit benannter
-> Alternative ("Alternativer Namensvorschlag: `konnektor_routes_faulty`. Und dann auch wieder
-> ohne `status` Label."). Erste Person, kollegial, hedgend ("Ich glaube …", "vermutlich",
-> "eventuell", "oder?"), Emoji sparsam ok (😄). Trivia mit "nit:". Optionales/Außer-Scope
-> explizit entschärfen ("kein Muss", "können wir auch in einem anderen Ticket"). Dubletten per
-> Link auf den ersten Kommentar statt Wiederholung. KEINE [major]/[minor]-Klammern.>
+> <Formuliert nach dem `/comment`-Skill im Modus `paste`: 1–3 Sätze, hart bei max. 4. Das
+> Problem in einem Satz, die Lösung nur, wenn sie nicht auf der Hand liegt. Fragen als Fragen,
+> ohne Hedge. Trivia mit "nit:". Optionales in einem Satz als Fakt ("Kein Muss."). Dubletten per
+> Link auf den ersten Kommentar statt Wiederholung. KEIN Marker, KEINE [major]/[minor]-Klammern,
+> KEINE F<n>-ID.>
 
-<NUR wenn eine tiefere/längere Analyse dahinter steckt (Cardinality, PromQL, Trade-offs …):
-NICHT in die kurze Zeile oben pressen. Stattdessen den kurzen menschlichen Kommentar behalten
-UND die Detailanalyse als klar ALS KI-Vorschlag ausgewiesenen, ausdrücklich optionalen Block
-anhängen — so postet dieser Reviewer das tatsächlich:>
+<NUR wenn der Punkt ohne eine tiefere Analyse (Cardinality, PromQL, Trade-offs …) nicht steht:
+NICHT in den kurzen Kommentar pressen, sondern als klar ALS KI ausgewiesenen, ausdrücklich
+optionalen Block anhängen:>
 
-> Die KI hat hier noch einen (mMn.) interessanten Vorschlag gemacht. Muss man nicht aufnehmen,
-> fand's nur spannend:
+> Laut KI, muss nicht übernommen werden:
 > <hier der Detailblock — gern mit Code/PromQL-Beispiel>
 
 **Kontext (für dich, nicht zum Posten):**
@@ -150,22 +146,23 @@ Guidance for the parts:
 
 - **Location line (📍)** — put it on its **own line directly under the title**, not buried in the title. Bold `path:line` plus the enclosing method/class/symbol so the reviewer can find the exact spot to attach the comment in Gitea at a glance. Every finding gets one — also under a `## <path>` heading, since the exact line is what the user needs there (the heading only gets them to the right file).
 - **Anchor a readability finding where the reader stumbles, not where the symbol is defined.** "I had to read this twice" is a statement about the *call site* — the method signature, the parameter name, the comparison you tripped over — so that is where the comment belongs, and the fix is almost always to rename the method or the parameter. Anchoring it at the definition of the constant or config key the code happens to read moves the comment away from the confusing line and proposes the wrong fix. Real case (RTM-3526): the review flagged the config keys `firmware_update_blackout_before_minutes` / `..._after_minutes` in `config/rtm.php`; the reviewer instead commented on the rule's private methods and their `$executeAt` parameter — and that is what got renamed.
-- **Gitea-Kommentar** — the copy-paste deliverable, and it must read like *this reviewer's* voice, which is **shorter than you think**: usually **one or two sentences**, often just a genuine question or one concrete rename/alternative. Look at the calibration examples below and match that length and tone. Hedge, name existing code/solutions by their real path (e.g. `App\Service\Firmware\Sorts\VersionSort`), prefix trivia with `nit:`, mark optional/out-of-scope explicitly ("kein Muss"), and suggest a follow-up ticket where it fits. Cross-reference duplicates with a link. Never a `[major]`/`[minor]` tag in the comment.
-- **Deeper analysis → attributed optional block.** Do **not** inflate the reviewer's own short comment with a wall of technical reasoning. Keep the human comment tight, then, if the point rests on deeper analysis, append it as a clearly **AI-attributed, explicitly optional** block ("Laut KI …", "Die KI plädiert hier relativ stark für ein Histogram 😄", "Muss man nicht aufnehmen, fands nur spannend:"). This two-tier split — short human ask + attributed optional deep-dive — is exactly how this reviewer posts.
+- **Gitea-Kommentar** — the copy-paste deliverable. **Load the `/comment` skill and write it in `paste` mode.** Its voice and hard rules apply in full: sober and direct, **one to three sentences**, the consequence in the first sentence, the fix only when it is not obvious, questions as plain questions without hedge words, no emoji, no dashes or colon lead-ins, at most two identifiers (one to locate, one for the replacement, using the real name of existing code such as `App\Service\Firmware\Sorts\VersionSort`). Prefix trivia with `nit:`, state optional/out-of-scope as a fact in one short sentence ("Kein Muss.", "Kann ein eigenes Ticket werden."). Cross-reference duplicates with a link. Never a `[major]`/`[minor]` tag or `F<n>` id in the comment, no marker in `paste` mode.
+- **Deeper analysis → `Kontext` first, attributed block second.** Do **not** inflate the short comment with technical reasoning. The analysis belongs in the `Kontext` block below. Only when the point cannot stand without it, append it as a clearly **AI-attributed, explicitly optional** block ("Laut KI, muss nicht übernommen werden:") after the short comment.
 - **Kontext** — for the user's understanding, not for posting: root cause, concrete impact (bug, security, performance, maintainability), recommended fix, grounded in `file:line` and any relevant Confluence doc. Keep it as short as the point allows.
 
 The severity tag (`[blocker|major|minor|nit]`) stays in the finding **title** as the rating — only keep it out of the pasted comment.
 
-### 5d. Voice calibration — real examples of this reviewer's comments
+### 5d. Voice calibration
 
-Match this register and length. These are the target; the wall-of-text paragraph is the anti-pattern.
+Match this register and length. The sober line is the target; the hedged, chatty paragraph is the anti-pattern (the `/comment` skill has more before/after pairs).
 
-- Middleware/config no-op → *"Brauchen wir diese Middleware und den dazugehörigen Config Eintrag? In der Config ist es eine statische leere Liste, das hat also keinen Effekt."*
-- Duplicated construction → *"Die `CollectorRegistry` wird im `MessageBrokerServiceProvider` quasi identisch nochmal gebaut. Vielleicht wäre es besser, diese nur einmal als Singleton zu definieren anstatt sie hier an die ServiceProvider-Instanz zu hängen."*
-- Naming + concrete alternative → *"Wäre als Name nicht etwas wie `konnektor_registration_card_missing` besser? Hier werden ja nicht mehr unterschiedliche Status über das Label abgebildet … Das `status` Label wäre dann auch obsolet."*
-- Test placement question → *"Sind die Tests bewusst in dem `Unit` Verzeichnis gelandet? Ich glaube die Trennung wurde bisher nicht absolut konsistent durchgezogen …"*
-- nit → *"nit: Hier wäre eventuell auch ein Name mit `_count` passender, oder?"*
-- Deep AI suggestion (attributed, optional) → *"Die KI plädiert hier relativ stark für ein Histogram 😄:"* followed by the detailed block.
+- Middleware/config no-op → *"Die Middleware hat keinen Effekt, die Liste in der Config ist statisch leer. Brauchen wir sie?"*
+- Duplicated construction → *"Die CollectorRegistry wird im MessageBrokerServiceProvider ein zweites Mal gebaut. Einmal als Singleton registrieren."*
+- Naming + concrete alternative → *"Das Label status bildet nur noch einen Zustand ab. Als Name passt `konnektor_registration_card_missing` ohne Label."*
+- Test placement → *"Die Tests unter Unit nutzen die Datenbank. Nach Feature verschieben."* (or, when genuinely unsure: *"Sind die Tests absichtlich unter Unit? Sie nutzen die Datenbank."*)
+- nit → *"nit: das ist ein Zähler, also Suffix _count."*
+- Deep AI suggestion (attributed, optional) → *"Histogram statt Gauge, dann lässt sich die Verteilung abfragen."* followed by *"Laut KI, muss nicht übernommen werden:"* and the detailed block.
+- Anti-pattern → *"Brauchen wir diese Middleware und den dazugehörigen Config Eintrag? In der Config ist es eine statische leere Liste, das hat also keinen Effekt."* and *"Ich glaube die Trennung wurde bisher nicht absolut konsistent durchgezogen …"* — hedged, indirect, twice as long as needed.
 
 End with an **Offene Fragen** section for anything you couldn't confirm — after the per-file sections and the `## Ohne Diff-Bezug` section, at the very bottom of the file.
 

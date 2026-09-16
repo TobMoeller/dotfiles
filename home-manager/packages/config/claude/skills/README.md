@@ -18,6 +18,7 @@ skills/
     ticket/SKILL.md
   red/           # linked on the red (work) machine only
     explain/SKILL.md   # work variant — overrides common/explain on red
+    comment/SKILL.md   # voice + post/paste rules for anything written to Gitea/Jira
 ```
 
 ## How groups are selected
