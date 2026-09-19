@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ ${1:-} == --help ]]; then
+  printf 'Usage: %s DIRECTORY [PHP_VERSION]\nExample: %s ~/code/dev-environments/shop 8.4\n' "$0" "$0"
+  exit 0
+fi
+
+if (( $# < 1 || $# > 2 )); then
+  printf 'Usage: %s DIRECTORY [PHP_VERSION]\n' "$0" >&2
+  exit 1
+fi
+
+destination=$1
+version=${2:-8.4}
+if [[ ! $version =~ ^[0-9]+\.[0-9]+$ ]]; then
+  printf 'Expected a PHP version such as 8.4, got: %s\n' "$version" >&2
+  exit 1
+fi
+
+command -v nix >/dev/null || { printf 'Nix must be installed and available in PATH.\n' >&2; exit 1; }
+if [[ -e $destination || -L $destination ]]; then
+  printf 'Destination already exists; nothing changed: %s\n' "$destination" >&2
+  exit 1
+fi
+
+mkdir -p -- "$(dirname -- "$destination")"
+mkdir -- "$destination"
+destination=$(cd -- "$destination" && pwd -P)
+php_attribute="php${version//./}"
+
+cat > "$destination/flake.nix" <<EOF
+{
+  description = "Personal PHP $version development environment";
+
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+  outputs = { nixpkgs, ... }:
+    let
+      systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
+    in {
+      devShells = nixpkgs.lib.genAttrs systems (system:
+        let
+          pkgs = nixpkgs.legacyPackages.\${system};
+          php = pkgs.$php_attribute.buildEnv {
+            extensions = { enabled, all }: enabled ++ [ all.bcmath all.intl all.pdo_mysql all.zip ];
+            extraConfig = ''
+              memory_limit = 512M
+            '';
+          };
+        in {
+          default = pkgs.mkShell {
+            packages = [ php php.packages.composer pkgs.nodejs_24 pkgs.git pkgs.unzip ];
+          };
+        });
+    };
+}
+EOF
+
+printf 'Created %s/flake.nix; pinning dependencies and evaluating the shell…\n' "$destination"
+nix flake lock "path:$destination"
+nix eval --raw "path:$destination#devShells.$(nix eval --impure --raw --expr builtins.currentSystem).default.drvPath" >/dev/null
+
+printf '\nFrom your project directory, run:\n  nix develop %q --command zsh\n' "path:$destination"
+printf '\nEdit flake.nix for extensions; keep flake.lock to preserve the package versions.\n'

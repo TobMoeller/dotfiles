@@ -1,0 +1,31 @@
+typeset -U path
+path=("$HOME/.local/bin" "$HOME/.nix-profile/bin" $path)
+
+mkdir -p -- "$XDG_STATE_HOME/zsh" "$XDG_CACHE_HOME/zsh"
+HISTFILE="$XDG_STATE_HOME/zsh/history"
+HISTSIZE=10000
+SAVEHIST=10000
+setopt HIST_IGNORE_DUPS HIST_IGNORE_SPACE SHARE_HISTORY EXTENDED_HISTORY
+
+fpath=("$HOME/.nix-profile/share/zsh/site-functions" $fpath)
+autoload -Uz compinit
+compinit -d "$XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION"
+zmodload zsh/complist
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
+bindkey -e
+bindkey '^[[Z' reverse-menu-complete
+
+source "$XDG_DATA_HOME/zsh/plugins/autosuggestions/zsh-autosuggestions.zsh"
+source "$XDG_DATA_HOME/zsh/plugins/powerlevel10k/powerlevel10k.zsh-theme"
+source "$XDG_CONFIG_HOME/zsh/p10k.zsh"
+alias ll='ls -alF'
+alias ..='cd ..'
+
+# Collect unreachable store paths; keep profile generations for rollback.
+alias nix-gc='nix-collect-garbage'
+
+# Optional machine-local overrides; this file is not managed or created here.
+[[ ! -r "$XDG_CONFIG_HOME/zsh/local.zsh" ]] || source "$XDG_CONFIG_HOME/zsh/local.zsh"
+
+source "$XDG_DATA_HOME/zsh/plugins/syntax-highlighting/zsh-syntax-highlighting.zsh"

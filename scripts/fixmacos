@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+
+if [ "$(uname -s)" != Darwin ]; then
+    printf '%s\n' 'fixmacos: this repair is only applicable to macOS.' >&2
+    exit 1
+fi
+
+file=/etc/zshrc
+hook=/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+
+grep -Fq "$hook" "$file" && exit 0
+
+sudo tee -a "$file" >/dev/null <<'EOF'
+
+# Nix
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
+# End Nix
+EOF

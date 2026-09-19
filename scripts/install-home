@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)
+action=switch
+if [[ ${1:-} == --build ]]; then
+  action=build
+  shift
+fi
+
+load_nix() {
+  if command -v nix >/dev/null; then return; fi
+
+  for profile in /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh \
+    "$HOME/.nix-profile/etc/profile.d/nix.sh"; do
+    if [[ -r $profile ]]; then
+      source "$profile"
+      if command -v nix >/dev/null; then return; fi
+    fi
+  done
+}
+
+load_nix
+if ! command -v nix >/dev/null; then
+  printf '%s\n' 'Installing upstream Nix (multi-user); the installer may request sudo.'
+  installer=$(mktemp)
+  trap 'rm -f -- "$installer"' EXIT
+  curl --fail --location https://nixos.org/nix/install --output "$installer"
+  sh "$installer" --daemon
+  rm -f -- "$installer"
+  trap - EXIT
+  load_nix
+fi
+
+command -v nix >/dev/null || { echo 'Nix is not in PATH after installation.' >&2; exit 1; }
+
+config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/nix"
+config_file="$config_dir/nix.conf"
+if [[ -e $config_file || -L $config_file ]]; then
+  if [[ ! $config_file -ef "$repo/nix/nix.conf" ]]; then
+    printf 'Existing Nix configuration: %s\nMove or merge it before retrying; nothing was replaced.\n' "$config_file" >&2
+    exit 1
+  fi
+else
+  mkdir -p -- "$config_dir"
+  ln -s -- "$repo/nix/nix.conf" "$config_file"
+fi
+
+# Export the user config location so nested Nix calls use the same configuration.
+export NIX_USER_CONF_FILES="$config_file"
+exec nix run "$repo#home-manager" -- "$action" --flake "$repo" "$@"

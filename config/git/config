@@ -1,0 +1,15 @@
+[init]
+    defaultBranch = main
+[fetch]
+    prune = true
+[pull]
+    ff = only
+[alias]
+    s = status --short --branch
+    st = status
+    ci = commit
+    co = checkout
+[include]
+    # Relative to the user-facing Git config location, outside the repository.
+    # Missing files are allowed. Identity, signing and credentials belong here.
+    path = local.inc

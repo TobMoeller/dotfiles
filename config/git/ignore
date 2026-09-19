@@ -1,0 +1,4 @@
+# Editor conflict/backup artifacts from other environments.
+*~
+*.swp
+*.swo
