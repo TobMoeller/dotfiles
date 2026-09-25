@@ -18,6 +18,7 @@ Später aus dem Repository:
 
 ```sh
 home-manager switch --flake .
+hms                                      # gleicher Switch, aus jedem Verzeichnis
 nix-collect-garbage                       # Alias in Zsh: nix-gc
 nix-collect-garbage --delete-older-than 30d # entfernt auch alte Rückrollpunkte
 ```
@@ -68,8 +69,12 @@ state-Verzeichnis gespeichert. Standard ist Catppuccin Mocha.
 
 Zsh nutzt Powerlevel10k, zusätzliche Completions, History-Vorschläge und
 Syntax-Highlighting. `exec zsh` lädt die aktuelle Konfiguration.
-`config/zsh/p10k.zsh` bestimmt den Prompt: Uhrzeit beim Abschicken,
-Git-Status und `prev:` als Laufzeit des vorherigen Befehls.
+Vi-Modus: `Esc` wechselt zu Normal, `i` zurück zu Insert; neue Eingaben starten
+in Insert. `Strg+E` übernimmt den grauen History-Vorschlag in beiden Modi.
+`config/zsh/p10k.zsh` bestimmt den kompakten Pfad-/Git-Prompt.
+Die Startzeit wird erst beim Abschicken im Prompt eingeblendet.
+Eine Abschlusszeile wird derzeit nicht angezeigt.
+Fehler und Abbrüche färben nur den Prompt-Pfeil rot.
 History und Completion-Cache liegen unter XDG state/cache, Plugins kommen aus Nix.
 
 Für Ubuntu-SSH-Logins nach der Aktivierung einmalig die Login-Shell setzen:
@@ -85,20 +90,30 @@ Das gilt ab dem nächsten Login. Herdr startet Zsh bereits direkt.
 ## Persönliche PHP-Umgebung
 
 ```sh
-./scripts/new-php-env ~/code/dev-environments/shop 8.4
-cd ~/code/mein-shop
-nix develop "path:$HOME/code/dev-environments/shop" --command zsh
+cd ~/code/dev-environments/shop
+nix flake init -t "path:$DOTFILES#php"
+# Kurzform: flake-init php (Hilfe: flake-init --help)
+dev
 ```
 
-Der Generator erstellt eine Flake samt Lockfile in einem neuen Verzeichnis;
-vorhandene Ziele bleiben unangetastet. Enthalten sind PHP, passender Composer,
-Node.js 24 samt npm, Git und unzip. Version (Standard 8.4), Extensions und PHP-Einstellungen lassen
-sich in der erzeugten Flake anpassen. Ein Lock-/Evaluationsfehler lässt die
-Dateien zur Korrektur stehen; die Umgebung wurde dann noch nicht validiert.
+`DOTFILES` wird aus `dotfiles.repoRoot` des Hosts gesetzt und in jeder Zsh
+erneut geladen. Nach der Aktivierung genügt `exec zsh`.
+Die Vorlage liegt unter `templates/php/`; `nix flake init` kopiert sie in das
+aktuelle Verzeichnis. Bestehende abweichende Dateien werden nicht überschrieben.
+PHP-Version, Extensions, INI-Werte und Node-Version in der Kopie anpassen.
+Beim ersten Entwickeln wird `flake.lock` erzeugt; für reproduzierbare Versionen
+aufbewahren. Änderungen an der Vorlage verändern vorhandene Kopien nicht.
 
-`exit` verlässt die Umgebung. Im Team-Repository wird nichts angelegt;
-Pakete liegen im Nix Store. Composer verwaltet Projektabhängigkeiten weiterhin
-normal über `composer.json`/`composer.lock` und `vendor/`.
-Node lässt sich über `pkgs.nodejs_24` in der erzeugten Flake auswählen;
-npm verwaltet Projektabhängigkeiten über `package.json`/`package-lock.json`
-und `node_modules/`. Der Generator installiert keine Projektabhängigkeiten.
+Aus einem separaten Team-Repository die persönliche Umgebung starten:
+
+```sh
+dev "path:$HOME/code/dev-environments/shop"
+```
+
+`exit` verlässt die Umgebung. PHP, Composer, Node/npm, Git und unzip kommen aus
+Nix; `vendor/` und `node_modules/` bleiben normale Projektabhängigkeiten.
+
+`dev` startet `nix develop` mit der persönlichen Zsh inklusive Vi-Modus,
+Completions und Prompt. Projektwerkzeuge behalten Vorrang im PATH; der Prompt
+zeigt in Nix-Shells ein kleines `dev`. Ohne den Helfer gilt weiterhin
+`nix develop --command zsh`; ein bloßes `nix develop` startet standardmäßig Bash.

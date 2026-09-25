@@ -1,5 +1,9 @@
 typeset -U path
-path=("$HOME/.local/bin" "$HOME/.nix-profile/bin" $path)
+if [[ -n ${IN_NIX_SHELL:-} ]]; then
+  path=($path "$HOME/.local/bin" "$HOME/.nix-profile/bin")
+else
+  path=("$HOME/.local/bin" "$HOME/.nix-profile/bin" $path)
+fi
 
 mkdir -p -- "$XDG_STATE_HOME/zsh" "$XDG_CACHE_HOME/zsh"
 HISTFILE="$XDG_STATE_HOME/zsh/history"
@@ -7,20 +11,48 @@ HISTSIZE=10000
 SAVEHIST=10000
 setopt HIST_IGNORE_DUPS HIST_IGNORE_SPACE SHARE_HISTORY EXTENDED_HISTORY
 
+typeset -U fpath
+for nix_profile in ${(z)NIX_PROFILES}; do
+  [[ ! -d "$nix_profile/share/zsh/site-functions" ]] ||
+    fpath=("$nix_profile/share/zsh/site-functions" $fpath)
+done
+unset nix_profile
 fpath=("$HOME/.nix-profile/share/zsh/site-functions" $fpath)
 autoload -Uz compinit
 compinit -d "$XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION"
 zmodload zsh/complist
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
-bindkey -e
-bindkey '^[[Z' reverse-menu-complete
+ZVM_INIT_MODE=sourcing
+ZVM_LAZY_KEYBINDINGS=false
+zvm_config() {
+  ZVM_LINE_INIT_MODE=$ZVM_MODE_INSERT
+}
+source "$XDG_DATA_HOME/zsh/plugins/vi-mode/zsh-vi-mode.plugin.zsh"
 
 source "$XDG_DATA_HOME/zsh/plugins/autosuggestions/zsh-autosuggestions.zsh"
+bindkey -M viins '^E' autosuggest-accept
+bindkey -M vicmd '^E' autosuggest-accept
+bindkey -M viins '^[[Z' reverse-menu-complete
 source "$XDG_DATA_HOME/zsh/plugins/powerlevel10k/powerlevel10k.zsh-theme"
 source "$XDG_CONFIG_HOME/zsh/p10k.zsh"
+
 alias ll='ls -alF'
 alias ..='cd ..'
+alias hms='home-manager switch --flake "path:${DOTFILES:?DOTFILES is not set}"'
+
+dev() {
+  nix develop "$@" --command "$HOME/.nix-profile/bin/zsh"
+}
+
+flake-init() {
+  if (( $# != 1 )) || [[ $1 == --help ]]; then
+    print -r -- 'Usage: flake-init TEMPLATE (e.g. flake-init php)'
+    print -r -- 'Copies a dotfiles template into the current directory.'
+    return 0
+  fi
+  nix flake init -t "path:${DOTFILES:?DOTFILES is not set}#$1"
+}
 
 # Collect unreachable store paths; keep profile generations for rollback.
 alias nix-gc='nix-collect-garbage'

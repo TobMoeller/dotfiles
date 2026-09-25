@@ -5,6 +5,6 @@
   xdg.configFile."herdr/config.toml".source = config.lib.file.mkOutOfStoreSymlink
     "${config.dotfiles.repoRoot}/config/herdr/config.toml";
   home.activation.herdrVimNavigation = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-    run ${pkgs.herdr}/bin/herdr plugin link ${lib.escapeShellArg "${config.dotfiles.repoRoot}/config/herdr/plugins/vim-nav"}
+    run ${pkgs.herdr}/bin/herdr plugin link ${lib.escapeShellArg "${config.dotfiles.repoRoot}/config/herdr/plugins/vim-nav"} > /dev/null
   '';
 }

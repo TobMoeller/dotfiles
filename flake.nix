@@ -18,6 +18,10 @@
         modules = [ ./hosts/devbox-01/home.nix ];
       };
     in {
+      templates.php = {
+        path = ./templates/php;
+        description = "Personal PHP and Node development environment";
+      };
       homeConfigurations."tobias@devbox-01" = home;
       apps.${system}.home-manager = {
         type = "app";
