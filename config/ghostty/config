@@ -1,0 +1,5 @@
+font-family = MesloLGS NF
+font-size = 14
+theme = Catppuccin Mocha
+macos-option-as-alt = true
+clipboard-write = allow

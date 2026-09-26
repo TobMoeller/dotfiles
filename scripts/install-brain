@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ ${1:-} == --help ]]; then
+  printf '%s\n' 'Usage: install-brain [REPOSITORY_URL]' \
+    'Clones into $BRAIN. Default: https://github.com/TobMoeller/brain.git' \
+    'Requires an existing Git authentication setup. Never replaces existing files.'
+  exit 0
+fi
+
+if (( $# > 1 )); then
+  printf 'Usage: %s [REPOSITORY_URL]\n' "$0" >&2
+  exit 1
+fi
+
+: "${BRAIN:?Enable dotfiles.brain and open a new shell first}"
+[[ $BRAIN == /* && $BRAIN != / ]] || { printf 'BRAIN must be an absolute directory path.\n' >&2; exit 1; }
+command -v git >/dev/null || { printf 'Git is required.\n' >&2; exit 1; }
+
+if [[ -e $BRAIN || -L $BRAIN ]]; then
+  printf 'Destination already exists; nothing changed: %s\n' "$BRAIN" >&2
+  exit 1
+fi
+
+repository=${1:-https://github.com/TobMoeller/brain.git}
+git ls-remote -- "$repository" HEAD >/dev/null
+mkdir -p -- "$(dirname -- "$BRAIN")"
+git clone -- "$repository" "$BRAIN"
+printf '\nBrain installed at %s\n' "$BRAIN"

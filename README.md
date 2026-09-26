@@ -1,5 +1,16 @@
 # Dotfiles
 
+Ghostty: Hosts importieren bei Bedarf `modules/ghostty.nix`. Die native
+Konfiguration unter `config/ghostty/config` nutzt MesloLGS NF, Größe 14 und
+Catppuccin Mocha. Linux erhält Ghostty und die Schrift über Nix/Fontconfig.
+Auf devbox-01 stellt der Home-Manager-nixGL-Wrapper Mesa-Grafikbibliotheken
+bereit, auch für den Desktop-Launcher. Kernel-/Display-Treiber bleiben Sache
+des Betriebssystems; NVIDIA-Hosts benötigen eine passende andere Anbindung.
+Auf NixOS bleibt nixGL unkonfiguriert. Für macOS muss die native Ghostty-App
+separat installiert und die Schrift für macOS registriert werden.
+Die Schrift wird auf dem Gerät benötigt, auf dem das Terminalfenster läuft;
+die VM-Konfiguration verändert keine lokalen SSH-Clients.
+
 Auf frischem Ubuntu mit Git und curl (Nix darf bereits manuell installiert sein):
 
 ```sh
@@ -55,6 +66,24 @@ Lokale Notizen (`docs/`) und Testskripte (`.local/`) werden nicht versioniert.
 
 ## Navigation und Themes
 
+Neovim: `<Leertaste>n` schaltet nvim-tree links ein/aus und zeigt die aktuelle
+Datei. Im Baum öffnet Enter Dateien/Ordner,
+`a` legt an, `r` benennt um, `R` aktualisiert, `g?` zeigt die Tastenbelegung.
+Git-Integration, Diagnostik und Dateisystem-Watcher sind im Baum deaktiviert.
+`-` oder `<Leertaste>e` öffnet Oil im aktuellen Fenster: Enter öffnet einen
+Eintrag, `-` geht nach oben, `g?` zeigt Hilfe. Dateinamen wie Text bearbeiten;
+`:w` wendet die Dateioperationen nach Bestätigung an.
+Strg+N/P wechselt im Normalmodus native Tabs (Fensterlayouts), `<Leertaste>tn`
+legt einen Tab an, `<Leertaste>tc` schließt ihn. Buffer sind tabübergreifend.
+`<Leertaste>g` öffnet Neogit, `bn`/`bp` nach Leertaste wechseln Buffer,
+`ff` sucht Dateien, `fg` Projekttext, `fb` offene Buffer und `fh` zuletzt
+geöffnete Dateien über fzf-lua. Strg+J/K bewegt die Auswahl, Enter öffnet im
+aktuellen Fenster und Strg+T im neuen Tab,
+Esc schließt. Die Suche startet im Arbeitsverzeichnis und beachtet Git-Ignores.
+`sv`/`sh` teilen vertikal/horizontal,
+`se` gleicht Fenstergrößen an. Im Visual-Modus behalten `<`/`>` die Auswahl;
+`p` ersetzt sie, ohne den bisherigen Registerinhalt zu verlieren.
+
 Strg+H/J/K/L wechselt zwischen Neovim-Splits und am Rand zum benachbarten
 Herdr-Pane. Das lokale `vim-nav`-Plugin wird beim HM-Switch registriert;
 Herdr-Keybindings werden mit `herdr server reload-config` neu geladen.
@@ -89,6 +118,13 @@ Das gilt ab dem nächsten Login. Herdr startet Zsh bereits direkt.
 
 ## Persönliche PHP-Umgebung
 
+Neovim aus `dev` starten, damit Language Server und Tools die Projektumgebung
+erben. Ein Verzeichniswechsel in einem laufenden Neovim wechselt die DevShell
+nicht; für andere Laufzeiten eine separate Neovim-Instanz starten. Mason wird
+beim Start eingerichtet und hängt seine Tools hinten an PATH an, sodass
+DevShell-Werkzeuge Vorrang behalten. Die LSP-Aktivierung wird separat nach
+Dateityp und Projektroot konfiguriert; derzeit sind keine Server aktiviert.
+
 ```sh
 cd ~/code/dev-environments/shop
 nix flake init -t "path:$DOTFILES#php"
@@ -117,3 +153,28 @@ Nix; `vendor/` und `node_modules/` bleiben normale Projektabhängigkeiten.
 Completions und Prompt. Projektwerkzeuge behalten Vorrang im PATH; der Prompt
 zeigt in Nix-Shells ein kleines `dev`. Ohne den Helfer gilt weiterhin
 `nix develop --command zsh`; ein bloßes `nix develop` startet standardmäßig Bash.
+
+## Brain (optional pro Host)
+
+`modules/brain.nix` importieren und `dotfiles.brain.enable = true` setzen.
+`BRAIN` zeigt standardmäßig auf `~/code/knowledge/brain`; der Pfad lässt sich
+mit `dotfiles.brain.path` ändern. Nach Aktivierung lädt `exec zsh` die Variable.
+
+```sh
+"$DOTFILES/scripts/install-brain"
+# Alternativ mit bereits eingerichteter SSH-Identität:
+"$DOTFILES/scripts/install-brain" git@github.com:TobMoeller/brain.git
+```
+
+Der Helfer prüft den Zugriff vor dem Clone und lehnt vorhandene Ziele ab.
+Zugangsdaten werden separat eingerichtet; weder Secrets noch Notizen gelangen
+in den Nix Store. Home-Manager-Switches klonen, pullen, resetten oder löschen
+Brain nicht. Deaktivieren lässt den Checkout bestehen; eine neue Login-Sitzung
+verwirft zuvor geerbte Umgebungsvariablen.
+
+`dotfiles.brain.syncthing.enable = true` installiert zunächst nur die CLI.
+Dienststart, Geräteverbindung und Ordnerfreigabe werden separat eingerichtet.
+Dabei denselben Brain-Pfad verwenden und `.git` über die Syncthing-Ignore-Regeln
+des Ordners ausschließen. Jedes Gerät behält eigene Git-Metadaten; parallele
+Git-Operationen vermeiden und synchronisierte Änderungen vor Commits prüfen.
+Auf devbox-01 ist Syncthing ausgeschaltet; GitHub-Zugriff ist noch einzurichten.

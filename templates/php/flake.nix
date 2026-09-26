@@ -1,5 +1,5 @@
 {
-  description = "Personal PHP 8.4 development environment";
+  description = "Personal PHP 8.5 and Node.js 24 LTS development environment";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
@@ -10,7 +10,7 @@
       devShells = nixpkgs.lib.genAttrs systems (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          php = pkgs.php84.buildEnv {
+          php = pkgs.php85.buildEnv {
             extensions = { enabled, all }: enabled ++ [ all.bcmath all.intl all.pdo_mysql all.zip ];
             extraConfig = ''
               memory_limit = 512M
