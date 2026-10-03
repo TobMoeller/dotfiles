@@ -1,8 +1,8 @@
 typeset -U path
 if [[ -n ${IN_NIX_SHELL:-} ]]; then
-  path=($path "$HOME/.local/bin" "$HOME/.nix-profile/bin")
+  path=($path "$HOME/.local/bin" "$HOME/.local/share/npm/bin" "$HOME/.nix-profile/bin")
 else
-  path=("$HOME/.local/bin" "$HOME/.nix-profile/bin" $path)
+  path=("$HOME/.local/bin" "$HOME/.local/share/npm/bin" "$HOME/.nix-profile/bin" $path)
 fi
 
 mkdir -p -- "$XDG_STATE_HOME/zsh" "$XDG_CACHE_HOME/zsh"

@@ -6,7 +6,7 @@
     ../../modules/cli-core.nix
     ../../modules/shell-zsh.nix
     ../../modules/git.nix
-    ../../modules/neovim-minimal.nix
+    ../../modules/neovim.nix
     ../../modules/herdr.nix
     ../../modules/tmux.nix
     ../../modules/ghostty.nix

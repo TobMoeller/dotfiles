@@ -1,0 +1,12 @@
+local map = vim.keymap.set
+local builtin = require("telescope.builtin")
+map("n", "<leader>ff", builtin.find_files, { desc = "Find files" })
+map("n", "<leader>fF", function()
+    builtin.find_files({ no_ignore = true, prompt_title = "All Files" })
+end, { desc = "Find files including ignored" })
+map("n", "<leader>fb", builtin.buffers, { desc = "Find buffer" })
+map("n", "<leader>fg", require("telescope").extensions.live_grep_args.live_grep_args, { desc = "Search project text" })
+map("x", "<leader>fg", require("telescope-live-grep-args.shortcuts").grep_visual_selection, { desc = "Search selection" })
+map("n", "<leader>fh", builtin.oldfiles, { desc = "Recent files" })
+map("n", "<leader>fs", builtin.lsp_document_symbols, { desc = "Document symbols" })
+map("n", "<leader>?", builtin.keymaps, { desc = "Find keybinding" })

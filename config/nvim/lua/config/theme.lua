@@ -8,7 +8,7 @@ local preference = vim.fn.stdpath("state") .. "/colorscheme"
 local function apply(name, save)
     local ok, err = pcall(vim.cmd.colorscheme, name)
     if not ok then
-        vim.notify(tostring(err) .. " (install themes with :Lazy sync)", vim.log.levels.WARN)
+        vim.notify(tostring(err), vim.log.levels.WARN)
         return
     end
     if save then
@@ -26,12 +26,15 @@ vim.api.nvim_create_user_command("Theme", function(args)
         end)
     end
 end, { nargs = "?", complete = function() return themes end })
-vim.keymap.set("n", "<leader>ut", "<cmd>Theme<CR>", { desc = "Choose theme" })
 vim.opt.termguicolors = true
+
+require("catppuccin").setup({
+    flavour = "mocha",
+    integrations = { cmp = true, nvimtree = true, telescope = { enabled = true } },
+})
 
 local selected = "catppuccin-mocha"
 if vim.fn.filereadable(preference) == 1 then
     selected = vim.fn.readfile(preference)[1] or selected
 end
--- Keep first startup usable before the theme plugins have been installed.
-pcall(vim.cmd.colorscheme, selected)
+apply(selected, false)

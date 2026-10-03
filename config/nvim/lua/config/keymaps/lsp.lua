@@ -1,0 +1,10 @@
+local map = vim.keymap.set
+map("n", "<leader>d", vim.diagnostic.open_float, { desc = "Line diagnostics" })
+map("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, { desc = "Previous diagnostic" })
+map("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, { desc = "Next diagnostic" })
+map("n", "gd", "<cmd>Telescope lsp_definitions<CR>", { desc = "Definition" })
+map("n", "gi", "<cmd>Telescope lsp_implementations<CR>", { desc = "Implementations" })
+map("n", "gr", "<cmd>Telescope lsp_references<CR>", { desc = "References" })
+map("n", "K", vim.lsp.buf.hover, { desc = "Documentation" })
+map("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename symbol" })
+map({ "n", "x" }, "<leader>ca", vim.lsp.buf.code_action, { desc = "Code action" })

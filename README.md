@@ -46,19 +46,33 @@ Native Änderungen brauchen nur den jeweiligen Programm-Reload. Paket- und
 Linkänderungen brauchen einen Switch. HM-Rollbacks stellen keine alten Inhalte
 der Live-Dateien wieder her; dafür ist Git zuständig.
 
-Zustand gehört in XDG data/state/cache, nicht ins Repository. Neovim-Plugins
-werden von lazy.nvim verwaltet; der Manager selbst kommt gepinnt aus Nix.
-Nach dem ersten Start `:Lazy sync` ausführen; es gibt keine automatischen Downloads
-beim Start. Neogit: `:Neogit` / `<Leertaste>g`. Mason: `:Mason` für LSP-Server,
-Formatter und andere Tools. Mason installiert Werkzeuge; die sprachspezifische
-Neovim-LSP-Konfiguration folgt separat (PHP/Laravel als nächster Schritt).
-Plugin-Installationen liegen unter Neovims data-Verzeichnis, Lazy-Lockfile unter
-state, Mason-Tools unter data/mason. Node/npm, Python und Archivwerkzeuge kommen
-aus Nix; zusätzliche Laufzeiten hängen vom gewählten Mason-Paket ab. Herdr verwaltet derzeit auch Zustand in seinem
-Config-Verzeichnis, deshalb nur einzelne Konfigurationsdateien verlinken.
+Zustand gehört in XDG data/state/cache, nicht ins Repository. Neovim und seine
+Plugins einschließlich Treesitter-Parser kommen aus Nix; Updates erfolgen mit
+Flake-Update und `hms`. Die Lua-Konfiguration bleibt live verlinkt. Es gibt keine
+Plugin-Downloads beim Editorstart. Frühere Lazy-Installationen unter data/lazy
+und das alte state/lazy-lock.json werden nicht mehr verwendet, aber nicht gelöscht.
+
+`modules/neovim.nix` enthält die Pakete. Unter `config/nvim/lua/config/` liegen
+`options.lua`, `lsp.lua`, `theme.lua`, Plugin-Setups in `plugins/` und nach Themen
+sortierte Tastenkürzel in `keymaps/`. Ausgangsbasis ist die alte Konfiguration
+bei `dc20e5e`; deaktivierte Experimente wurden nicht übernommen. Treesitter nutzt
+die aktuelle API ohne doppelte Regex-Hervorhebung. Seine inkrementelle Auswahl
+(`v` Enter, Tab/Shift-Tab) arbeitet mit Syntaxknoten; `v` Enter im Visual-Modus
+vergrößert ebenfalls auf den Elternknoten statt auf einen eigenen Scope.
+
+Completion kommt von nvim-cmp: Tab/Shift-Tab wählen Vorschläge oder springen in
+Snippets, Enter bestätigt, Strg+Leertaste öffnet das Menü, Strg+E schließt es.
+PHP (Intelephense), TypeScript/JavaScript, Tailwind und Python (Pyright) kommen
+mit Servern aus Nix. Dart, SourceKit, Zig und Go werden ebenfalls angebunden,
+wenn ihr Server im PATH verfügbar ist. `:Mason` installiert zusätzliche Tools
+unter data/mason; neue Sprachen brauchen außerdem einen Eintrag in `lsp.lua`.
+Node/npm, Python und Archivwerkzeuge kommen aus Nix. DevShell-Werkzeuge haben
+Vorrang vor Mason. Mit `:checkhealth vim.lsp` lässt sich die Anbindung prüfen.
+Herdr verwaltet derzeit auch Zustand in seinem Config-Verzeichnis, deshalb
+werden dort nur einzelne Konfigurationsdateien verlinkt.
 Git-Identität und Signing stehen optional in `~/.config/git/local.inc`.
 
-Nix-Konfiguration und persönliche Pakete einschließlich Codex, Herdr und ripgrep
+Nix-Konfiguration und persönliche Pakete einschließlich Node/npm, Herdr und ripgrep
 gehören zu den Dotfiles. Ansible ist dafür keine Voraussetzung. Neue Geräte
 bekommen eine Host-Komposition mit eigenem Benutzer und `dotfiles.repoRoot`;
 aktuell ist nur devbox-01 definiert. Alte Konfiguration: Branch `playground`.
@@ -69,7 +83,7 @@ Lokale Notizen (`docs/`) und Testskripte (`.local/`) werden nicht versioniert.
 Neovim: `<Leertaste>n` schaltet nvim-tree links ein/aus und zeigt die aktuelle
 Datei. Im Baum öffnet Enter Dateien/Ordner,
 `a` legt an, `r` benennt um, `R` aktualisiert, `g?` zeigt die Tastenbelegung.
-Git-Integration, Diagnostik und Dateisystem-Watcher sind im Baum deaktiviert.
+Der Baum übernimmt wieder die Git-Anzeige aus der alten Konfiguration.
 `-` oder `<Leertaste>e` öffnet Oil im aktuellen Fenster: Enter öffnet einen
 Eintrag, `-` geht nach oben, `g?` zeigt Hilfe. Dateinamen wie Text bearbeiten;
 `:w` wendet die Dateioperationen nach Bestätigung an.
@@ -77,9 +91,15 @@ Strg+N/P wechselt im Normalmodus native Tabs (Fensterlayouts), `<Leertaste>tn`
 legt einen Tab an, `<Leertaste>tc` schließt ihn. Buffer sind tabübergreifend.
 `<Leertaste>g` öffnet Neogit, `bn`/`bp` nach Leertaste wechseln Buffer,
 `ff` sucht Dateien, `fg` Projekttext, `fb` offene Buffer und `fh` zuletzt
-geöffnete Dateien über fzf-lua. Strg+J/K bewegt die Auswahl, Enter öffnet im
+geöffnete Dateien über Telescope. Strg+J/K bewegt die Auswahl, Enter öffnet im
 aktuellen Fenster und Strg+T im neuen Tab,
-Esc schließt. Die Suche startet im Arbeitsverzeichnis und beachtet Git-Ignores.
+Esc schließt. `fF` sucht auch ignorierte Dateien, `fs` Dokumentsymbole und
+`<Leertaste>?` durchsucht die Tastenkürzel. Die Suche startet im Arbeitsverzeichnis und beachtet Git-Ignores.
+Die obere Bufferline zeigt offene Dateien; `<Leertaste>` Tab/Shift-Tab wechselt
+zwischen ihnen, `<Leertaste>q` schließt den Buffer und erhält das Fenster.
+`tt`/`tf`/`tl` nach Leertaste führen nächsten Test, Datei oder letzten Test aus;
+`tx` schließt das Test-Pane. `gd`/`gi`/`gr` springen zu Definitionen,
+Implementierungen und Referenzen, `<Leertaste>rn` benennt Symbole um.
 `sv`/`sh` teilen vertikal/horizontal,
 `se` gleicht Fenstergrößen an. Im Visual-Modus behalten `<`/`>` die Auswahl;
 `p` ersetzt sie, ohne den bisherigen Registerinhalt zu verlieren.
@@ -178,3 +198,15 @@ Dabei denselben Brain-Pfad verwenden und `.git` über die Syncthing-Ignore-Regel
 des Ordners ausschließen. Jedes Gerät behält eigene Git-Metadaten; parallele
 Git-Operationen vermeiden und synchronisierte Änderungen vor Commits prüfen.
 Auf devbox-01 ist Syncthing ausgeschaltet; GitHub-Zugriff ist noch einzurichten.
+
+## Globale npm-Werkzeuge
+
+Node/npm kommen aus Nix. Die native `config/npm/npmrc` wird als `~/.npmrc`
+verlinkt: globale Pakete liegen unter `~/.local/share/npm`, ihr `bin/` liegt im
+PATH; Cache und npm-Logs liegen unter `~/.cache/npm`. Diese Daten bleiben
+außerhalb des Repositories und werden nicht durch Home Manager zurückgerollt.
+Codex wird unabhängig vom Flake installiert und aktualisiert:
+
+```sh
+npm install -g @openai/codex@latest
+```
