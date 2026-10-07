@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+
+# wl-runden - the Prüfverlauf of a ticket: one row per agent call the /work
+# orchestrator made, joined with the subagent transcripts for turns, tokens
+# and duration. Reads work-log/<repo>/<TICKET>/pruefung/verlauf.md (written
+# by /work after every call) and ~/.claude/projects/<worktree>/*/subagents/.
+#
+#   wl-runden <TICKET>           table: Nr · Zeit · Phase · Runde · Agent · Ergebnis · Befunde · Ausgang · Turns · Cache-Tokens · Dauer
+#   wl-runden <TICKET> --sum     one line per phase: calls, turns, cache tokens, minutes
+#   wl-runden <TICKET> --json
+#
+# Called by `wl <TICKET> --runden` and by the writer for handover.md.
+
+set -euo pipefail
+
+WORK_LOG="${WORK_LOG:-$HOME/code/knowledge/work-log}"
+CLAUDE_PROJECTS="${CLAUDE_PROJECTS:-$HOME/.claude/projects}"
+
+ticket="" mode=table
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --sum) mode=sum; shift ;;
+        --json) mode=json; shift ;;
+        -h|--help) sed -n '3,12p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *) ticket=$(printf '%s' "$1" | tr '[:lower:]' '[:upper:]'); shift ;;
+    esac
+done
+[[ -n "$ticket" ]] || { echo "wl-runden: ticket missing" >&2; exit 1; }
+
+store=$(ls -d "$WORK_LOG"/*/"$ticket" 2>/dev/null | head -1 || true)
+[[ -n "$store" ]] || { echo "wl-runden: no folder for $ticket under $WORK_LOG" >&2; exit 1; }
+verlauf="$store/pruefung/verlauf.md"
+[[ -f "$verlauf" ]] || { echo "wl-runden: no pruefung/verlauf.md for $ticket (the pipeline writes it after its first agent call)"; exit 0; }
+
+fm() { sed -nE "1,/^---\$/!b; s/^$2:[[:space:]]*(.*)\$/\1/p" "$1" | sed -n '1p' | sed -E 's/[[:space:]]+#.*$//; s/[[:space:]]+$//'; }
+encode() { printf '%s' "$1" | tr '/.' '--'; }
+
+wt=$(fm "$store/state.md" worktree); wt=${wt/#\~/$HOME}
+projdir="$CLAUDE_PROJECTS/$(encode "$wt")"
+
+# turns · cache tokens (M, one decimal) · minutes from the subagent transcript,
+# limited to the records between $2 (epoch, exclusive; 0 = from the start) and
+# $3 (epoch, inclusive): a continued agent has several rows with the same id,
+# and each row gets only the calls since the previous one
+stats() {
+    local id=$1 lo=${2:-0} hi=${3:-9999999999} f
+    f=$(ls "$projdir"/*/subagents/agent-"$id".jsonl 2>/dev/null | head -1 || true)
+    [[ -n "$f" ]] || { printf '%s\n' "-|-|-"; return; }
+    # one API call writes several assistant records (one per content block)
+    # with the same message.id and the same usage: count and sum per id
+    jq -rs --argjson lo "$lo" --argjson hi "$hi" '
+        [.[] | select(.type=="assistant")
+             | select(((.timestamp | sub("\\.[0-9]+Z$"; "Z") | fromdate) as $t | $t > $lo and $t <= $hi))] as $a
+        | ($a | group_by(.message.id) | map(.[0])) as $calls
+        | if ($a | length) == 0 then "-|-|-" else
+          (($calls | length) | tostring) + "|"
+          + (([$calls[].message.usage.cache_read_input_tokens // 0] | add) / 100000 | floor / 10 | tostring) + "M|"
+          + ((($a[-1].timestamp | sub("\\.[0-9]+Z$"; "Z") | fromdate) - ($a[0].timestamp | sub("\\.[0-9]+Z$"; "Z") | fromdate)) / 60 | floor | tostring) + "m"
+          end' "$f"
+}
+
+# rows of verlauf.md: | Nr | Zeit | Phase | Runde | Agent | Agent-Id | Ergebnis | Befunde | Ausgang |
+rows=()
+declare -A last_seen   # agent id → epoch of its previous row (continued agents)
+while IFS='|' read -r _ nr zeit phase runde agent id ergebnis befunde ausgang _; do
+    nr=$(echo "$nr" | xargs); [[ "$nr" =~ ^[0-9]+$ ]] || continue
+    id=$(echo "$id" | xargs); zeit=$(echo "$zeit" | xargs)
+    # the row is written right after the agent returned: its calls end at the
+    # row's minute (+90 s slack) and start after the id's previous row
+    hi=$(( $(date -d "$zeit" +%s 2>/dev/null || echo 9999999800) + 90 ))
+    lo=${last_seen[$id]:-0}
+    last_seen[$id]=$hi
+    IFS='|' read -r turns cache dauer <<< "$(stats "$id" "$lo" "$hi")"
+    rows+=("$nr|$(echo "$zeit"|xargs)|$(echo "$phase"|xargs)|$(echo "$runde"|xargs)|$(echo "$agent"|xargs)|$(echo "$ergebnis"|xargs)|$(echo "$befunde"|xargs)|$(echo "$ausgang"|xargs)|$turns|$cache|$dauer")
+done < "$verlauf"
+
+[[ ${#rows[@]} -gt 0 ]] || { echo "wl-runden: verlauf.md has no rows yet"; exit 0; }
+
+case "$mode" in
+    json)
+        printf '%s\n' "${rows[@]}" | jq -R -s 'split("\n") | map(select(length>0) | split("|") | {nr:.[0]|tonumber, zeit:.[1], phase:.[2], runde:.[3], agent:.[4], ergebnis:.[5], befunde:.[6], ausgang:.[7], turns:.[8], cache:.[9], dauer:.[10]})'
+        ;;
+    sum)
+        printf '%s\n' "${rows[@]}" | LC_NUMERIC=C awk -F'|' '
+            { calls[$3]++; order[$3]=NR
+              if ($9 ~ /^[0-9]+$/) turns[$3]+=$9
+              if ($10 ~ /M$/) { sub(/M$/,"",$10); cache[$3]+=$10 }
+              if ($11 ~ /m$/) { sub(/m$/,"",$11); mins[$3]+=$11 } }
+            END { for (p in calls) printf "%d|%s|%d Aufrufe|%d Turns|%.1fM Cache|%d min\n", order[p], p, calls[p], turns[p], cache[p], mins[p] }' \
+          | sort -n | cut -d'|' -f2- | column -t -s'|'
+        ;;
+    *)
+        { echo "NR|ZEIT|PHASE|RUNDE|AGENT|ERGEBNIS|BEFUNDE|AUSGANG|TURNS|CACHE|DAUER"
+          printf '%s\n' "${rows[@]}"; } | column -t -s'|'
+        ;;
+esac

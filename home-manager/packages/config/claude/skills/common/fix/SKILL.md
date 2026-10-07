@@ -1,5 +1,7 @@
 ---
 name: fix
+model: opus
+effort: high
 description: Diagnose a bug to its root cause, then make the smallest correct in-scope fix with a focused passing test. Use when the user reports a bug, a failing job, an exception, or asks to fix broken behavior.
 ---
 
@@ -29,7 +31,7 @@ Match the codebase's existing conventions and idioms.
 
 ## 4. Harden the adjacent failure mode
 
-Go one step beyond the immediate symptom where it's cheap and clearly right — e.g. `tryFrom` + skip-and-log for an unhandled enum value, feature-scoped logging — but stay within the bug's blast radius. Don't expand scope.
+Harden the adjacent failure mode only inside the method you are already changing — e.g. `tryFrom` + skip-and-log for an unhandled enum value — and name it in the step-2 plan so it can be vetoed. Everything beyond that method is a separate ticket, not part of this fix.
 
 ## 5. Reproduce and test
 

@@ -1,5 +1,7 @@
 ---
 name: comment
+model: opus
+effort: low
 description: Formulate any text that goes out to other people in the user's name — Gitea PR comments, line comments, replies to review comments, review bodies, Jira comments — and decide first whether anything gets posted at all or a 👍 is enough. Sober, direct, one to three sentences, no hedging, no reasoning chains. Two delivery modes — paste (the user posts, no marker) and post (Claude posts via MCP, mandatory `_Written by AI_` marker). Never posts itself; returns the finished text to the calling skill. Load before any skill or agent writes a comment for Gitea or Jira (e.g. "formulier die Antwort", "was schreiben wir in den PR", "Kommentar fürs Ticket").
 argument-hint: "<channel> <mode> <occasion>: what happened, who reads it, what they need to know"
 allowed-tools: Read Grep Glob

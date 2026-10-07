@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+
+# gitday - what happened in git today, across the main checkouts and all their
+# worktrees. Deterministic input for the Claude `/day` skill (morning overview,
+# evening Slack status), so the model never has to walk repos itself.
+#
+#   gitday                 commits by me since midnight + dirty/ahead state
+#   gitday --since <date>  any git approxidate ("yesterday", "2026-09-15", "3 days ago")
+#   gitday --until <date>  upper bound (default: now)
+#   gitday --all-authors   don't filter by author
+#   gitday <path>...       extra repositories to include
+#
+# Repositories are discovered from $WT_ROOT/<repo>/<branch> (the `wt` layout);
+# each worktree's main checkout is added too. Set GITDAY_REPOS (colon-separated)
+# for repos without worktrees. Output is plain text, one block per checkout.
+
+set -euo pipefail
+
+CODE_DIR="${WT_CODE_DIR:-$HOME/code}"
+WT_ROOT="${WT_ROOT:-$CODE_DIR/worktrees}"
+
+since="midnight"
+until_=""
+all_authors=0
+extra=()
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --since) since="${2:?--since needs a value}"; shift 2 ;;
+        --until) until_="${2:?--until needs a value}"; shift 2 ;;
+        --all-authors) all_authors=1; shift ;;
+        -h|--help) sed -n '3,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *) extra+=("$1"); shift ;;
+    esac
+done
+
+# --- discover checkouts ------------------------------------------------------
+declare -A seen=()
+paths=()
+
+add_path() {
+    local p
+    p=$(cd "$1" 2>/dev/null && pwd -P) || return 0
+    git -C "$p" rev-parse --is-inside-work-tree >/dev/null 2>&1 || return 0
+    [[ -n "${seen[$p]:-}" ]] && return 0
+    seen[$p]=1
+    paths+=("$p")
+}
+
+if [[ -d "$WT_ROOT" ]]; then
+    while IFS= read -r wt; do
+        main=$(dirname "$(git -C "$wt" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)") || continue
+        add_path "$main"
+        add_path "$wt"
+    done < <(find "$WT_ROOT" -mindepth 2 -maxdepth 2 -type d | sort)
+fi
+
+if [[ -n "${GITDAY_REPOS:-}" ]]; then
+    IFS=':' read -r -a env_repos <<< "$GITDAY_REPOS"
+    for r in "${env_repos[@]}"; do [[ -n "$r" ]] && add_path "$r"; done
+fi
+
+for r in "${extra[@]}"; do add_path "$r"; done
+
+if [[ ${#paths[@]} -eq 0 ]]; then
+    echo "gitday: no repositories found (WT_ROOT=$WT_ROOT, GITDAY_REPOS unset)" >&2
+    exit 1
+fi
+
+# --- report ------------------------------------------------------------------
+range_desc="since $since"
+[[ -n "$until_" ]] && range_desc="$range_desc until $until_"
+echo "# gitday · $range_desc · $(date '+%Y-%m-%d %H:%M')"
+
+for p in "${paths[@]}"; do
+    main=$(dirname "$(git -C "$p" rev-parse --path-format=absolute --git-common-dir)")
+    repo=$(basename "$main")
+    if [[ "$p" == "$main" ]]; then
+        label="$repo (main)"
+    else
+        label="$repo/$(basename "$p")"
+    fi
+
+    branch=$(git -C "$p" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
+    [[ "$branch" == "HEAD" ]] && branch="(detached)"
+
+    dirty=$(git -C "$p" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+
+    upstream=$(git -C "$p" rev-parse --abbrev-ref '@{upstream}' 2>/dev/null || true)
+    ahead=0
+    if [[ -n "$upstream" && "$upstream" != "@{upstream}" ]]; then
+        # rev-list prints "<behind>\t<ahead>" for upstream...HEAD
+        read -r behind ahead < <(git -C "$p" rev-list --left-right --count "$upstream...HEAD" 2>/dev/null || echo "0 0")
+        sync="ahead $ahead · behind $behind ($upstream)"
+    else
+        sync="no upstream"
+    fi
+
+    author_args=()
+    if (( ! all_authors )); then
+        email=$(git -C "$p" config user.email || true)
+        [[ -n "$email" ]] && author_args=(--author="$email")
+    fi
+
+    # committer date: that is what --since filters on, and what "done today" means after a rebase
+    log_args=(--since="$since" --no-merges --date=format:'%m-%d %H:%M' --format='  %h %cd %s')
+    [[ -n "$until_" ]] && log_args+=(--until="$until_")
+
+    commits=$(git -C "$p" log "${log_args[@]}" "${author_args[@]}" 2>/dev/null || true)
+    count=0
+    [[ -n "$commits" ]] && count=$(printf '%s\n' "$commits" | wc -l | tr -d ' ')
+
+    # skip silent checkouts: nothing committed, nothing dirty, nothing unpushed
+    if [[ "$count" -eq 0 && "$dirty" -eq 0 && "${ahead:-0}" == "0" ]]; then
+        continue
+    fi
+
+    echo
+    echo "## $label"
+    echo "path:    $p"
+    echo "branch:  $branch"
+    echo "dirty:   $dirty file(s) · $sync"
+    echo "commits: $count"
+    [[ -n "$commits" ]] && printf '%s\n' "$commits"
+done

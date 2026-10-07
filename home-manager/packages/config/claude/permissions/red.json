@@ -1,45 +1,185 @@
 {
-  "allow": [
-    "Read(~/code/knowledge/work-brain/**)",
-    "Edit(~/code/knowledge/work-brain/**)",
+  "model": "opus",
 
-    "Read(~/code/knowledge/work-log/**)",
-    "Edit(~/code/knowledge/work-log/**)",
+  "permissions": {
+    "defaultMode": "auto",
 
-    "mcp__devtools-mcp__ping",
-    "mcp__devtools-mcp__get_config_url",
-    "mcp__devtools-mcp__get_current_user",
-    "mcp__devtools-mcp__get_datetime",
+    "allow": [
+      "Read(~/code/knowledge/work-brain/**)",
+      "Edit(~/code/knowledge/work-brain/**)",
 
-    "mcp__devtools-mcp__read_jira_issue",
-    "mcp__devtools-mcp__search_jira",
-    "mcp__devtools-mcp__search_jira_users",
-    "mcp__devtools-mcp__list_jira_fields",
-    "mcp__devtools-mcp__get_jira_sprint",
-    "mcp__devtools-mcp__get_jira_attachment",
+      "Read(~/code/knowledge/work-log/**)",
+      "Edit(~/code/knowledge/work-log/**)",
 
-    "mcp__devtools-mcp__read_confluence_page",
-    "mcp__devtools-mcp__get_confluence_page_by_title",
-    "mcp__devtools-mcp__search_confluence",
+      "Read(~/code/worktrees/**)",
+      "Edit(~/code/worktrees/**)",
 
-    "mcp__devtools-mcp__get_gitea_pull_request",
-    "mcp__devtools-mcp__get_gitea_pull_request_diff",
-    "mcp__devtools-mcp__get_gitea_user",
-    "mcp__devtools-mcp__list_gitea_pull_request_comments",
-    "mcp__devtools-mcp__list_gitea_pull_request_commits",
-    "mcp__devtools-mcp__list_gitea_pull_request_files",
-    "mcp__devtools-mcp__list_gitea_pull_request_reviews",
+      "Edit(~/code/tobmoeller/dotfiles/home-manager/packages/config/claude/**)",
+      "Edit(~/code/tobmoeller/dotfiles/home-manager/packages/claude-*.nix)",
 
-    "mcp__devtools-mcp__read_pull_request",
-    "mcp__devtools-mcp__get_pull_request_diff",
-    "mcp__devtools-mcp__list_pull_request_comments",
-    "mcp__devtools-mcp__list_pull_request_files",
-    "mcp__devtools-mcp__search_pull_requests",
+      "Bash(git rev-parse:*)",
+      "Bash(git merge-base:*)",
+      "Bash(git for-each-ref:*)",
+      "Bash(git worktree list:*)",
+      "Bash(git fetch:*)",
+      "Bash(git ls-remote:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git stash list)",
+      "Bash(git add:*)",
+      "Bash(mkdir:*)",
 
-    "mcp__devtools-mcp__get_repo_file_contents",
+      "Bash(wt add:*)",
+      "Bash(wt ls)",
+      "Bash(wt agent:*)",
+      "Bash(wt lead:*)",
+      "ListAgents",
+      "SendMessage",
+      "Bash(gitday:*)",
+      "Bash(wl:*)",
+      "Bash(herdr agent list:*)",
+      "Bash(herdr agent get:*)",
+      "Bash(herdr agent wait:*)",
+      "Bash(herdr pane list:*)",
+      "Bash(herdr workspace list:*)",
 
-    "mcp__devtools-mcp__get_team_city_build",
-    "mcp__devtools-mcp__get_team_city_build_log",
-    "mcp__devtools-mcp__search_team_city_builds"
-  ]
+      "Bash(vendor/bin/phpstan:*)",
+      "Bash(./vendor/bin/phpstan:*)",
+      "Bash(php artisan route:list:*)",
+      "Bash(php artisan migrate:status:*)",
+      "Bash(php artisan migrate --seed --env=testing:*)",
+      "Bash(composer dump-autoload:*)",
+      "Bash(composer validate:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(docker compose ps:*)",
+      "Bash(docker compose logs:*)",
+
+      "mcp__devtools-mcp__ping",
+      "mcp__devtools-mcp__get_config_url",
+      "mcp__devtools-mcp__get_current_user",
+      "mcp__devtools-mcp__get_datetime",
+
+      "mcp__devtools-mcp__read_jira_issue",
+      "mcp__devtools-mcp__search_jira",
+      "mcp__devtools-mcp__search_jira_users",
+      "mcp__devtools-mcp__list_jira_fields",
+      "mcp__devtools-mcp__get_jira_sprint",
+      "mcp__devtools-mcp__get_jira_attachment",
+
+      "mcp__devtools-mcp__create_jira_issue",
+      "mcp__devtools-mcp__update_jira_issue",
+      "mcp__devtools-mcp__comment_jira_issue",
+      "mcp__devtools-mcp__transition_jira_issue",
+      "mcp__devtools-mcp__link_jira_issues",
+      "mcp__devtools-mcp__add_jira_attachment",
+      "mcp__devtools-mcp__list_jira_sprints",
+
+      "mcp__devtools-mcp__read_confluence_page",
+      "mcp__devtools-mcp__get_confluence_page_by_title",
+      "mcp__devtools-mcp__search_confluence",
+
+      "mcp__devtools-mcp__get_gitea_pull_request",
+      "mcp__devtools-mcp__get_gitea_pull_request_diff",
+      "mcp__devtools-mcp__get_gitea_user",
+      "mcp__devtools-mcp__list_gitea_pull_requests",
+      "mcp__devtools-mcp__search_gitea_pull_requests",
+      "mcp__devtools-mcp__list_gitea_pull_request_checks",
+      "mcp__devtools-mcp__list_gitea_pull_request_comments",
+      "mcp__devtools-mcp__list_gitea_pull_request_commits",
+      "mcp__devtools-mcp__list_gitea_pull_request_files",
+      "mcp__devtools-mcp__list_gitea_pull_request_reviews",
+
+      "mcp__devtools-mcp__read_pull_request",
+      "mcp__devtools-mcp__get_pull_request_diff",
+      "mcp__devtools-mcp__list_pull_request_comments",
+      "mcp__devtools-mcp__list_pull_request_files",
+      "mcp__devtools-mcp__search_pull_requests",
+
+      "mcp__devtools-mcp__get_repo_file_contents",
+
+      "mcp__devtools-mcp__get_team_city_build",
+      "mcp__devtools-mcp__get_team_city_build_log",
+      "mcp__devtools-mcp__search_team_city_builds"
+    ],
+
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git branch -D:*)",
+      "Bash(git branch -d:*)",
+      "Bash(git branch -f:*)",
+      "Bash(git branch -m:*)",
+      "Bash(git branch -M:*)",
+      "Bash(wt rm:*)",
+      "Bash(wt main:*)",
+      "Bash(wt back:*)",
+      "Bash(php artisan migrate)",
+      "Bash(php artisan migrate:rollback:*)",
+      "Bash(php artisan migrate:reset:*)",
+      "Bash(php artisan migrate:refresh:*)",
+      "Bash(php artisan migrate:fresh:*)",
+      "Bash(php artisan db:*)",
+      "Bash(herdr agent prompt:*)",
+      "Bash(herdr agent start:*)",
+      "Edit(~/code/worktrees/**/.claude/**)",
+      "Edit(~/code/worktrees/**/.env*)",
+      "Edit(~/code/tobmoeller/dotfiles/home-manager/packages/config/claude/permissions/**)",
+      "Edit(~/code/tobmoeller/dotfiles/home-manager/packages/config/claude/settings.json)",
+      "Edit(~/code/tobmoeller/dotfiles/home-manager/packages/claude-settings.nix)",
+
+      "mcp__devtools-mcp__create_gitea_pull_request",
+      "mcp__devtools-mcp__create_gitea_pull_request_review",
+      "mcp__devtools-mcp__comment_gitea_pull_request",
+      "mcp__devtools-mcp__reply_gitea_review_comment",
+      "mcp__devtools-mcp__resolve_gitea_review_comment",
+      "mcp__devtools-mcp__react_gitea_comment",
+      "mcp__devtools-mcp__comment_pull_request",
+      "mcp__devtools-mcp__submit_pull_request_review",
+
+      "mcp__devtools-mcp__create_confluence_page",
+      "mcp__devtools-mcp__update_confluence_page",
+      "mcp__devtools-mcp__add_confluence_attachment"
+    ],
+
+    "deny": [
+      "Read(~/.claude/.credentials.json)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(php artisan db:wipe:*)"
+    ]
+  },
+
+  "autoMode": {
+    "environment": [
+      "$defaults",
+      "Organization: RED Medical, team RED-telematik-manager. Primary use: software development on a Laravel (PHP) / Vue monolith with an autonomous ticket pipeline (Claude skills /lead and /work with specialist subagents).",
+      "Source control: Gitea at git.sys.redicals.de, org RED-telematik-manager and all repos under it. The team works on feature branches feat/RTM-…/… and fix/RTM-…/… and merges via pull requests into develop.",
+      "Key internal services: Jira, Confluence, TeamCity and TestRail, all reached only through the devtools-mcp MCP server. Reading them is routine; writing to them (comments, transitions, PRs, reviews) is gated by permissions.ask rules and always needs Tobias' answer.",
+      "Trusted repo: the main checkout under ~/code/RED-telematik-manager/ and every git worktree of it under ~/code/worktrees/<repo>/<branch>. The worktrees are the intended working directories of autonomous ticket sessions; each has its own docker compose project (COMPOSE_PROJECT_NAME) and test database.",
+      "Trusted local stores: ~/code/knowledge/work-log/ (per-ticket pipeline artifacts: state.md, plan.md, spec.md, handover.md) and ~/code/knowledge/work-brain/ (team knowledge). Both are private git repos, committed locally, never pushed to a personal remote.",
+      "Sensitive data locations: .env files, ~/.ssh, ~/.claude/.credentials.json, and any customer data reachable through the app's database. None of it may enter work-log, work-brain, a commit, a comment or an artifact."
+    ],
+    "allow": [
+      "$defaults",
+      "Running the project's own checks inside a worktree under ~/code/worktrees/ is routine: ./vendor/bin/phpunit with a path or filter, ./vendor/bin/pint, ./vendor/bin/phpstan, php artisan test, composer dump-autoload, npm run lint, npm run type-check.",
+      "Migrating and seeding a worktree's own test database with `php artisan migrate --seed --env=testing` inside ~/code/worktrees/ is routine: it targets only that worktree's own compose stack (its own MariaDB container and port from .env.testing), never a shared database.",
+      "Starting, inspecting or stopping the docker compose stack of a worktree (its own COMPOSE_PROJECT_NAME) without removing volumes is routine; it never touches the main checkout's stack.",
+      "git add and git commit of the session's own work on a ticket branch (feat/RTM-…, fix/RTM-…) inside its worktree after the step was verified is routine when the ticket's state.md records commits: auto; the commit-guard PreToolUse hook enforces that record.",
+      "The /lead coordinator session starting or prompting a ticket's worker session through the wt agent script is routine; wt agent refuses when the worker is busy or blocked."
+    ],
+    "soft_deny": [
+      "$defaults",
+      "Never push a branch or create a pull request from a ticket pipeline session or the /lead session: Tobias pushes and opens the PR himself when the worker asks for it at gate PR; the pipeline only reads branch and PR afterwards.",
+      "Never write to Gitea, Confluence or Slack (PRs, reviews, comments, reactions, pages) unless Tobias answered a prompt for that specific write in this session. Never write to Jira (comments, transitions, field updates, new issues, links) unless Tobias asked for that write in this session or the pipeline step prescribes it (the bare PR link comment at ABNAHME); never on the model's own initiative, never to tidy up.",
+      "Never change the commits: line of a state.md under work-log on the model's own initiative; the pipeline writes commits: auto as the default when it creates the state file, only Tobias opts a ticket out (/work <TICKET> commits manual, or manual in a gate answer), and that line is the only source the commit-guard hook trusts. commits: auto allows commits inside the ticket worktree, never a push.",
+      "Never run php artisan migrate, db:seed or anything that changes a database against the main checkout's stack; inside a ticket worktree only against that worktree's own compose stack and only when the task needs it.",
+      "Never remove a worktree, run wt rm, wt main, wt back, git worktree remove or docker compose down --volumes unless Tobias asked for exactly that in this session.",
+      "Never send text to another Claude session (herdr agent prompt, herdr agent send-keys, tmux send-keys) except through wt agent from the /lead session; a prompt relayed into a waiting dialog would answer it."
+    ],
+    "hard_deny": [
+      "$defaults",
+      "Never read, print, commit or transmit the contents of .env files, ~/.ssh or ~/.claude/.credentials.json.",
+      "Never run sudo, and never force-push.",
+      "Never merge a pull request, never push to develop, main, master or a release branch, and never approve a PR or change its base, title, body or state — not even after Tobias accepted the ticket. Merging is always Tobias' own action."
+    ]
+  }
 }

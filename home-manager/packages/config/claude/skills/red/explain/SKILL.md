@@ -1,5 +1,7 @@
 ---
 name: explain
+model: opus
+effort: medium
 description: Explain why code behaves a certain way by tracing the actual code path and citing file:line, cross-referenced with internal Confluence documentation. Use when the user asks how or why something works (e.g. "why does this job time out with no logs", "how does our KIM sync work", "what does the docs say about X").
 ---
 
@@ -14,7 +16,9 @@ Answer the *why* by reading the real code AND the team's internal documentation 
 
 ## Check the internal docs
 
-Search our Confluence for design docs, runbooks, and decisions relevant to the question, using the devtools MCP:
+First grep `~/code/knowledge/work-brain/index.md` for the question's domain terms and read the matching notes — past decisions, API quirks and runbooks are filed there and are cheaper than a Confluence search.
+
+Then search our Confluence for design docs, runbooks, and decisions relevant to the question, using the devtools MCP:
 
 - `search_confluence` to find relevant pages
 - `get_confluence_page_by_title` / `read_confluence_page` to read them

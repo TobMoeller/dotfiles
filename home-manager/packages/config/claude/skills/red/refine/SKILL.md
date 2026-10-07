@@ -1,5 +1,7 @@
 ---
 name: refine
+model: opus
+effort: medium
 description: Prepare for sprint refinement — pull a KW sprint's tickets from Jira (in Backlog/Rank order) and write a short German pre-read: per ticket, one plain-language explanation of what it wants and whether it's implementable, any genuinely real concerns (only when the ticket is under-defined or problematic — never manufactured), and a single code-grounded story-point estimate calibrated to RTM history. One subagent per ticket → independent results. Then walk the user through it interactively (accept/retune SP, ask a question, postpone, pause), recording an agreed SP per ticket as at-a-glance bullets for the team meeting. Writes a single pre-read to the work-log store (~/code/knowledge/work-log/refinement/). Read-only against Jira; never writes estimates back. Use when the user wants to prep refinement or estimate a sprint (e.g. "refine the next sprint", "estimate KW 30-32", "prep tomorrow's refinement").
 allowed-tools: Read Grep Glob Bash(git log:*) Bash(git diff:*) Bash(git show:*) Bash(git branch:*) Bash(git rev-parse:*) Bash(git fetch:*) Bash(git worktree:*) Bash(git reset:*) Bash(mkdir:*) Write Edit Agent mcp__devtools-mcp__read_jira_issue mcp__devtools-mcp__search_jira mcp__devtools-mcp__search_confluence mcp__devtools-mcp__read_confluence_page mcp__devtools-mcp__get_confluence_page_by_title
 ---
@@ -110,10 +112,7 @@ _Snapshot: 2026-07-14, ~53 completed RTM tickets (Stories + Bugs), resolved 2025
 
 Spawn **one `Agent` (subagent) per ticket**, in parallel, so results are independent (no anchoring between tickets). Give each subagent: the ticket key, the full **calibration section 3** (so every estimate uses the same scale), and the instructions below. Each subagent works **single-pass** — one estimate, no reconciliation round.
 
-**Tool discipline — include this in every subagent prompt, verbatim and emphatic.** Estimation is pure reading, so the subagent must use the dedicated tools and almost never shell out:
-- Use **Grep** for content search, **Glob** for finding files, **Read** for reading files. **Never** use their shell equivalents (`grep`/`rg`/`find`/`ls`/`cat`/`head`/`tail`/`sed`/`awk`) — the dedicated tools are faster and don't prompt.
-- **Never chain or compose shell commands**: no `&&`, `;`, `|`, or `$(…)` substitution. One command per call. A composite/piped shell command is the **absolute, outermost exception** — permitted only when steps are genuinely interdependent *and* no dedicated tool fits, which for read-only code tracing under `$ro` is essentially never.
-- Why it matters: every composite shell command forces a **manual approval prompt** on the user and stalls the parallel run. Treat "zero composite shell commands" as a hard requirement, not a preference. If a subagent thinks it needs one, that's a signal it should be a Grep/Glob/Read call instead.
+Tell each subagent in one sentence that estimation is pure reading: Grep, Glob and Read under `$ro`, no shell needed (the global CLAUDE.md it loads already explains why composed shell commands prompt and stall the run).
 
 Each subagent must:
 
@@ -179,7 +178,7 @@ For each ticket, ask the user with **`AskUserQuestion`** (one question, `header`
 
 Tell the user in the question text they can also pick *Other* and type **„pause"** to stop the round-through at any point.
 
-After each ticket resolves to an SP (accept or retune), **immediately write/update its bullet** in the `## Ergebnisse der Durchsprache` section. **Keep the list in Backlog (Rank) order, not resolution order** — a postponed ticket, once decided, is inserted back at its original Backlog position, not appended at the end. (Pre-seed the 14 bullets in Backlog order and fill each in place, or insert each at its rank slot.)
+After each ticket resolves to an SP (accept or retune), **immediately write/update its bullet** in the `## Ergebnisse der Durchsprache` section. **Keep the list in Backlog (Rank) order, not resolution order** — a postponed ticket, once decided, is inserted back at its original Backlog position, not appended at the end. (Pre-seed one bullet per ticket in Backlog order and fill each in place, or insert each at its rank slot.)
 
 ```
 - <KEY> — SP **<final>** <(angenommen | angepasst von <draft>) ; ggf. kurzer Hinweis>

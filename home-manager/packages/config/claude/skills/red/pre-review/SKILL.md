@@ -1,5 +1,7 @@
 ---
 name: pre-review
+model: opus
+effort: high
 description: Self-review changes before they leave the machine — either the open working-tree changes (pre-commit) or the whole ticket branch (pre-push). Fans out three independent reviewer subagents that each check the same diff against the repo's .claude/rules and for logic errors, merges and adversarially verifies their findings in the main context, then fixes the confirmed ones directly (never commits). Use when the user wants their own open changes checked before committing (e.g. "review my open changes", "pre-commit review", "check this before I commit") or the whole branch checked before pushing/handing to a reviewer (e.g. "pre-review the branch", "pre-review RTM-1234", "check everything before I push").
 argument-hint: "[branch | RTM-XXXX] (default: open changes)"
 allowed-tools: Agent Read Grep Glob Edit Write Bash(git status:*) Bash(git diff:*) Bash(git log:*) Bash(git show:*) Bash(git merge-base:*) Bash(git rev-parse:*) Bash(git ls-files:*) Bash(vendor/bin/phpunit:*) Bash(vendor/bin/phpstan:*) Bash(vendor/bin/pint:*) mcp__devtools-mcp__read_jira_issue
@@ -53,44 +55,17 @@ failures untouched by the diff: report them, do not fix them.
 
 ## 3. Fan out three independent reviewers
 
-Spawn **three identical subagents in one message** (Agent tool,
-`subagent_type: general-purpose`), so they run in parallel. Each is blind to
-the others — do not share one reviewer's output with another. Each prompt must
-contain, self-sufficiently (subagents inherit nothing from this skill):
+Spawn **three `reviewer` subagents in one message** (Agent tool,
+`subagent_type: reviewer`; the profile in `~/.claude/agents/reviewer.md`
+carries the rules to read, the two review dimensions, the findings
+discipline and the output format), so they run in parallel. Each is blind
+to the others — do not share one reviewer's output with another. Brief each
+with only what it cannot know:
 
-- **The scope**: the exact git commands from step 1 so the subagent recomputes
-  the same diff itself, plus the untracked-file list.
-- **The rules to read first**, selected by touched paths — always the repo
-  `CLAUDE.md`, plus:
-  - `.claude/rules/backend/*.md` when backend files are touched (`app/`,
-    `routes/`, `database/`, `config/`, `tests/`)
-  - `.claude/rules/frontend/*.md` for `resources/client/**`
-  - `.claude/rules/documentation.md` for `resources/docs/*.json` or
-    `app/Service/Documentation/*`
+- **The scope**: the exact git commands from step 1 so the subagent
+  recomputes the same diff itself, plus the untracked-file list.
 - **Ticket context** (branch mode, when fetched): summary + acceptance
   criteria, with the instruction to flag gaps between diff and AC.
-- **The two review dimensions**:
-  1. **Rules compliance** — does the change violate a concrete rule? Every
-     rule finding must name the rule file and quote the rule it breaks.
-  2. **Logic errors** — correctness bugs with a concrete failure scenario:
-     wrong data written or returned, broken/unreachable state transition,
-     missed edge case reachable in normal operation, permission/authorization
-     hole, transaction boundary or side-effect ordering problem (broadcast/
-     dispatch before commit), N+1 or obvious performance trap, tests that
-     assert the wrong thing or miss the changed behavior.
-- **The findings discipline** (put this in the prompt verbatim):
-  - Verify every finding against the actual code — open the surrounding code,
-    follow the call paths. Never speculate.
-  - A finding needs a realistic trigger **today**, not a chain of hypothetical
-    preconditions ("if the enum ever grows…" is not a finding).
-  - No style/formatting findings — Pint and PHPStan run separately.
-  - Behaviour beats symmetry: "inconsistent with the sibling implementation"
-    only counts when you can name the concrete consequence.
-  - You are read-only. Do not modify, create, or delete any file.
-- **The output format** — one block per finding:
-  `file:line · [rule|logic] · [blocker|major|minor] · one-sentence claim ·
-  evidence (rule quote or failure scenario) · suggested fix` — and an explicit
-  "no findings" when clean.
 
 ## 4. Merge and dedupe
 
@@ -111,9 +86,10 @@ For each merged finding, actively try to refute it before touching anything:
   guarded elsewhere on the call path, unreachable input, or an existing test
   proves the behavior.
 
-With more than ~10 merged findings, fan the verification out instead: one
-refuter subagent per finding, prompted to refute it against the real code and
-to default to "refuted" when uncertain. Only findings that survive move on.
+With more than ~10 merged findings, fan the verification out instead: a
+`step-verifier` subagent in „Modus: widerlegen" per batch of findings (at
+most 5 in parallel), each returning a `WIDERLEGT: ja|nein · Beleg` line per
+finding. Only findings that survive move on.
 
 ## 6. Fix directly
 

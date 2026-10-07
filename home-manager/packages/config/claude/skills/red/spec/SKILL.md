@@ -1,5 +1,7 @@
 ---
 name: spec
+model: opus
+effort: high
 description: Collaboratively define a detailed, implementation-ready backend specification for a task, through dialog. Gathers context from Jira (ticket/epic), Confluence, Figma, and the real codebase, then writes the spec to the central work-log store (~/code/knowledge/work-log/). Focuses on the backend (PHP) while accounting for the frontend structure it must serve. Use when the user wants to spec out, design, or plan a task before implementing it (e.g. "let's spec out RTM-1234", "spec this epic", "design the backend for this feature").
 allowed-tools: Read Grep Glob Bash(git log:*) Bash(git diff:*) Bash(git show:*) Bash(git branch:*) Bash(git rev-parse:*) Bash(mkdir:*) Write Edit mcp__devtools-mcp__read_jira_issue mcp__devtools-mcp__search_jira mcp__devtools-mcp__get_jira_sprint mcp__devtools-mcp__link_jira_issues mcp__devtools-mcp__search_confluence mcp__devtools-mcp__read_confluence_page mcp__devtools-mcp__get_confluence_page_by_title mcp__claude_ai_Figma__get_design_context mcp__claude_ai_Figma__get_screenshot mcp__claude_ai_Figma__get_metadata mcp__claude_ai_Figma__get_variable_defs
 ---
@@ -43,12 +45,7 @@ This is the core of the skill. Drive an iterative conversation:
 
 ## 4. Write the spec
 
-The spec goes in the central **work-log** store, in one folder per ticket — co-located with that ticket's review if one exists. Resolve the store path from the **main repository name** (stable across the main checkout and all worktrees):
-
-```bash
-repo=$(basename "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")")
-mkdir -p ~/code/knowledge/work-log/"$repo"/<TICKET>
-```
+The spec goes in the central **work-log** store, in one folder per ticket — co-located with that ticket's review if one exists. Resolve the store path from the **main repository name** (stable across the main checkout and all worktrees): run `git rev-parse --path-format=absolute --git-common-dir` (one call), take the basename of its parent directory as `<repo>`, then `mkdir -p ~/code/knowledge/work-log/<repo>/<TICKET>`.
 
 Write to `~/code/knowledge/work-log/<repo>/<TICKET>/spec.md`, where `<TICKET>` is the bare ticket id (e.g. `RTM-1234`); use a short kebab-case slug folder when there's no ticket. Keep unresolved items in `open-questions.md` in the same folder. Write incrementally as decisions settle — don't wait for the very end to commit anything to disk.
 
@@ -99,3 +96,5 @@ Adapt the headings to the task — drop sections that don't apply, add ones that
 ## Stay in scope
 
 This is specification and planning, not implementation. **Do not change source files** in the project and don't post anything to Jira/Confluence/Figma — only write under `~/code/knowledge/work-log/`. Don't commit the store unless the user asks.
+
+When the spec is settled, say that `/work <TICKET>` will treat this `spec.md` as the finished spec phase: it stops at its `SPEC` gate only if product questions are still open, otherwise it goes straight on to the plan (with `commits: auto` as the default commit mode; `/work <TICKET> commits manual` opts out).

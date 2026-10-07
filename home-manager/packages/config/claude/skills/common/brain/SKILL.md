@@ -1,5 +1,7 @@
 ---
 name: brain
+model: opus
+effort: low
 description: Read from or write to the personal/work AI second brain (Open Knowledge Format markdown stores). Use to look up stored knowledge, file new knowledge (ingest), or health-check the store (lint). Examples: "what's in the brain about the billing API", "file this into the brain", "remember how we fixed the webhook retries", "lint the brain".
 ---
 
@@ -28,7 +30,7 @@ is the manual.
 ## Modes
 
 ### Query (look something up)
-1. `grep`/read the store's `index.md` and concept `description`s for relevance.
+1. Grep (Grep tool) the store's `index.md` and concept `description`s for relevance, then Read the matches.
 2. Read matching concept files.
 3. Answer with citations (`apis/billing.md`). If the answer was valuable and not
    already captured, offer to ingest it.

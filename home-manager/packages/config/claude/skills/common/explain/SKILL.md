@@ -1,5 +1,7 @@
 ---
 name: explain
+model: opus
+effort: medium
 description: Explain why code behaves a certain way by tracing the actual code path and citing file:line — never from memory. Use when the user asks how or why something works (e.g. "why does this job time out with no logs", "what's the difference between loadMissing and getKey here", "how does Laravel handle X").
 ---
 

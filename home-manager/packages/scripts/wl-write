@@ -1,0 +1,213 @@
+#!/usr/bin/env bash
+
+# wl-write - the deterministic pen of the /work orchestrator. Every line that
+# carries a timestamp or a running number in a ticket's work-log folder is
+# written through this script, so the time comes from the system clock and
+# the numbers never collide — agents estimate both badly. One call per
+# transition: every call costs the orchestrator a full-context turn.
+#
+#   wl-write phase  <TICKET> <phase> [--step n/N] [--round n] [--gate none|open|passed]
+#                   [--gate-id ID] [--next "<text>"] [<key> <value>]... "<log text>"
+#                                                     one transition: set phase (+ keys), replace
+#                                                     ## Nächster Schritt, append the log line
+#   wl-write log    <TICKET> <phase> <text...>       append "- <now> · <phase> · <text>" to ## Log, set updated:
+#   wl-write set    <TICKET> <key> <value> [<key> <value>]...
+#                                                     set frontmatter keys (phase, gate, gate_id, step, round, …), set updated:
+#   wl-write next   <TICKET> <text...>               replace the body of ## Nächster Schritt
+#   wl-write runde  <TICKET> <phase> <runde> <agent> <agent-id> <ergebnis> <befunde> <ausgang...>
+#                                                     append a row to pruefung/verlauf.md, print its Nr, and write
+#                                                     pruefung/<Nr>-<phase>-<agent>-r<runde>.md with the agent's brief
+#                                                     and final report copied from its transcript (nothing to retype)
+#   wl-write befund <TICKET> add <phase> <kriterium> <quelle> <text...>
+#                                                     append a row to pruefung/befunde.md (Status offen), print its Id (B01…)
+#   wl-write befund <TICKET> set <Bnn[,Bnn…]> <status> [entscheidung...]
+#                                                     set Status (and Entscheidung) of one or more rows
+#   wl-write befund <TICKET> list [offen|alle]        print the rows (default: offen)
+#
+# Files: work-log/<repo>/<TICKET>/state.md, pruefung/verlauf.md, pruefung/befunde.md, pruefung/NN-*.md.
+# Status values: offen · umgesetzt · zurückgewiesen · Auditor: bestätigt · Auditor: verworfen · Hinweis
+
+set -euo pipefail
+
+WORK_LOG="${WORK_LOG:-$HOME/code/knowledge/work-log}"
+CLAUDE_PROJECTS="${CLAUDE_PROJECTS:-$HOME/.claude/projects}"
+
+die() { echo "wl-write: $*" >&2; exit 1; }
+now() { date '+%Y-%m-%d %H:%M'; }
+
+cmd=${1:-}; shift || true
+ticket=$(printf '%s' "${1:-}" | tr '[:lower:]' '[:upper:]'); shift || true
+[[ -n "$cmd" && -n "$ticket" ]] || { sed -n '3,29p' "$0" | sed 's/^# \{0,1\}//'; exit 1; }
+
+store=$(ls -d "$WORK_LOG"/*/"$ticket" 2>/dev/null | head -1 || true)
+[[ -n "$store" ]] || die "no folder for $ticket under $WORK_LOG"
+state="$store/state.md"
+pruef="$store/pruefung"
+
+# set frontmatter key $1 to $2 in state.md (only inside the first --- block)
+set_fm() {
+    local key=$1 value=$2 tmp
+    tmp=$(mktemp)
+    awk -v k="$key" -v v="$value" '
+        BEGIN { infm=0; done=0 }
+        NR==1 && $0=="---" { infm=1; print; next }
+        infm && $0=="---" { if (!done) { print k ": " v; done=1 } ; infm=0; print; next }
+        infm && index($0, k ":")==1 { if (!done) { c=$0; sub(/^[^#]*/, "", c); printf "%s %s%s\n", k ":", v, (c!="" ? "  " c : ""); done=1 } ; next }
+        { print }' "$state" > "$tmp"
+    mv "$tmp" "$state"
+}
+
+append_section() { # append line $2 at the end of "## $1" (section ends at next "## " or EOF)
+    local name=$1 line=$2 tmp
+    tmp=$(mktemp)
+    awk -v h="## $name" -v l="$line" '
+        BEGIN { f=0; done=0 }
+        $0==h { f=1; print; next }
+        f && /^## / { if (!done) { print l; print ""; done=1 } ; f=0 }
+        { print }
+        END { if (f && !done) print l }' "$state" > "$tmp"
+    mv "$tmp" "$state"
+}
+
+replace_section() { # replace the body of "## $1" with $2 (one paragraph); creates the section before ## Gate or at EOF when missing
+    local name=$1 body=$2 tmp
+    tmp=$(mktemp)
+    awk -v h="## $name" -v b="$body" '
+        BEGIN { f=0; seen=0 }
+        $0==h { f=1; seen=1; print; print ""; print b; print ""; next }
+        f && /^## / { f=0 }
+        f { next }
+        { print }
+        END { if (!seen) { print ""; print h; print ""; print b } }' "$state" > "$tmp"
+    mv "$tmp" "$state"
+}
+
+log_line() { # $1 phase, $2 text → append to ## Log, set updated:, echo the line
+    local ts; ts=$(now)
+    append_section "Log" "- $ts · $1 · $2"
+    set_fm updated "$ts"
+    echo "- $ts · $1 · $2"
+}
+
+set_pairs() { # key value [key value]...
+    while (($# >= 2)); do
+        set_fm "$1" "$2"
+        echo "$1: $2"
+        shift 2
+    done
+    (($# == 0)) || die "odd key/value list (left: $*)"
+    set_fm updated "$(now)"
+}
+
+# the brief (first user message, without the harness reminder) and the final
+# report (SubagentHandback message, else the last assistant text) of a
+# subagent transcript, as markdown sections
+transcript_sections() {
+    local id=$1 f
+    f=$(ls "$CLAUDE_PROJECTS"/*/*/subagents/agent-"$id".jsonl 2>/dev/null | head -1 || true)
+    [[ -n "$f" ]] || return 1
+    jq -rs '
+        ([.[] | select(.type=="user")] | first | .message.content
+            | if type=="string" then . else ([.[] | select(.type=="text") | .text] | join("\n")) end
+            | split("<system-reminder>")[0] | rtrimstr("\n")) as $brief
+        | ([.[] | select(.type=="assistant") | .message.content[]? | select(.type=="tool_use" and .name=="SubagentHandback") | .input.message] | last) as $handback
+        | ([.[] | select(.type=="assistant") | .message.content[]? | select(.type=="text") | .text] | last) as $text
+        | "## Brief\n\n" + $brief + "\n\n## Ergebnis\n\n" + ($handback // $text // "(kein Ergebnisblock im Transkript)")
+    ' "$f"
+}
+
+case "$cmd" in
+    phase)
+        [[ -f "$state" ]] || die "no state.md for $ticket"
+        phase=${1:?phase missing}; shift
+        next=""; pairs=()
+        while (($# > 1)); do
+            case "$1" in
+                --step)    pairs+=(step "$2"); shift 2 ;;
+                --round)   pairs+=(round "$2"); shift 2 ;;
+                --gate)    pairs+=(gate "$2"); shift 2 ;;
+                --gate-id) pairs+=(gate_id "$2"); shift 2 ;;
+                --next)    next=$2; shift 2 ;;
+                --*)       die "unknown option $1" ;;
+                *)         pairs+=("$1" "$2"); shift 2 ;;
+            esac
+        done
+        text=${1:-}; [[ -n "$text" ]] || die "log text missing (last argument)"
+        set_fm phase "$phase"; echo "phase: $phase"
+        ((${#pairs[@]} == 0)) || set_pairs "${pairs[@]}"
+        [[ -z "$next" ]] || replace_section "Nächster Schritt" "$next"
+        log_line "$phase" "$text"
+        ;;
+    log)
+        [[ -f "$state" ]] || die "no state.md for $ticket"
+        phase=${1:?phase missing}; shift
+        text="$*"
+        [[ -n "$text" ]] || die "log text missing"
+        log_line "$phase" "$text"
+        ;;
+    set)
+        [[ -f "$state" ]] || die "no state.md for $ticket"
+        (($# >= 2)) || die "key and value missing"
+        set_pairs "$@"
+        ;;
+    next)
+        [[ -f "$state" ]] || die "no state.md for $ticket"
+        text="$*"; [[ -n "$text" ]] || die "text missing"
+        replace_section "Nächster Schritt" "$text"
+        set_fm updated "$(now)"
+        echo "## Nächster Schritt: $text"
+        ;;
+    runde)
+        mkdir -p "$pruef"
+        f="$pruef/verlauf.md"
+        [[ -f "$f" ]] || printf '# %s — Prüfverlauf\n\n| Nr | Zeit | Phase | Runde | Agent | Agent-Id | Ergebnis | Befunde | Ausgang |\n|---|---|---|---|---|---|---|---|---|\n' "$ticket" > "$f"
+        phase=${1:?}; runde=${2:?}; agent=${3:?}; id=${4:?}; ergebnis=${5:?}; befunde=${6:?}; shift 6
+        ausgang="$*"
+        ts=$(now)
+        # cells may be re-padded by a table formatter (Obsidian), so allow any spacing
+        nr=$(grep -cE '^\|[[:space:]]*[0-9]{2}[[:space:]]*\|' "$f" || true); nr=$(printf '%02d' $((nr + 1)))
+        printf '| %s | %s | %s | %s | %s | %s | %s | %s | %s |\n' "$nr" "$ts" "$phase" "$runde" "$agent" "$id" "$ergebnis" "$befunde" "$ausgang" >> "$f"
+        report="$pruef/$nr-$phase-$agent-r$runde.md"
+        {
+            printf '# %s · %s · %s · Runde %s\n\n' "$nr" "$phase" "$agent" "$runde"
+            printf 'Agent-Id: %s · Zeit: %s · Ergebnis: %s · Befunde: %s · Ausgang: %s\n\n' "$id" "$ts" "$ergebnis" "$befunde" "$ausgang"
+            transcript_sections "$id" || printf '## Ergebnis\n\n(kein Transkript für %s gefunden — Ergebnisblock bitte anhängen)\n' "$id"
+        } > "$report"
+        echo "$nr"
+        echo "$report"
+        ;;
+    befund)
+        mkdir -p "$pruef"
+        f="$pruef/befunde.md"
+        [[ -f "$f" ]] || printf '# %s — Befund-Register\n\nStatus: offen · umgesetzt · zurückgewiesen · Auditor: bestätigt · Auditor: verworfen · Hinweis\n\n| Id | Zeit | Phase | Kriterium | Quelle | Befund | Status | Entscheidung |\n|---|---|---|---|---|---|---|---|\n' "$ticket" > "$f"
+        sub=${1:?add|set|list}; shift
+        case "$sub" in
+            add)
+                phase=${1:?}; krit=${2:?}; quelle=${3:?}; shift 3
+                text="$*"; [[ -n "$text" ]] || die "befund text missing"
+                n=$(grep -cE '^\|[[:space:]]*B[0-9]{2}[[:space:]]*\|' "$f" || true); id=$(printf 'B%02d' $((n + 1)))
+                printf '| %s | %s | %s | %s | %s | %s | offen | |\n' "$id" "$(now)" "$phase" "$krit" "$quelle" "${text//|/∣}" >> "$f"
+                echo "$id"
+                ;;
+            set)
+                ids=${1:?Bnn[,Bnn…]}; status=${2:?status}; shift 2
+                ent="$*"
+                for id in ${ids//,/ }; do
+                    grep -qE "^\|[[:space:]]*$id[[:space:]]*\|" "$f" || die "no row $id in befunde.md"
+                    tmp=$(mktemp)
+                    awk -F'|' -v id="$id" -v st="$status" -v en="$ent · $(now)" 'BEGIN{OFS="|"}
+                        $2 ~ "^[ \t]*"id"[ \t]*$" { $8=" "st" "; $9=" "en" " } { print }' "$f" > "$tmp"
+                    mv "$tmp" "$f"
+                    echo "$id → $status"
+                done
+                ;;
+            list)
+                which=${1:-offen}
+                if [[ "$which" == "alle" ]]; then grep -E '^\|[[:space:]]*B[0-9]{2}[[:space:]]*\|' "$f" || true
+                else grep -E '^\|[[:space:]]*B[0-9]{2}[[:space:]]*\|' "$f" | awk -F'|' '$8 ~ /offen|zurückgewiesen/' || true; fi
+                ;;
+            *) die "befund: add|set|list" ;;
+        esac
+        ;;
+    *) die "unknown command $cmd (phase, log, set, next, runde, befund)" ;;
+esac

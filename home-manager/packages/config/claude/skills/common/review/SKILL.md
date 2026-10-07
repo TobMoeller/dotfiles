@@ -1,6 +1,8 @@
 ---
 name: review
-description: Review a PR, diff, or branch against its linked ticket and write a grounded, severity-tagged review to the central reviews store (~/code/reviews/). Use when the user asks for a code review, PR review, or to review changes for a ticket (e.g. "review RTM-1234", "review this PR").
+model: opus
+effort: high
+description: Review a PR, diff, or branch against its linked ticket and write a grounded, severity-tagged review to the central work-log store (~/code/knowledge/work-log/<repo>/<TICKET>/review.md). Use when the user asks for a code review, PR review, or to review changes for a ticket (e.g. "review RTM-1234", "review this PR").
 ---
 
 # Code review
@@ -28,14 +30,9 @@ Features must be verified, not assumed. Run the tests relevant to the change and
 
 ## 4. Write the review
 
-Write to the central reviews store, **not** into the checkout (a `.reviews/` inside a worktree is destroyed by `wt rm`). The target is `~/code/reviews/<repo>/<ticket>.md` (or `.../PR-<id>.md` if there's no ticket), where `<repo>` is the main repository name — stable across the main checkout and all its worktrees. Resolve and create it with:
+Write to the central work-log store, **not** into the checkout (a `.reviews/` inside a worktree is destroyed by `wt rm`). The target is `~/code/knowledge/work-log/<repo>/<TICKET>/review.md` (folder `PR-<id>` if there's no ticket), where `<repo>` is the main repository name — stable across the main checkout and all its worktrees: run `git rev-parse --path-format=absolute --git-common-dir` (one call), take the basename of its parent directory, then `mkdir -p` the ticket folder.
 
-```bash
-repo=$(basename "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")")
-mkdir -p ~/code/reviews/"$repo"
-```
-
-Then write to `~/code/reviews/$repo/<ticket>.md`. Structure:
+Structure of `review.md`:
 
 - **Summary** — what the change does, whether it meets the ticket's DoD (call out any gaps).
 - **Findings** — each tagged `[blocker]` / `[major]` / `[minor]` / `[nit]`, with `file:line` references and a concrete suggested fix.

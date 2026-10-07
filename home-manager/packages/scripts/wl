@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+
+# wl - work-log status: one line per ticket the /work pipeline knows about,
+# read from the state files under ~/code/knowledge/work-log/<repo>/<TICKET>/.
+# Deterministic input for the /lead and /day skills, and the quickest human
+# view of "what is where".
+#
+#   wl                     table of all tickets not done (gates open first)
+#   wl --all               include done/parked
+#   wl --open              only tickets waiting on Tobias (gate: open)
+#   wl <TICKET>            the ticket's state file path, next step, the open
+#                          gate block, open questions, last three log lines
+#   wl <TICKET> --runden   the Prüfverlauf: every agent call with result,
+#                          Befunde, Ausgang, turns, tokens, duration
+#                          (see wl-runden; --sum for one line per phase)
+#   wl --json              machine-readable (one object per ticket)
+#
+# The "session" column tells whether a Claude session exists in the ticket's
+# worktree (newest transcript under ~/.claude/projects/<encoded worktree>/)
+# and how old it is — that is what /lead uses to spot a worker that stopped
+# without writing a gate, and to choose `claude --continue` vs a fresh start.
+
+set -euo pipefail
+
+WORK_LOG="${WORK_LOG:-$HOME/code/knowledge/work-log}"
+CLAUDE_PROJECTS="${CLAUDE_PROJECTS:-$HOME/.claude/projects}"
+
+mode=table
+ticket=""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --all) mode=all; shift ;;
+        --open) mode=open; shift ;;
+        --json) mode=json; shift ;;
+        --runden) shift; exec "$(dirname "$0")/wl-runden" "$ticket" "$@" ;;
+        -h|--help) sed -n '3,19p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *) ticket=$1; shift ;;
+    esac
+done
+
+# frontmatter value, empty when the file has no frontmatter or no such key
+fm() { sed -nE "1,/^---\$/!b; s/^$2:[[:space:]]*(.*)\$/\1/p" "$1" | sed -n '1p' | sed -E 's/[[:space:]]+#.*$//; s/[[:space:]]+$//'; }
+
+# ~/.claude/projects encodes a cwd by replacing every '/' and '.' with '-'
+encode() { printf '%s' "$1" | tr '/.' '--'; }
+
+session_info() {
+    local wt=$1 dir file age
+    [[ -n "$wt" && -d "$wt" ]] || { echo "-"; return; }
+    dir="$CLAUDE_PROJECTS/$(encode "$wt")"
+    [[ -d "$dir" ]] || { echo "keine"; return; }
+    file=$(ls -t "$dir"/*.jsonl 2>/dev/null | head -1 || true)
+    [[ -n "$file" ]] || { echo "keine"; return; }
+    age=$(( ( $(date +%s) - $(stat -c %Y "$file") ) / 60 ))
+    if (( age < 60 )); then echo "${age}m"
+    elif (( age < 1440 )); then echo "$(( age / 60 ))h"
+    else echo "$(( age / 1440 ))d"
+    fi
+}
+
+section() { # print the body of "## <name>" until the next "## "
+    awk -v h="## $2" '$0==h{f=1;next} /^## /{f=0} f' "$1"
+}
+
+if [[ -n "$ticket" ]]; then
+    ticket=$(printf '%s' "$ticket" | tr '[:lower:]' '[:upper:]')
+    state=$(ls "$WORK_LOG"/*/"$ticket"/state.md 2>/dev/null | head -1 || true)
+    [[ -n "$state" ]] || { echo "wl: no state.md for $ticket under $WORK_LOG" >&2; exit 1; }
+    echo "state:    $state"
+    echo "phase:    $(fm "$state" phase) · gate: $(fm "$state" gate) $(fm "$state" gate_id) · step: $(fm "$state" step) · round: $(fm "$state" round) · commits: $(fm "$state" commits) · updated: $(fm "$state" updated)"
+    echo "branch:   $(fm "$state" branch)"
+    wt=$(fm "$state" worktree); wt=${wt/#\~/$HOME}
+    echo "worktree: ${wt:-?} · session: $(session_info "$wt")"
+    echo
+    echo "## Nächster Schritt"; section "$state" "Nächster Schritt" | sed '/^$/d'
+    if [[ "$(fm "$state" gate)" == "open" ]]; then
+        echo; echo "## Gate"; section "$state" "Gate" | sed '/^$/d'
+    fi
+    echo
+    echo "## Offene Fragen"; section "$state" "Offene Fragen" | grep -E '^- \[ \]' || echo "-"
+    echo
+    echo "## Log (letzte 3)"; section "$state" "Log" | grep -E '^- ' | tail -3
+    exit 0
+fi
+
+rows=()
+while IFS= read -r state; do
+    [[ -f "$state" ]] || continue
+    t=$(basename "$(dirname "$state")")
+    repo=$(basename "$(dirname "$(dirname "$state")")")
+    phase=$(fm "$state" phase)
+    if [[ -z "$phase" ]]; then
+        # hand-written state file without frontmatter (pre-pipeline)
+        rows+=("$t|$repo|frei|?|?|?|$(sed -n '3p' "$state" | cut -c1-20)|$(sed -nE '/^## Phase/{n;n;p}' "$state" | cut -c1-70)|-")
+        continue
+    fi
+    gate=$(fm "$state" gate)
+    gid=$(fm "$state" gate_id)
+    [[ "$gate" == "open" && -n "$gid" ]] && gate="open:$gid"
+    step=$(fm "$state" step)
+    updated=$(fm "$state" updated)
+    wt=$(fm "$state" worktree); wt=${wt/#\~/$HOME}
+    next=$(section "$state" "Nächster Schritt" | sed '/^$/d' | head -1 | cut -c1-70)
+    sess=$(session_info "$wt")
+    case "$mode" in
+        open)  [[ "$gate" == open* ]] || continue ;;
+        table) [[ "$phase" != "done" && "$phase" != "parked" ]] || continue ;;
+    esac
+    rows+=("$t|$repo|$phase|$gate|${step:--}|$updated|$sess|$next|$wt")
+done < <(find "$WORK_LOG" -mindepth 3 -maxdepth 3 -name state.md | sort)
+
+if [[ "$mode" == "json" ]]; then
+    printf '%s\n' "${rows[@]}" | jq -R -s 'split("\n") | map(select(length>0) | split("|") | {ticket:.[0], repo:.[1], phase:.[2], gate:.[3], step:.[4], updated:.[5], session:.[6], next:.[7], worktree:.[8]})'
+    exit 0
+fi
+
+[[ ${#rows[@]} -gt 0 ]] || { echo "wl: keine Tickets in $WORK_LOG"; exit 0; }
+
+# gate: open first, then by phase order, then ticket
+phase_order='{"assess":0,"spec":1,"plan":2,"implement":3,"verify":4,"review":5,"accept":6,"done":7,"parked":8,"frei":9}'
+{
+    echo "TICKET|PHASE|GATE|SCHRITT|UPDATED|SESSION|NÄCHSTER SCHRITT"
+    printf '%s\n' "${rows[@]}" \
+      | jq -R -r --argjson p "$phase_order" '
+          split("|") | {t:.[0], ph:.[2], g:.[3], st:.[4], u:.[5], s:.[6], n:.[7]}
+          | [ (if (.g|startswith("open")) then 0 else 1 end), ($p[.ph] // 9), .t, .ph, .g, .st, .u, .s, .n ] | @tsv' \
+      | sort -t $'\t' -k1,1n -k2,2n -k3,3 \
+      | awk -F '\t' '{ print $3 "|" $4 "|" $5 "|" $6 "|" $7 "|" $8 "|" $9 }'
+} | column -t -s '|'

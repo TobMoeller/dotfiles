@@ -24,3 +24,11 @@ macos-option-as-alt = true
 # available and keeps copy working across the multiplexer.
 clipboard-write = allow
 # clipboard-read = allow   # uncomment to also allow OSC 52 paste without a prompt
+
+# Ctrl+C/V copy & paste (ctrl+shift+c/v keep working too).
+# 'performable:' only copies when there is a selection; otherwise Ctrl+C passes
+# through to the app, so SIGINT still works. Ctrl+V is always swallowed by
+# Ghostty: shell quoted-insert, vim visual-block and image paste in Claude Code
+# no longer see it.
+keybind = performable:ctrl+c=copy_to_clipboard
+keybind = ctrl+v=paste_from_clipboard

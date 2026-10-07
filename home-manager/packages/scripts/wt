@@ -10,9 +10,39 @@
 #                   session again if it is gone, e.g. after a reboot)
 #   wt add          pick a repo from ~/code, then pick an existing branch or
 #                   type a new name; creates worktree + tmux session
+#   wt add <repo> <branch> [--base <ref>] [--no-focus] [--dry-run]
+#                   non-interactive form (used by the Claude `worktree` skill):
+#                   --base names the start point for a NEW branch (default
+#                   origin/develop when no terminal is attached, fzf otherwise),
+#                   --no-focus leaves the herdr focus where it is (the /lead
+#                   case), --dry-run only prints what would happen.
+#                   The bootstrap ends by writing .wt-ready (or .wt-failed)
+#                   into the worktree; /work waits for that marker. While it
+#                   runs, .wt-bootstrapping is there.
 #   wt rm           pick a worktree, tear it down (tmux session, docker
 #                   compose stack incl. volumes, git worktree)
 #   wt ls           list existing worktrees
+#   wt main [<repo/branch-dir>] [--keep-session] [--dry-run]
+#                   move a worktree's branch into the main checkout, then tear
+#                   the worktree down (default: the worktree you are in)
+#   wt back [<repo>] [--dry-run]
+#                   move the main checkout's branch back into its own worktree;
+#                   the main checkout returns to the default branch
+#   wt agent <repo/branch-dir> [--resume|--fresh] [--] [prompt...]
+#                   the Claude session of a worktree (used by the /lead skill):
+#                   ensures the space, waits for the bootstrap, starts
+#                   `claude` in the space's root pane (one pane per space,
+#                   no split) when none runs (--resume: `claude --continue`, --fresh: new
+#                   session, or /clear on a running one; default: continue
+#                   when a transcript exists), then submits the prompt.
+#                   Refuses while the agent is working or blocked, so a
+#                   relayed answer never lands in a dialog or a permission
+#                   prompt. Prints JSON {session, pane, started, mode, status}.
+#   wt lead [--fresh|--resume] [--] [prompt...]
+#                   the coordinator session: herdr space "lead" with the
+#                   work-log store as cwd, `claude` there, prompt `/lead`
+#                   (default). Resumes today's session, starts fresh on a
+#                   new day. This is how a day begins.
 #
 # Worktrees live under $WT_ROOT/<repo>/<branch>, separate from ~/code.
 #
@@ -59,16 +89,22 @@ list_worktrees() {
     find "$WT_ROOT" -mindepth 2 -maxdepth 2 -type d | sed "s|^$WT_ROOT/||" | sort
 }
 
+# true when a human is on the other end (fzf and attaching make sense)
+interactive() { [[ -t 0 && -t 1 ]]; }
+
 attach_session() {
     if [[ -n "${TMUX:-}" ]]; then
         tmux switch-client -t "=$1"
-    else
+    elif interactive; then
         tmux new-session -A -s "$1"
+    else
+        echo "wt: session '$1' is ready — attach with: tmux attach -t '=$1'"
     fi
 }
 
 # ensure a session exists for worktree path $2 with name $1, then attach.
 # A single window at the worktree root - windows are yours to arrange.
+# WT_NO_FOCUS=1 creates the herdr space without focusing it.
 ensure_session() {
     local session=$1 path=$2 setup=${3:-}
 
@@ -76,10 +112,11 @@ ensure_session() {
         local id
         id=$(herdr_ws_id "$session")
         if [[ -n "$id" ]]; then
-            herdr workspace focus "$id"
+            [[ -n "${WT_NO_FOCUS:-}" ]] || herdr workspace focus "$id"
         else
-            local root
-            root=$(herdr workspace create --cwd "$path" --label "$session" --focus \
+            local root focus_flag=--focus
+            [[ -n "${WT_NO_FOCUS:-}" ]] && focus_flag=--no-focus
+            root=$(herdr workspace create --cwd "$path" --label "$session" "$focus_flag" \
                 | jq -r '.result.root_pane.pane_id // empty')
             # run the setup command in the new space's root pane (text + Enter)
             [[ -n "$setup" && -n "$root" ]] && herdr pane run "$root" "$setup"
@@ -175,6 +212,14 @@ pick_base_branch() {
     } | fzf --prompt='base> ' --header="base for new branch $branch"
 }
 
+# EXIT trap of the bootstrap: no result marker yet means it was cut short
+bootstrap_exit() {
+    local path=$1
+    [[ -e "$path/.wt-ready" || -e "$path/.wt-failed" ]] \
+        || date '+%Y-%m-%d %H:%M (aborted)' > "$path/.wt-failed"
+    rm -f "$path/.wt-bootstrapping"
+}
+
 # Worktree bootstrap: env setup, git-ignored file copies, vendor/node_modules,
 # then a generic .worktree-setup.sh build step (composer/npm install) which
 # needs those deps present. Invoked inside the worktree's own session (see
@@ -183,6 +228,13 @@ pick_base_branch() {
 cmd_bootstrap() {
     local repo=$1 path=$2
     local env_failed=0
+    rm -f "$path/.wt-ready" "$path/.wt-failed"
+    # .wt-bootstrapping while this runs, so `wt agent` waits instead of taking
+    # an early vendor/ + .env for a finished bootstrap; an abort (set -e,
+    # Ctrl-C) leaves .wt-failed behind rather than no marker at all
+    date '+%Y-%m-%d %H:%M' > "$path/.wt-bootstrapping"
+    # shellcheck disable=SC2064 # $path is meant to expand now
+    trap "bootstrap_exit $(printf '%q' "$path")" EXIT
 
     setup_env "$repo" "$path" || env_failed=1
 
@@ -200,25 +252,52 @@ cmd_bootstrap() {
         fi
     done
 
-    [[ -x "$path/.worktree-setup.sh" ]] && ( cd "$path" && ./.worktree-setup.sh )
+    local setup_failed=0
+    if [[ -x "$path/.worktree-setup.sh" ]]; then
+        ( cd "$path" && ./.worktree-setup.sh ) || setup_failed=1
+    fi
 
-    (( env_failed )) && echo "wt: env setup FAILED (see above) -- no usable .env, fix it before starting the stack" >&2
+    # marker for /work (and wt agent): the worktree is usable, or not
+    if (( env_failed || setup_failed )); then
+        (( env_failed )) && echo "wt: env setup FAILED (see above) -- no usable .env, fix it before starting the stack" >&2
+        (( setup_failed )) && echo "wt: .worktree-setup.sh FAILED (see above)" >&2
+        date '+%Y-%m-%d %H:%M' > "$path/.wt-failed"
+    else
+        date '+%Y-%m-%d %H:%M' > "$path/.wt-ready"
+    fi
+    rm -f "$path/.wt-bootstrapping"
     return 0
 }
 
 cmd_add() {
-    local repo=${1:-} branch=${2:-}
+    local repo="" branch="" base="" dry_run=0
+    local positional=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --base) base=${2:?--base needs a ref}; shift 2 ;;
+            --dry-run) dry_run=1; shift ;;
+            --no-focus) export WT_NO_FOCUS=1; shift ;;
+            --*) die "unknown option for add: $1" ;;
+            *) positional+=("$1"); shift ;;
+        esac
+    done
+    repo=${positional[0]:-}
+    branch=${positional[1]:-}
 
     if [[ -z "$repo" ]]; then
+        interactive || die "add needs <repo> <branch> when no terminal is attached"
         repo=$(find "$CODE_DIR" -mindepth 2 -maxdepth 3 -name .git -prune \
             -not -path "$WT_ROOT/*" \
             | sed 's|/\.git$||' | sort | fzf --prompt='repo> ') || exit 0
     fi
     [[ -d "$repo/.git" || -f "$repo/.git" ]] || die "not a git repository: $repo"
+    # normalise: a worktree path resolves to its main checkout
+    repo=$(dirname "$(git -C "$repo" rev-parse --path-format=absolute --git-common-dir)")
     local repo_name
     repo_name=$(basename "$repo")
 
     if [[ -z "$branch" ]]; then
+        interactive || die "add needs <repo> <branch> when no terminal is attached"
         # pick an existing branch or type a new name (fzf --print-query)
         local out="" status=0
         out=$(git -C "$repo" branch --all --format='%(refname:short)' \
@@ -228,6 +307,7 @@ cmd_add() {
         branch=$(tail -1 <<< "$out")
     fi
     [[ -n "$branch" ]] || exit 0
+    git check-ref-format --branch "$branch" >/dev/null 2>&1 || die "invalid branch name: $branch"
 
     local branch_dir session path
     branch_dir=$(echo "$branch" | tr '/.' '--')
@@ -236,30 +316,83 @@ cmd_add() {
 
     # already there? just go to it
     if [[ -d "$path" ]]; then
+        (( dry_run )) && { echo "wt: worktree exists: $path (would focus session $session)"; exit 0; }
         ensure_session "$session" "$path"
         exit 0
     fi
 
+    # Without a terminal there is nobody to answer an SSH prompt: fail fast
+    # instead of hanging (the caller reports the error).
+    local -a fetch_env=()
+    interactive || fetch_env=(GIT_SSH_COMMAND="${GIT_SSH_COMMAND:-ssh} -o BatchMode=yes")
+
     echo "wt: fetching origin ..."
-    git -C "$repo" fetch --prune origin || echo "wt: fetch failed, using local refs" >&2
+    env "${fetch_env[@]}" git -C "$repo" fetch --prune origin \
+        || echo "wt: fetch failed, using local refs" >&2
+
+    # how the branch comes into being
+    local mode
+    if git -C "$repo" show-ref --verify --quiet "refs/heads/$branch"; then
+        mode="local branch"
+    elif git -C "$repo" show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+        mode="track origin/$branch"
+    else
+        if [[ -z "$base" ]]; then
+            if interactive; then
+                base=$(pick_base_branch "$repo" "$branch") || exit 0
+                [[ -n "$base" ]] || exit 0
+            else
+                base=$(git -C "$repo" symbolic-ref --quiet --short refs/remotes/origin/HEAD || true)
+                base=${base:-origin/develop}
+            fi
+        fi
+        git -C "$repo" rev-parse --verify --quiet "$base^{commit}" >/dev/null || die "base ref not found: $base"
+        mode="new branch from $base"
+    fi
+
+    if (( dry_run )); then
+        echo "wt: dry run"
+        echo "  repo:     $repo"
+        echo "  branch:   $branch ($mode)"
+        echo "  worktree: $path"
+        echo "  session:  $session"
+        exit 0
+    fi
 
     mkdir -p "$WT_ROOT/$repo_name"
-    if git -C "$repo" show-ref --verify --quiet "refs/heads/$branch"; then
-        git -C "$repo" worktree add "$path" "$branch"
-    elif git -C "$repo" show-ref --verify --quiet "refs/remotes/origin/$branch"; then
-        git -C "$repo" worktree add --track -b "$branch" "$path" "origin/$branch"
-    else
-        local base
-        base=$(pick_base_branch "$repo" "$branch") || exit 0
-        [[ -n "$base" ]] || exit 0
-        git -C "$repo" worktree add --no-track -b "$branch" "$path" "$base"
-    fi
+    case "$mode" in
+        "local branch")  git -C "$repo" worktree add "$path" "$branch" ;;
+        track\ *)        git -C "$repo" worktree add --track -b "$branch" "$path" "origin/$branch" ;;
+        *)               git -C "$repo" worktree add --no-track -b "$branch" "$path" "$base" ;;
+    esac
+    # mark the worktree as bootstrapping before the space even exists, so a
+    # `wt agent` right after `wt add` waits (the bootstrap rewrites it)
+    date '+%Y-%m-%d %H:%M' > "$path/.wt-bootstrapping"
 
     # --- Everything else (env setup, git-ignored file copies, reflink dep copy,
     #     any .worktree-setup.sh build step) runs *inside* the new session, so
     #     `wt add` returns at once and nothing fails out of sight. -------------
     ensure_session "$session" "$path" \
         "wt _bootstrap $(printf '%q' "$repo") $(printf '%q' "$path")"
+}
+
+close_session() {
+    local session=$1
+    if [[ -n "${HERDR_ENV:-}" ]]; then
+        local ws_id
+        ws_id=$(herdr_ws_id "$session" || true)
+        [[ -n "$ws_id" ]] && herdr workspace close "$ws_id" 2>/dev/null || true
+    else
+        tmux kill-session -t "=$session" 2>/dev/null || true
+    fi
+}
+
+stop_stack() {
+    local path=$1
+    if [[ -f "$path/docker-compose.yml" || -f "$path/compose.yaml" || -f "$path/docker-compose.yaml" ]]; then
+        echo "wt: tearing down docker compose stack ..."
+        (cd "$path" && docker compose down --volumes --remove-orphans) || true
+    fi
 }
 
 cmd_rm() {
@@ -273,18 +406,8 @@ cmd_rm() {
     local path="$WT_ROOT/$repo_name/$branch_dir"
     [[ -d "$path" ]] || die "no such worktree: $path"
 
-    if [[ -n "${HERDR_ENV:-}" ]]; then
-        local ws_id
-        ws_id=$(herdr_ws_id "$(session_name "$repo_name" "$branch_dir")" || true)
-        [[ -n "$ws_id" ]] && herdr workspace close "$ws_id" 2>/dev/null || true
-    else
-        tmux kill-session -t "=$(session_name "$repo_name" "$branch_dir")" 2>/dev/null || true
-    fi
-
-    if [[ -f "$path/docker-compose.yml" || -f "$path/compose.yaml" || -f "$path/docker-compose.yaml" ]]; then
-        echo "wt: tearing down docker compose stack ..."
-        (cd "$path" && docker compose down --volumes --remove-orphans) || true
-    fi
+    close_session "$(session_name "$repo_name" "$branch_dir")"
+    stop_stack "$path"
 
     local main_repo
     main_repo=$(dirname "$(git -C "$path" rev-parse --path-format=absolute --git-common-dir)")
@@ -300,12 +423,340 @@ cmd_rm() {
     echo "wt: removed $selected (its branch was kept)"
 }
 
+cmd_main() {
+    local selected="" keep_session=0 dry_run=0
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --keep-session) keep_session=1; shift ;;
+            --dry-run) dry_run=1; shift ;;
+            --*) die "unknown option for main: $1" ;;
+            *) selected=$1; shift ;;
+        esac
+    done
+
+    if [[ -z "$selected" ]]; then
+        local here
+        here=$(git rev-parse --show-toplevel 2>/dev/null || true)
+        if [[ -n "$here" && "$here" == "$WT_ROOT/"* ]]; then
+            selected=${here#"$WT_ROOT/"}
+        else
+            interactive || die "main needs <repo/branch-dir> when not run inside a worktree"
+            selected=$(list_worktrees | fzf --prompt='worktree to main> ') || exit 0
+        fi
+    fi
+    [[ -n "$selected" ]] || exit 0
+
+    local repo_name=${selected%%/*} branch_dir=${selected#*/}
+    local path="$WT_ROOT/$repo_name/$branch_dir"
+    [[ -d "$path" ]] || die "no such worktree: $path"
+
+    local repo branch
+    repo=$(dirname "$(git -C "$path" rev-parse --path-format=absolute --git-common-dir)")
+    branch=$(git -C "$path" symbolic-ref --quiet --short HEAD) \
+        || die "worktree has no branch checked out (detached HEAD): $path"
+
+    if [[ -n "$(git -C "$path" status --porcelain)" ]]; then
+        git -C "$path" status --short
+        die "worktree has uncommitted or untracked changes, commit them first"
+    fi
+    if [[ -n "$(git -C "$repo" status --porcelain --untracked-files=no)" ]]; then
+        git -C "$repo" status --short --untracked-files=no
+        die "main checkout has uncommitted changes: $repo"
+    fi
+
+    local session
+    session=$(session_name "$repo_name" "$branch_dir")
+
+    if (( dry_run )); then
+        echo "wt: dry run"
+        echo "  branch:   $branch"
+        echo "  from:     $path (docker stack incl. volumes and worktree removed)"
+        echo "  to:       $repo (currently $(git -C "$repo" branch --show-current))"
+        echo "  session:  $session ($( (( keep_session )) && echo kept || echo closed))"
+        exit 0
+    fi
+
+    git -C "$path" switch --detach --quiet
+    if ! git -C "$repo" switch "$branch"; then
+        git -C "$path" switch --quiet "$branch"
+        die "could not switch the main checkout to $branch, worktree left as it was"
+    fi
+
+    stop_stack "$path"
+    git -C "$repo" worktree remove --force "$path"
+    rmdir "$WT_ROOT/$repo_name" 2>/dev/null || true
+    echo "wt: $branch is now checked out in $repo, worktree removed"
+
+    (( keep_session )) || close_session "$session"
+}
+
+cmd_back() {
+    local repo="" dry_run=0
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dry-run) dry_run=1; shift ;;
+            --*) die "unknown option for back: $1" ;;
+            *) repo=$1; shift ;;
+        esac
+    done
+    repo=${repo:-$PWD}
+    [[ -d "$repo" ]] || die "not a directory: $repo"
+    repo=$(dirname "$(git -C "$repo" rev-parse --path-format=absolute --git-common-dir)") \
+        || die "not a git repository"
+
+    local branch default
+    branch=$(git -C "$repo" symbolic-ref --quiet --short HEAD) \
+        || die "main checkout has no branch checked out (detached HEAD)"
+    default=$(git -C "$repo" symbolic-ref --quiet --short refs/remotes/origin/HEAD || true)
+    default=${default#origin/}
+    default=${default:-develop}
+    [[ "$branch" != "$default" ]] || die "main checkout is on $default, nothing to move"
+
+    local path
+    path="$WT_ROOT/$(basename "$repo")/$(echo "$branch" | tr '/.' '--')"
+    [[ ! -e "$path" ]] || die "a worktree for $branch already exists at $path, remove it first (wt rm)"
+
+    if [[ -n "$(git -C "$repo" status --porcelain --untracked-files=no)" ]]; then
+        git -C "$repo" status --short --untracked-files=no
+        die "main checkout has uncommitted changes, commit them first"
+    fi
+
+    if (( dry_run )); then
+        echo "wt: dry run"
+        echo "  branch:   $branch (moves into its own worktree via wt add)"
+        echo "  main:     $repo (switches to $default)"
+        exit 0
+    fi
+
+    git -C "$repo" switch "$default"
+    cmd_add "$repo" "$branch"
+}
+
+# --- wt agent: the Claude session that works a worktree ----------------------
+#
+# One worktree = one ticket = one Claude session directory
+# (~/.claude/projects/<encoded path>/). `claude --continue` in the worktree
+# resumes the newest session there; a fresh `claude` starts from state.md.
+# Inside herdr the session is a herdr *agent* (herdr agent start/prompt/list),
+# so /lead can see idle/working/blocked per ticket; under tmux it is the
+# session's pane and the prompt goes in via send-keys.
+
+# newest transcript under the worktree's Claude project dir, empty if none
+claude_transcript() {
+    local dir="$HOME/.claude/projects/$(printf '%s' "$1" | tr '/.' '--')"
+    ls -t "$dir"/*.jsonl 2>/dev/null | head -1 || true
+}
+
+cmd_agent() {
+    local selected="" how="auto"
+    local prompt=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --resume) how=resume; shift ;;
+            --fresh) how=fresh; shift ;;
+            --) shift; prompt=("$@"); break ;;
+            --*) die "unknown option for agent: $1" ;;
+            *) if [[ -z "$selected" ]]; then selected=$1; shift; else prompt=("$@"); break; fi ;;
+        esac
+    done
+    [[ -n "$selected" ]] || die "agent needs <repo/branch-dir>"
+
+    local repo_name=${selected%%/*} branch_dir=${selected#*/}
+    local path="$WT_ROOT/$repo_name/$branch_dir"
+    [[ -d "$path" ]] || die "no such worktree: $path (wt add first)"
+    local session
+    session=$(session_name "$repo_name" "$branch_dir")
+
+    if [[ "$how" == "auto" ]]; then
+        [[ -n "$(claude_transcript "$path")" ]] && how=resume || how=fresh
+    fi
+    local -a claude_cmd=(claude)
+    [[ "$how" == "resume" ]] && claude_cmd+=(--continue)
+    local prompt_text="${prompt[*]:-}"
+
+    # the bootstrap of a fresh `wt add` must be through before Claude starts:
+    # it runs in the space's root pane and writes the marker at the end.
+    # Worktrees from before the markers existed (none of .wt-ready,
+    # .wt-failed, .wt-bootstrapping) count as ready when their deps and env
+    # are in place; a running bootstrap is always waited for.
+    if [[ ! -e "$path/.wt-ready" && ! -e "$path/.wt-failed" ]]; then
+        if [[ ! -e "$path/.wt-bootstrapping" && -d "$path/vendor" && -e "$path/.env" ]]; then
+            echo "wt: no bootstrap marker, but vendor/ and .env exist — treating $path as ready" >&2
+            date '+%Y-%m-%d %H:%M (assumed)' > "$path/.wt-ready"
+        else
+            echo "wt: waiting for the worktree bootstrap (.wt-ready) ..." >&2
+            local waited=0
+            while [[ ! -e "$path/.wt-ready" && ! -e "$path/.wt-failed" && $waited -lt 600 ]]; do
+                sleep 5; waited=$(( waited + 5 ))
+            done
+        fi
+    fi
+    [[ -e "$path/.wt-failed" ]] && die "worktree bootstrap failed ($path/.wt-failed), fix it in the space first"
+    [[ -e "$path/.wt-ready" ]] || die "worktree bootstrap not finished after 10 minutes"
+
+    run_space_agent "$session" "$path" "$(herdr_agent_name "$branch_dir")" "$how" "$prompt_text"
+}
+
+# branch dir -> herdr agent name (lowercase [a-z0-9_-], starts with a letter,
+# max 32 chars, no trailing '-'). The ticket key goes to the front, so a
+# feat-/fix- prefix is dropped: feat-RTM-3836-preserve-tenant-data-in-parallel-syncs
+# -> rtm-3836-preserve-tenant-data-in. Deterministic, so the same worktree
+# always yields the same name.
+herdr_agent_name() {
+    local n rest
+    n=$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9_-' '-' | tr -s '-')
+    rest=$n
+    while [[ -n "$rest" ]]; do
+        if [[ "$rest" =~ ^[a-z][a-z0-9]*-[0-9]+([-_]|$) ]]; then n=$rest; break; fi
+        [[ "$rest" == *[-_]* ]] || break
+        rest=${rest#*[-_]}
+    done
+    [[ "$n" =~ ^[a-z] ]] || n="wt-$n"
+    n=${n:0:32}
+    while [[ "$n" == *[-_] ]]; do n=${n%?}; done
+    printf '%s\n' "${n:-agent}"
+}
+
+# wt lead [--fresh|--resume] [--] [prompt...]
+# The coordinator session (/lead): one herdr space "lead" with the work-log
+# store as cwd (daily notes and state files live there, no project rules get
+# loaded). Default: resume today's session, fresh on a new day.
+cmd_lead() {
+    local how="auto"
+    local prompt=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --resume) how=resume; shift ;;
+            --fresh) how=fresh; shift ;;
+            --) shift; prompt=("$@"); break ;;
+            --*) die "unknown option for lead: $1" ;;
+            *) prompt=("$@"); break ;;
+        esac
+    done
+    local path="${WORK_LOG:-$HOME/code/knowledge/work-log}"
+    [[ -d "$path" ]] || die "work-log store not found: $path"
+    if [[ "$how" == "auto" ]]; then
+        local t
+        t=$(claude_transcript "$path")
+        if [[ -n "$t" && "$(date -r "$t" +%F)" == "$(date +%F)" ]]; then how=resume; else how=fresh; fi
+    fi
+    export WT_NO_FOCUS=   # the lead space is where Tobias wants to be
+    # the lead talks to Tobias and judges; it runs on Fable (override with
+    # WT_LEAD_MODEL=opus). Workers and specialists stay on Opus.
+    export WT_CLAUDE_MODEL="${WT_LEAD_MODEL:-fable}"
+    run_space_agent "lead" "$path" "lead" "$how" "${prompt[*]:-/lead}"
+}
+
+# true when herdr pane $1 sits at its interactive shell prompt (the shell
+# itself is the foreground process group, nothing runs in it)
+pane_at_prompt() {
+    herdr pane process-info --pane "$1" 2>/dev/null \
+        | jq -e '.result.process_info | .foreground_process_group_id == .shell_pid' >/dev/null
+}
+
+# start claude in the herdr space / tmux session $1 at path $2 (herdr agent
+# name $3), or address the one already running there; $4 = fresh|resume,
+# $5 = prompt text (may be empty). Shared by `wt agent` and `wt lead`.
+run_space_agent() {
+    local session=$1 path=$2 agent_name=$3 how=$4 prompt_text=$5
+    local -a claude_cmd=(claude)
+    [[ "$how" == "resume" ]] && claude_cmd+=(--continue)
+    [[ -n "${WT_CLAUDE_MODEL:-}" ]] && claude_cmd+=(--model "$WT_CLAUDE_MODEL")
+
+    if [[ -n "${HERDR_ENV:-}" ]]; then
+        local ws_id
+        ws_id=$(herdr_ws_id "$session")
+        if [[ -z "$ws_id" ]]; then
+            local focus_flag=--no-focus
+            [[ -n "${WT_NO_FOCUS+x}" && -z "${WT_NO_FOCUS}" ]] && focus_flag=--focus   # wt lead: focus the new space
+            ws_id=$(herdr workspace create --cwd "$path" --label "$session" "$focus_flag" \
+                | jq -r '.result.workspace_id // .result.workspace.workspace_id // empty')
+            [[ -n "$ws_id" ]] || ws_id=$(herdr_ws_id "$session")
+            [[ -n "$ws_id" ]] || die "could not create herdr workspace $session"
+        fi
+
+        agent_status() { herdr agent get "$1" | jq -r '.result.agent.agent_status // .result.agent_status // "unknown"'; }
+
+        # a claude agent already running in this space? The one started under
+        # $agent_name first, else any claude there (started by hand, unnamed)
+        local agent_pane started=0 status
+        agent_pane=$(herdr agent list \
+            | jq -r --arg ws "$ws_id" --arg n "$agent_name" \
+                '[.result.agents[] | select(.workspace_id==$ws and .agent=="claude")]
+                 | (map(select(.name==$n)) + .) | first(.[] | .pane_id) // empty')
+        if [[ -n "$agent_pane" ]]; then
+            status=$(agent_status "$agent_pane")
+            case "$status" in
+                idle|done) ;;
+                *) die "worker is $status in $session ($agent_pane) — a prompt now would land in its dialog; answer it in the space or wait" ;;
+            esac
+            if [[ "$how" == "fresh" ]]; then
+                # same pane, empty context: /clear is the in-session "fresh"
+                herdr agent prompt "$agent_pane" "/clear" >/dev/null
+                herdr agent wait "$agent_pane" --until idle --timeout 30000 >/dev/null || true
+            fi
+        else
+            # Claude runs in the space's root pane, no split: in a worker
+            # space the bootstrap ran there before (cmd_agent waited for
+            # .wt-ready), so its output stays in the scrollback above Claude.
+            # `herdr agent start` needs the pane at its shell prompt; the
+            # bootstrap may still be returning, so wait for that briefly.
+            # Never create a pane here — a failed start must not leave one
+            # behind, and a re-run must find this agent, not split again.
+            local root
+            root=$(herdr pane list --workspace "$ws_id" | jq -r 'first(.result.panes[] | .pane_id) // empty')
+            [[ -n "$root" ]] || die "no pane in workspace $session"
+            local waited=0
+            until pane_at_prompt "$root"; do
+                (( waited < 30 )) || die "root pane $root in $session is busy (not at its shell prompt) — free it, then run wt agent again"
+                sleep 1; waited=$(( waited + 1 ))
+            done
+            agent_pane=$root
+            herdr agent start "$agent_name" --kind claude --pane "$agent_pane" -- "${claude_cmd[@]:1}" >/dev/null \
+                || die "herdr agent start failed in $agent_pane ($session)"
+            herdr agent wait "$agent_pane" --until idle --timeout 90000 >/dev/null \
+                || die "claude did not become idle in $agent_pane (trust dialog? open the space)"
+            started=1
+        fi
+        if [[ -n "$prompt_text" ]]; then
+            herdr agent prompt "$agent_pane" "$prompt_text" >/dev/null
+        fi
+        status=$(agent_status "$agent_pane")
+        jq -n --arg s "$session" --arg p "$agent_pane" --argjson st "$started" --arg how "$how" --arg status "$status" \
+            '{session:$s, pane:$p, started:($st==1), mode:$how, status:$status}'
+        return
+    fi
+
+    # tmux fallback: no agent-state API, so only a freshly started session
+    # gets the prompt (a running one might be sitting in a dialog)
+    if ! tmux has-session -t "=$session" 2>/dev/null; then
+        tmux new-session -d -s "$session" -c "$path"
+    fi
+    local running=0
+    tmux list-panes -t "=$session" -F '#{pane_current_command}' | grep -qx claude && running=1
+    if (( running )); then
+        die "a claude session already runs in tmux session $session — attach and type the prompt there (tmux cannot tell whether it is waiting in a dialog)"
+    fi
+    tmux send-keys -t "=$session" "${claude_cmd[*]}" C-m
+    sleep 5
+    if [[ -n "$prompt_text" ]]; then
+        tmux send-keys -t "=$session" -l "$prompt_text"
+        tmux send-keys -t "=$session" C-m
+    fi
+    jq -n --arg s "$session" --arg how "$how" \
+        '{session:$s, pane:"tmux", started:true, mode:$how, status:"unknown"}'
+}
+
 case "${1:-}" in
     add) shift; cmd_add "$@" ;;
     _bootstrap) shift; cmd_bootstrap "$@" ;;
     rm) shift; cmd_rm "$@" ;;
+    main) shift; cmd_main "$@" ;;
+    back) shift; cmd_back "$@" ;;
+    agent) shift; cmd_agent "$@" ;;
+    lead) shift; cmd_lead "$@" ;;
     ls) cmd_ls ;;
     "") cmd_switch ;;
-    -h|--help) sed -n '3,29p' "$0" | sed 's/^# \{0,1\}//' ;;
-    *) die "unknown command: $1 (use add, rm, ls or no argument)" ;;
+    -h|--help) sed -n '3,52p' "$0" | sed 's/^# \{0,1\}//' ;;
+    *) die "unknown command: $1 (use add, rm, main, back, agent, lead, ls or no argument)" ;;
 esac

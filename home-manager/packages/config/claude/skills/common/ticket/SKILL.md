@@ -1,5 +1,7 @@
 ---
 name: ticket
+model: opus
+effort: low
 description: Pull a Jira ticket's full context (description, acceptance criteria, Definition of Done) into the conversation, with a paste fallback when the connector is down. Use when the user references a ticket ID and you need its requirements (e.g. "what does RTM-1234 ask for", "load ticket RTM-1234").
 ---
 
@@ -9,7 +11,7 @@ Get the requirements for a ticket reliably, even when the Jira connector is flak
 
 ## Fetch
 
-Use the Jira MCP to retrieve, for the given ticket ID:
+Use the Jira MCP (`mcp__devtools-mcp__read_jira_issue`) to retrieve, for the given ticket ID:
 
 - Title and description
 - Acceptance criteria / **Definition of Done**

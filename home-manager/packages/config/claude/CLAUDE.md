@@ -11,9 +11,13 @@ project's own CLAUDE.md instead.
 # Global instructions
 
 ## Workflow
-- Commit or push only when I explicitly ask. (Exception: the two brain knowledge
+- Commit or push only when I explicitly ask. (Exceptions: the two brain knowledge
   stores below are auto-committed — never auto-pushed. `work-log` is not: commit
-  it only when I ask.)
+  it only when I ask. In a `/work` ticket worktree whose `state.md` says
+  `commits: auto` — the default the pipeline writes when it creates the state
+  file; I opt out per ticket with `/work <T> commits manual` or `manual` in a
+  gate answer — that line is my explicit ask: the orchestrator commits each
+  verified plan step. Pushing stays behind a prompt.)
 
 ## Knowledge vault
 - Everything lives under the `~/code/knowledge/` Obsidian vault, as three separate
@@ -29,7 +33,8 @@ project's own CLAUDE.md instead.
   convention worth keeping, **proactively offer to file it** (don't auto-write).
   Use the `/brain` skill. Route work/RED knowledge to work-brain, personal to
   brain; if ambiguous, ask. Never store secrets or customer data. `brain/notes/`
-  is a freeform human-only zone — leave it alone unless I ask.
+  is a freeform human-only zone — leave it alone unless I ask. In a subagent
+  there is nobody to offer to: name the candidate in your result block instead.
 
 ## Conventions
 <!-- Add cross-project preferences here as they come up. -->

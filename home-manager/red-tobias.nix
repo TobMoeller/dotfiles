@@ -30,6 +30,7 @@ in
 
   # Shared skills plus red-specific ones; red overrides common on a name clash.
   claudeSkillGroups = [ "common" "red" ];
+  claudeAgentGroups = [ "common" "red" ];
 
   # Read-only devtools-mcp permissions (Jira/Gitea/Confluence/TeamCity) merged
   # into ~/.claude/settings.json on this host only. Modifying tools still prompt.
@@ -45,6 +46,7 @@ in
     # ghostscript
     openfortivpn
     ffmpeg
+    tuicr
   ];
 
   home.file = {
