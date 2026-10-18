@@ -6,6 +6,8 @@
       self.modules.homeManager.dotfiles
       self.modules.homeManager.herdr
       self.modules.homeManager.npm
+      self.modules.homeManager.zsh
+      self.modules.homeManager.git
     ];
 
     home.sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];

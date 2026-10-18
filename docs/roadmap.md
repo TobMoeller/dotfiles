@@ -11,9 +11,12 @@
 - [x] Hibernate manuell mit erhaltener Sitzung, NVIDIA, Audio und Netzwerk getestet.
 - [ ] Suspend-then-Hibernate testen und als Desktop-Schlafaktion einrichten (zunächst nach einer Stunde im Akkubetrieb).
 - [x] Zwischencommit einschließlich getesteter Suspend-/Hibernate-Pfade und aktivierter kombinierter Schlafaktion erstellen; Übergangstest bleibt offen.
-- [ ] SSH-Schlüssel einrichten, öffentlichen Schlüssel bei GitHub hinterlegen und Verbindung prüfen. Danach `origin` auf `git@github.com:TobMoeller/dotfiles.git` umstellen.
-- [ ] Gemeinsame Git-Konfiguration und getrennte private/berufliche Identitäten einrichten.
-- [ ] Shell, Terminal und Editor auswählen und konfigurieren.
+- [x] SSH-Schlüssel vom Benutzer bei GitHub hinterlegt; `origin` auf `git@github.com:TobMoeller/dotfiles.git` umgestellt.
+- [ ] SSH-Verbindung prüfen und ersten Branch-Push durchführen (Benutzer; Schlüssel mit Passphrase).
+- [x] Gemeinsame Git-Konfiguration und private ThinkPad-Identität deklarieren; Arbeitsidentität folgt beim Arbeitsgerät.
+- [x] zsh mit nativer Konfiguration deklarieren und bauen.
+- [ ] zsh/Git aktivieren und interaktiv im Alltag prüfen.
+- [ ] Terminal und Editor auswählen und konfigurieren.
 - [ ] herdr-Tastenkürzel, vim-nav und t/wt-Integration aus playground gezielt übernehmen.
 - [ ] Niri und Noctalia neben Plasma einrichten und Alltagstauglichkeit prüfen.
 - [ ] Gaming mit Steam/Proton und GPU-Offload prüfen.

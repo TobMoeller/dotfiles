@@ -109,3 +109,12 @@ Für denselben Zwischencommit ergänzt: native Plasma-Konfiguration mit `LidActi
 - Gebaut: vollständiges System erfolgreich unter `/nix/store/g5q510sxsz7zrll7n5bd6aq0kg9kqvxk-nixos-system-nixos-26.05.20261015.26f4107`.
 - Aktiviert: `/run/current-system` entspricht dem gebauten System; `powerdevilrc` zeigt direkt ins Checkout und `/etc/systemd/sleep.conf` enthält die konfigurierte Stunde sowie `HibernateOnACPower=false`. Der Benutzer bestätigt den Neustart von PowerDevil.
 - Kombinierter Übergang und Deckelaktion noch nicht getestet. Kurzer Test mit temporärer Zwei-Minuten-Verzögerung in `docs/hibernate.md` dokumentiert; er blockiert den Zwischencommit nicht.
+
+## zsh und Git
+
+- Ausgewertet: Flake-Prüfung und NixOS-Toplevel erfolgreich. Die Login-Shell für `tobias` ist als zsh deklariert; gemeinsame Git-Einstellungen und private Host-Identität sind enthalten.
+- Gebaut: vollständiges System `/nix/store/8dgmrn42z89dz5y96pqsffsipwa1ln7j-nixos-system-nixos-26.05.20261015.26f4107`.
+- Geprüft: Syntax der nativen und erzeugten zsh-Konfiguration; interaktiver Start mit erzeugter Konfiguration und temporärem ZDOTDIR/History-Pfad. Completion, Autosuggestions, Syntaxhervorhebung, Alias und Git-Branch-Erkennung erfolgreich. Der noch nicht aktivierte native Symlink wurde für diesen Test durch den direkten Checkout-Pfad ersetzt.
+- Git: erzeugte Konfiguration auf Name, E-Mail, Aliase, `init.defaultBranch` und `push.autoSetupRemote` geprüft.
+- Aktiviert: noch nicht; kein Systemwechsel durch den Agenten.
+- `origin` auf SSH umgestellt. Benutzer bestätigt hinterlegten öffentlichen Schlüssel und übernimmt wegen der Passphrase selbst Verbindungstest und Push; beides hier noch nicht bestätigt.

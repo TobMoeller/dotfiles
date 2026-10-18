@@ -4,15 +4,18 @@ let
   hostName = "nixos";
 in
 {
-  flake.modules.nixos.thinkpad = {
+  flake.modules.nixos.thinkpad = { pkgs, ... }: {
     networking.hostName = hostName;
     imports = [
       self.modules.nixos.base
       self.modules.nixos.nvidia-prime
       self.modules.nixos.hibernate
+      self.modules.nixos.zsh
       ../../hosts/thinkpad/configuration.nix
       inputs.home-manager.nixosModules.home-manager
     ];
+
+    users.users.tobias.shell = pkgs.zsh;
 
     # Measured PCI addresses on this ThinkPad; PRIME uses decimal notation.
     hardware.nvidia.prime = {
@@ -45,6 +48,11 @@ in
           username = "tobias";
           homeDirectory = "/home/tobias";
           stateVersion = "26.05";
+        };
+        # Private identity belongs to this host, not the shared Git feature.
+        programs.git.settings.user = {
+          name = "TobMoeller";
+          email = "tobiasmoellerw@t-online.de";
         };
         home.file.".local/bin/dotfiles-rebuild".source =
           config.lib.file.mkOutOfStoreSymlink "${config.dotfiles.repositoryPath}/scripts/rebuild";
