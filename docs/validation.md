@@ -138,3 +138,14 @@ Auf Benutzerwunsch ersetzt ein separates Starship-Feature die kurzfristig übern
 - Gebaut: vollständiges System `/nix/store/h29f8g8bzai0ji1zihkzcp4gwf7jkr0i-nixos-system-nixos-26.05.20261015.26f4107`.
 - Geprüft: Starship 1.25.1 rendert die native Konfiguration ohne Warnungen; Git-Branch, Fehlercode, 17 ms und 0 ms erfolgreich angezeigt. Native zsh-Konfiguration syntaktisch gültig.
 - Aktiviert: noch nicht; kein Push durch den Agenten.
+
+## Starship aktiviert; erste zusätzliche Desktop-Sitzung gebaut
+
+Der Benutzer bestätigt den Starship-Prompt. `/run/current-system` entspricht dem oben gebauten Starship-System. Die Startdateien liegen unter `~/.config/zsh`; `~/.zshenv` leitet dorthin weiter, `ZDOTDIR` wird in der dortigen `.zshenv` gesetzt.
+
+Für den nächsten separaten Schritt eingerichtet: Niri 26.04 aus System-Nixpkgs, Noctalia 5.3.0 aus dem vorhandenen Tools-Input, native Konfigurationsdateien, Niri-Session in SDDM, Xwayland-Satellite und fuzzel. Noctalia startet nur über Niri. UPower, Bluetooth und Power-Profiles-Daemon sind deklariert; Netzwerk und Audio verwenden die bestehende Konfiguration.
+
+- Ausgewertet: Flake-Prüfung und NixOS-Toplevel erfolgreich.
+- Gebaut: vollständiges System `/nix/store/kycgdxwiw213798kf7777mqvv0zzry3p-nixos-system-nixos-26.05.20261015.26f4107`.
+- Geprüft: `niri validate --config modules/features/niri/config.kdl` und `noctalia config validate modules/features/noctalia/config.toml` erfolgreich. Die verwendeten IPC-Kommandos sind in der mitgelieferten CLI dokumentiert; Niri-Sitzungsdatei vorhanden.
+- Aktiviert: neuer Desktop noch nicht; kein grafischer Sitzungsstart durch den Agenten. Login, Skalierung, Hardware, Portale und Lockscreen bleiben am Gerät zu testen.

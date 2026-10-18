@@ -1,0 +1,24 @@
+# Native Noctalia v5 configuration; changes are hot-reloaded.
+# GUI changes override these values in ~/.local/state/noctalia/settings.toml.
+[theme]
+mode = "dark"
+
+[bar.default]
+position = "top"
+
+[shell]
+polkit_agent = true
+
+[lockscreen]
+enabled = true
+lock_before_suspend = true
+
+[idle.behavior.lock]
+enabled = true
+timeout = 600
+action = "lock"
+
+[idle.behavior.screen-off]
+enabled = true
+timeout = 660
+action = "screen_off"

@@ -30,6 +30,8 @@
         ./modules/features/zsh/default.nix
         ./modules/features/starship/default.nix
         ./modules/features/git.nix
+        ./modules/features/niri/default.nix
+        ./modules/features/noctalia/default.nix
         ./modules/users/tobias.nix
         ./modules/hosts/thinkpad.nix
       ];

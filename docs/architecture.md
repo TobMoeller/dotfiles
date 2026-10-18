@@ -47,6 +47,12 @@ Module können bestehende Optionen setzen. `lib.mkDefault` kennzeichnet bewusst 
 
 ## Native Konfiguration und direkte Symlinks
 
+Niri und Noctalia sind getrennte Features, die nur der ThinkPad-Host wählt.
+NixOS richtet die Sitzung und Dienste ein, Home Manager installiert die
+nativen KDL-/TOML-Dateien. Noctalia startet aus der Niri-Konfiguration;
+Plasma verwendet weiterhin seine eigene Shell. Noctalia v5 kommt wie herdr
+aus dem fixierten Tools-Input, Niri aus dem System-Paketsatz.
+
 Das separate Home-Manager-Feature `starship` stellt den Prompt und seine
 zsh-Integration bereit. `modules/features/starship/starship.toml` wird direkt
 als `~/.config/starship.toml` verknüpft. Tastenkürzel bleiben im zsh-Feature;

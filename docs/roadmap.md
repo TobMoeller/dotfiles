@@ -17,12 +17,14 @@
 - [x] Gemeinsame Git-Konfiguration und private ThinkPad-Identität deklarieren; Arbeitsidentität folgt beim Arbeitsgerät.
 - [x] zsh mit nativer Konfiguration deklarieren und bauen.
 - [x] Starship mit nativer TOML und stets sichtbarer Befehlslaufzeit deklarieren und bauen.
-- [ ] Starship aktivieren und den Prompt im Alltag prüfen.
+- [x] Starship aktiviert; erster visueller Benutzertest erfolgreich.
 - [ ] Starship später optimieren: Ein-/Zweizeiler, Farben, Git-Details, Projektmodule, Vi-Modus-Anzeige und Verhalten in herdr. Befehlslaufzeit bleibt auf Wunsch immer sichtbar. Native TOML-Datei: `modules/features/starship/starship.toml`.
-- [ ] zsh/Git aktivieren und interaktiv im Alltag prüfen.
+- [x] zsh/Git aktiviert; Grundbedienung geprüft. Weitere Optimierungen folgen einzeln.
 - [ ] Terminal und Editor auswählen und konfigurieren.
 - [ ] herdr-Tastenkürzel, vim-nav und t/wt-Integration aus playground gezielt übernehmen.
-- [ ] Niri und Noctalia neben Plasma einrichten und Alltagstauglichkeit prüfen.
+- [ ] Niri/Noctalia als zusätzliche Sitzung aktivieren und ersten Login prüfen (Terminal, Launcher, Portale, Audio, WLAN, Helligkeit, Sperre und Deckelaktion).
+- [x] Niri/Noctalia-Grundkonfiguration deklarieren, mit nativen Validatoren prüfen und System bauen.
+- [ ] Niri/Noctalia im Alltag optimieren: Skalierung/Monitore, Shortcuts, Theme, Clipboard und Screenshots.
 - [ ] Gaming mit Steam/Proton und GPU-Offload prüfen.
 - [ ] Erste lokale AI-Laufzeit mit CUDA aufsetzen und passende Modelle auswählen.
 - [ ] MacBook und red nach Bestandsaufnahme einzeln anbinden.

@@ -11,6 +11,8 @@ in
       self.modules.nixos.nvidia-prime
       self.modules.nixos.hibernate
       self.modules.nixos.zsh
+      self.modules.nixos.niri
+      self.modules.nixos.noctalia
       ../../hosts/thinkpad/configuration.nix
       inputs.home-manager.nixosModules.home-manager
     ];
@@ -43,6 +45,8 @@ in
         imports = [
           self.modules.homeManager.tobias
           self.modules.homeManager.plasma-sleep
+          self.modules.homeManager.niri
+          self.modules.homeManager.noctalia
         ];
         home = {
           username = "tobias";

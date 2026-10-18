@@ -20,6 +20,7 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 - [ThinkPad: Grafik und Energiesparen](docs/thinkpad-hardware.md)
 - [Swap und Hibernate testen](docs/hibernate.md)
 - [zsh und Git](docs/shell-and-git.md)
+- [Erste Niri-/Noctalia-Sitzung](docs/niri.md)
 
 ## Aktueller Umfang
 
@@ -32,4 +33,4 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 - NVIDIA-Treiber und PRIME-Offload nach Neustart und Suspend getestet; auf diesem Gerät coarse-grained Runtime-PM als Workaround für GSP-Abstürze.
 - 80-GiB-Swapdatei und Hibernate über UEFI/systemd aktiviert; Wiederaufnahme samt NVIDIA, Audio, Netzwerk und erhaltener Sitzung erfolgreich getestet.
 
-Suspend-then-Hibernate beim Zuklappen ist für Plasma aktiviert; der kombinierte Übergang ist noch nicht getestet. Niri/Noctalia, die vollständige persönliche Werkzeugauswahl sowie andere Hosts folgen. Konfigurationsänderungen werden durch Bearbeiten des Repositorys nicht automatisch aktiviert.
+Suspend-then-Hibernate beim Zuklappen ist für Plasma aktiviert; der kombinierte Übergang ist noch nicht getestet. Niri/Noctalia ist als zusätzliche Sitzung vorbereitet; der erste Login steht aus. Die vollständige persönliche Werkzeugauswahl sowie andere Hosts folgen. Konfigurationsänderungen werden durch Bearbeiten des Repositorys nicht automatisch aktiviert.

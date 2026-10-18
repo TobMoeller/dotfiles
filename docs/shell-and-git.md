@@ -10,6 +10,9 @@ ein Neustart ist nicht erforderlich. Terminals sollten die Login-Shell verwenden
 
 Home Manager erzeugt die Startdateien unter `~/.config/zsh` und lädt die
 Sitzungsvariablen einschließlich `DOTFILES`, npm-Prefix und PATH.
+`~/.zshenv` lädt die dortige `.zshenv`, die `ZDOTDIR` auf `~/.config/zsh` setzt.
+zsh liest deshalb `~/.config/zsh/.zshrc`; ohne `ZDOTDIR` ist `~/.zshrc` der
+Standard. Eine fehlende `.zshrc` direkt im Home-Verzeichnis ist hier gewollt.
 `~/.config/zsh/config.zsh` ist ein direkter Symlink auf
 `modules/features/zsh/config.zsh`. Änderungen daran benötigen nur `exec zsh`.
 Optionale lokale Ergänzungen können in `~/.config/zsh/local.zsh` stehen.
