@@ -32,6 +32,11 @@ layout {
 prefer-no-csd
 hotkey-overlay { skip-at-startup; }
 
+// Keep maximizing/resizing immediate; other animations remain enabled.
+animations {
+    window-resize { off; }
+}
+
 // Noctalia runs only inside this compositor session, not in Plasma.
 spawn-at-startup "noctalia"
 
@@ -42,6 +47,12 @@ window-rule {
 window-rule {
     match app-id="dev.noctalia.Noctalia"
     open-floating true
+}
+window-rule {
+    match app-id="^firefox$"
+    // Start tiled even if Firefox restores a maximized/fullscreen window.
+    open-fullscreen false
+    open-maximized-to-edges false
 }
 
 binds {
@@ -79,7 +90,8 @@ binds {
     Mod+4 { focus-workspace 4; }
     Mod+5 { focus-workspace 5; }
     Mod+Tab { toggle-overview; }
-    Mod+F { fullscreen-window; }
+    Mod+F hotkey-overlay-title="Maximize, keep bar visible" { maximize-window-to-edges; }
+    Mod+Shift+F hotkey-overlay-title="Fullscreen" { fullscreen-window; }
     Mod+M { maximize-column; }
     Mod+C { center-column; }
     Mod+R { switch-preset-column-width; }

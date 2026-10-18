@@ -37,7 +37,9 @@ Anwendungen; eine Codex-Sitzung im Terminal gegebenenfalls später fortsetzen.
 | Mod+I/U | Workspace darüber/darunter |
 | Mod+1 bis Mod+5 | Workspace auswählen |
 | Mod+Q | Fenster schließen |
-| Mod+F / Mod+M | Vollbild / Spalte maximieren |
+| Mod+F | Fenster maximieren, Leiste bleibt sichtbar |
+| Mod+Shift+F | Echtes Vollbild |
+| Mod+M | Spalte auf volle Breite bringen |
 | Mod+Shift+Space | Floating umschalten |
 | Mod+Alt+L | Sperren |
 | Mod+Shift+E | Sitzungsmenü |
@@ -47,6 +49,17 @@ Anwendungen; eine Codex-Sitzung im Terminal gegebenenfalls später fortsetzen.
 Lautstärke- und Helligkeitstasten sind mit Noctalia verbunden. Nach zehn Minuten
 Inaktivität wird gesperrt, nach elf Minuten der Bildschirm abgeschaltet.
 Ein zusätzlicher automatischer Idle-Suspend ist zunächst nicht konfiguriert.
+
+Größenänderungen sind ohne Animation; andere Animationen bleiben aktiv.
+Firefox-Fenster starten ausdrücklich als normale gekachelte Fenster, auch
+wenn Firefox zuvor maximiert oder im Vollbild beendet wurde. Diese Startregel
+wirkt auf neue Fenster; spätere manuelle Maximierung/Vollbild bleiben möglich.
+
+Die bisherigen Gesten von Niri 26.04 sind fest vorgegeben: drei Finger
+horizontal bewegen die Ansicht, vertikal wechseln sie Workspaces; vier Finger
+vertikal öffnen/schließen die Übersicht. Eine freie Umbelegung auf Browser-Zurück
+oder horizontales Vier-Finger-Workspace-Wechseln ist nicht nativ konfigurierbar.
+Ein externer Listener allein verhindert nicht die parallele Niri-Geste.
 
 Beim Zuklappen greift außerhalb Plasma die vorhandene logind-Aktion
 Suspend-then-Hibernate. Noctalia soll davor die Sitzung sperren. Der Lockscreen

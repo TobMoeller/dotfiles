@@ -25,6 +25,8 @@
 - [ ] Niri/Noctalia als zusätzliche Sitzung aktivieren und ersten Login prüfen (Terminal, Launcher, Portale, Audio, WLAN, Helligkeit, Sperre und Deckelaktion).
 - [x] Niri/Noctalia-Grundkonfiguration deklarieren, mit nativen Validatoren prüfen und System bauen.
 - [ ] Niri/Noctalia im Alltag optimieren: Skalierung/Monitore, Shortcuts, Theme, Clipboard und Screenshots.
+- [ ] Gewünschte Touchpad-Gesten prüfen: drei Finger links/rechts für Zurück/Vor, vier Finger horizontal für Workspaces, vertikal Übersicht. Niri 26.04 hat feste Gesten; eine Lösung muss die eingebauten Aktionen ersetzen, statt zusätzlich auszulösen.
+- [ ] Workspace-Tasten entscheiden: aktuell Super+I/U; Super+J/K fokussieren Fenster innerhalb einer Spalte. Noch keine Umbelegung der Navigation vorgenommen.
 - [ ] Gaming mit Steam/Proton und GPU-Offload prüfen.
 - [ ] Erste lokale AI-Laufzeit mit CUDA aufsetzen und passende Modelle auswählen.
 - [ ] MacBook und red nach Bestandsaufnahme einzeln anbinden.

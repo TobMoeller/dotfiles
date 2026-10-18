@@ -149,3 +149,11 @@ Für den nächsten separaten Schritt eingerichtet: Niri 26.04 aus System-Nixpkgs
 - Gebaut: vollständiges System `/nix/store/kycgdxwiw213798kf7777mqvv0zzry3p-nixos-system-nixos-26.05.20261015.26f4107`.
 - Geprüft: `niri validate --config modules/features/niri/config.kdl` und `noctalia config validate modules/features/noctalia/config.toml` erfolgreich. Die verwendeten IPC-Kommandos sind in der mitgelieferten CLI dokumentiert; Niri-Sitzungsdatei vorhanden.
 - Aktiviert: neuer Desktop noch nicht; kein grafischer Sitzungsstart durch den Agenten. Login, Skalierung, Hardware, Portale und Lockscreen bleiben am Gerät zu testen.
+
+## Erster Niri-Login und Fensterverhalten
+
+Der Benutzer ist in Niri/Noctalia angemeldet. Auf Wunsch maximiert Super+F jetzt das Fenster mit sichtbarer Leiste, Super+Shift+F schaltet echtes Vollbild. Größenänderungsanimationen sind deaktiviert. Neue Firefox-Fenster starten gekachelt ohne wiederhergestellte Maximierung/Vollbild; die Ursache des vorherigen Startzustands wurde nicht abschließend nachgewiesen. Bei der Bestandsaufnahme belegte Firefox ungefähr die Bildschirmfläche abzüglich der Leiste.
+
+- Native Niri-Validierung, Flake-Prüfung und NixOS-Toplevel-Auswertung erfolgreich; System-Derivation unverändert (`ikj327wxagxkqhpk6iskwdpv522lsnb4`). Kein neuer Systembuild oder Systemwechsel erforderlich.
+- Das laufende Niri hat die native Datei laut Journal am 2026-10-19 um 00:37:36 neu geladen. Visueller Benutzertest der Änderungen steht aus.
+- Gesten in Niri 26.04 sind im Eingabecode fest auf drei/vier Finger verteilt. Wünsche und Konflikt mit externen Listenern sind in der Roadmap dokumentiert; keine zusätzliche Gestensoftware oder Umbelegung von Super+J/K eingerichtet.
