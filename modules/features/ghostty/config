@@ -1,0 +1,12 @@
+# Native Ghostty config. Reload with Ctrl+Shift+Comma or open a new window.
+theme = Catppuccin Mocha
+font-family = MesloLGS NF
+font-size = 14
+window-padding-x = 8
+window-padding-y = 8
+
+# Matches the legacy setup; ignored on Linux, useful on a future Mac host.
+macos-option-as-alt = true
+
+# Let herdr and other terminal applications copy via OSC 52.
+clipboard-write = allow

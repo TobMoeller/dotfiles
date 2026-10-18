@@ -32,6 +32,7 @@
         ./modules/features/git.nix
         ./modules/features/niri/default.nix
         ./modules/features/noctalia/default.nix
+        ./modules/features/ghostty/default.nix
         ./modules/users/tobias.nix
         ./modules/hosts/thinkpad.nix
       ];

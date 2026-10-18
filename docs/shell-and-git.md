@@ -55,6 +55,19 @@ git config --show-origin --get user.email
 git config --global --get user.name
 ```
 
+## Ghostty
+
+Der ThinkPad-Host wählt das Ghostty-Feature. Niri startet Ghostty über
+Super+Return oder Super+T; Konsole bleibt als bestehende Anwendung verfügbar.
+Das Feature installiert Ghostty und MesloLGS NF, setzt `TERMINAL` und nennt
+Ghostty in `xdg-terminals.list`. Nicht jede Anwendung nutzt diese Vorgaben.
+`modules/features/ghostty/config` ist direkt als `~/.config/ghostty/config`
+verknüpft. Catppuccin Mocha, Schriftgröße 14 und Option-as-Alt auf macOS
+orientieren sich an der bisherigen Ghostty-Konfiguration.
+
+Nach dem Rebuild ein neues Fenster öffnen. Konfiguration mit Ctrl+Shift+Komma
+neu laden; Themes lassen sich mit `ghostty +list-themes` ansehen.
+
 ## GitHub über SSH
 
 GitHub benötigt für diese Verbindung einen SSH-Schlüssel; ein Personal Access

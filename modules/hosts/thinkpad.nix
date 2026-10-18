@@ -47,6 +47,7 @@ in
           self.modules.homeManager.plasma-sleep
           self.modules.homeManager.niri
           self.modules.homeManager.noctalia
+          self.modules.homeManager.ghostty
         ];
         home = {
           username = "tobias";

@@ -6,8 +6,7 @@ Der ThinkPad-Host wählt die NixOS- und Home-Manager-Features ausdrücklich.
 
 Niri erscheint zusätzlich in SDDM. Plasma bleibt auswählbar. Noctalia startet
 über die native Niri-Konfiguration und läuft nicht zusätzlich unter Plasma.
-Konsole bleibt vorerst das Terminal; die Terminal-Auswahl ist ein eigener
-späterer Schritt. Xwayland-Satellite unterstützt X11-Anwendungen, fuzzel dient
+Ghostty ist das Terminal. Xwayland-Satellite unterstützt X11-Anwendungen, fuzzel dient
 als unabhängiger Launcher. Die NixOS-Niri-Integration richtet Portale und
 GNOME-Keyring ein; der Dateidialog verwendet GTK.
 
@@ -27,7 +26,7 @@ Anwendungen; eine Codex-Sitzung im Terminal gegebenenfalls später fortsetzen.
 
 | Tasten | Aktion |
 | --- | --- |
-| Mod+Return oder Mod+T | Konsole |
+| Mod+Return oder Mod+T | Ghostty |
 | Mod+Space | Noctalia-App-Launcher |
 | Mod+D | Unabhängiger fuzzel-Launcher |
 | Mod+S | Control Center |

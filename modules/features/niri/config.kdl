@@ -57,8 +57,8 @@ window-rule {
 
 binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
-    Mod+Return hotkey-overlay-title="Terminal" { spawn "konsole"; }
-    Mod+T hotkey-overlay-title="Terminal" { spawn "konsole"; }
+    Mod+Return hotkey-overlay-title="Terminal" { spawn "ghostty"; }
+    Mod+T hotkey-overlay-title="Terminal" { spawn "ghostty"; }
     Mod+Space hotkey-overlay-title="Noctalia launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
     Mod+D hotkey-overlay-title="Fallback launcher" { spawn "fuzzel"; }
     Mod+Comma hotkey-overlay-title="Noctalia settings" { spawn "noctalia" "msg" "settings-toggle"; }

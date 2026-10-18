@@ -157,3 +157,12 @@ Der Benutzer ist in Niri/Noctalia angemeldet. Auf Wunsch maximiert Super+F jetzt
 - Native Niri-Validierung, Flake-Prüfung und NixOS-Toplevel-Auswertung erfolgreich; System-Derivation unverändert (`ikj327wxagxkqhpk6iskwdpv522lsnb4`). Kein neuer Systembuild oder Systemwechsel erforderlich.
 - Das laufende Niri hat die native Datei laut Journal am 2026-10-19 um 00:37:36 neu geladen. Visueller Benutzertest der Änderungen steht aus.
 - Gesten in Niri 26.04 sind im Eingabecode fest auf drei/vier Finger verteilt. Wünsche und Konflikt mit externen Listenern sind in der Roadmap dokumentiert; keine zusätzliche Gestensoftware oder Umbelegung von Super+J/K eingerichtet.
+
+## Ghostty statt Konsole
+
+Ghostty 1.3.1 und MesloLGS NF als ThinkPad-Home-Manager-Feature eingerichtet. Native Konfiguration direkt ins Checkout verknüpft, Niri-Terminalkürzel auf Ghostty umgestellt. Weitere gewünschte Arbeiten in der Roadmap erfasst.
+
+- Ausgewertet: Flake-Prüfung und NixOS-Toplevel erfolgreich.
+- Gebaut: vollständiges System `/nix/store/gavxi8pc6xzm7f0h0drqw445di2mrbjv-nixos-system-nixos-26.05.20261015.26f4107`.
+- Geprüft: `ghostty +validate-config` für die native Datei erfolgreich; Niri-Konfiguration validiert.
+- Aktiviert: noch nicht. Grafik, Schrift und Shell-Integration im neuen Terminal sind anschließend interaktiv zu prüfen.

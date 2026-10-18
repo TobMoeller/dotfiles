@@ -30,6 +30,7 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 - Erstes herdr-Feature mit kleiner nativer TOML-Konfiguration, direkt ins Checkout verknüpft.
 - Persönlicher PATH mit `~/.local/bin`, npm-Prefix `~/.local` und `dotfiles-rebuild` als verknüpfter Repo-Befehl eingerichtet.
 - zsh als ThinkPad-Login-Shell, Starship mit direkt bearbeitbarer TOML und gemeinsame Git-Einstellungen mit privater Host-Identität; Aktivierung siehe Shell-Dokumentation.
+- Ghostty mit nativer Konfiguration, Catppuccin Mocha und MesloLGS NF; Niri-Terminalkürzel verwenden Ghostty nach Aktivierung.
 - NVIDIA-Treiber und PRIME-Offload nach Neustart und Suspend getestet; auf diesem Gerät coarse-grained Runtime-PM als Workaround für GSP-Abstürze.
 - 80-GiB-Swapdatei und Hibernate über UEFI/systemd aktiviert; Wiederaufnahme samt NVIDIA, Audio, Netzwerk und erhaltener Sitzung erfolgreich getestet.
 
