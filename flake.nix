@@ -28,6 +28,7 @@
         ./modules/features/hibernate.nix
         ./modules/features/plasma-sleep/default.nix
         ./modules/features/zsh/default.nix
+        ./modules/features/starship/default.nix
         ./modules/features/git.nix
         ./modules/users/tobias.nix
         ./modules/hosts/thinkpad.nix

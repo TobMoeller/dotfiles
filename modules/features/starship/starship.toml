@@ -1,0 +1,41 @@
+# Edit directly; Starship reads this file for each prompt.
+# No Nerd Font required. Shell key bindings live in zsh/config.zsh.
+"$schema" = 'https://starship.rs/config-schema.json'
+add_newline = true
+format = '$hostname$directory$git_branch$git_status$nix_shell$line_break$character'
+right_format = '$status$cmd_duration'
+
+[hostname]
+ssh_only = true
+format = '[$hostname](dimmed green) '
+
+[directory]
+truncation_length = 3
+truncate_to_repo = false
+read_only = ' ro'
+style = 'bold cyan'
+
+[git_branch]
+format = '[$branch]($style) '
+style = 'bold purple'
+
+[git_status]
+style = 'yellow'
+
+[nix_shell]
+format = '[nix:$state]($style) '
+style = 'dimmed blue'
+
+[status]
+disabled = false
+format = '[exit $status](bold red) '
+
+[cmd_duration]
+min_time = 0
+show_milliseconds = true
+format = '[$duration](dimmed yellow) '
+
+[character]
+success_symbol = '[>](bold green)'
+error_symbol = '[>](bold red)'
+vimcmd_symbol = '[<](bold yellow)'

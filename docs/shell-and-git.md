@@ -1,6 +1,6 @@
 # zsh und Git
 
-Das gemeinsame Benutzerprofil wählt die Home-Manager-Features `zsh` und `git`.
+Das gemeinsame Benutzerprofil wählt die Home-Manager-Features `zsh`, `starship` und `git`.
 Der ThinkPad-Host aktiviert zusätzlich die NixOS-zsh-Integration und setzt
 zsh als Login-Shell für `tobias`.
 
@@ -15,8 +15,16 @@ Sitzungsvariablen einschließlich `DOTFILES`, npm-Prefix und PATH.
 Optionale lokale Ergänzungen können in `~/.config/zsh/local.zsh` stehen.
 
 Enthalten sind Completion, geteilte History (50.000 Einträge), Vorschläge,
-Syntaxhervorhebung und der bisherige Powerlevel10k-Prompt aus den Legacy-Dotfiles.
-`modules/features/zsh/p10k.zsh` bleibt ebenfalls direkt verknüpft und bearbeitbar.
+Syntaxhervorhebung und Starship als Prompt. `~/.config/starship.toml` ist direkt
+mit `modules/features/starship/starship.toml` verknüpft; Änderungen erscheinen
+beim nächsten Prompt. Home Manager übernimmt Installation und zsh-Integration.
+
+Der Prompt zeigt Verzeichnis, Git-Branch/-Status und gegebenenfalls eine
+Nix-Shell. Die Eingabe beginnt auf einer eigenen Zeile. Rechts stehen
+Fehlercodes und die Befehlslaufzeit, auch für kurze Befehle mit Millisekunden.
+Der Hostname erscheint bei SSH-Sitzungen. Ein grünes `>` kennzeichnet Erfolg,
+ein rotes Fehler und ein gelbes `<` den Vi-Befehlsmodus. Es ist keine Nerd Font
+erforderlich. Feintuning und Alternativen stehen in der Roadmap.
 Die History ignoriert Befehle mit führendem Leerzeichen; sie ist kein sicherer
 Aufbewahrungsort für Geheimnisse. Keine automatischen herdr-Sitzungen.
 

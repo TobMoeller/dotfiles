@@ -129,3 +129,12 @@ Der zunächst neu geschriebene Prompt entsprach nicht der erwarteten bisherigen 
 - Gebaut: vollständiges System `/nix/store/1n1r0q8byfa08inwx2nx0wkixqdi79ab-nixos-system-nixos-26.05.20261015.26f4107`.
 - Geprüft: zsh-Syntax und Start mit Powerlevel10k/Legacy-Konfiguration; Strg-P/Strg-N im Vi-Eingabemodus korrekt gebunden.
 - Aktiviert: diese Prompt-Ergänzung noch nicht. Push des umbenannten Branches bleibt beim Benutzer.
+
+## Starship als gewählter Prompt
+
+Auf Benutzerwunsch ersetzt ein separates Starship-Feature die kurzfristig übernommene Powerlevel10k-Konfiguration. Native TOML direkt ins Checkout verknüpft, zsh-Integration über Home Manager. Verzeichnis, Git-Branch/-Status, Nix-Shell und SSH-Hostname links; Fehlercode und Laufzeit rechts. Laufzeit ohne Mindestdauer einschließlich Millisekunden. Shell-Tastenkürzel bleiben erhalten; spätere Optimierungen und Alternativen in der Roadmap.
+
+- Ausgewertet: Flake-Prüfung und NixOS-Toplevel erfolgreich.
+- Gebaut: vollständiges System `/nix/store/h29f8g8bzai0ji1zihkzcp4gwf7jkr0i-nixos-system-nixos-26.05.20261015.26f4107`.
+- Geprüft: Starship 1.25.1 rendert die native Konfiguration ohne Warnungen; Git-Branch, Fehlercode, 17 ms und 0 ms erfolgreich angezeigt. Native zsh-Konfiguration syntaktisch gültig.
+- Aktiviert: noch nicht; kein Push durch den Agenten.

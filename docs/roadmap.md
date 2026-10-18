@@ -16,6 +16,9 @@
 - [ ] Ersten Push von `nixos-foundation` durchführen (Benutzer; Schlüssel mit Passphrase). Der ursprüngliche Name kollidierte mit dem bestehenden Remote-Branch `rebuild`.
 - [x] Gemeinsame Git-Konfiguration und private ThinkPad-Identität deklarieren; Arbeitsidentität folgt beim Arbeitsgerät.
 - [x] zsh mit nativer Konfiguration deklarieren und bauen.
+- [x] Starship mit nativer TOML und stets sichtbarer Befehlslaufzeit deklarieren und bauen.
+- [ ] Starship aktivieren und den Prompt im Alltag prüfen.
+- [ ] Starship später optimieren: Ein-/Zweizeiler, Farben, Git-Details, Projektmodule, Vi-Modus-Anzeige und Verhalten in herdr. Befehlslaufzeit bleibt auf Wunsch immer sichtbar. Native TOML-Datei: `modules/features/starship/starship.toml`.
 - [ ] zsh/Git aktivieren und interaktiv im Alltag prüfen.
 - [ ] Terminal und Editor auswählen und konfigurieren.
 - [ ] herdr-Tastenkürzel, vim-nav und t/wt-Integration aus playground gezielt übernehmen.
@@ -28,7 +31,8 @@
 ## Offene Entscheidungen
 
 - Geräte-Hostname; aktuell `nixos`, die Flake-Auswahl entspricht dem Hostnamen. Umbenennung über die `hostName`-Bindung im Hostmodul und einmalig `sudo nixos-rebuild switch --flake .#NEUER-NAME` aus dem Repository.
-- Gewünschte Shell, Terminal und Editor sowie globale Werkzeuge gegenüber Projekt-devShells.
+- Terminal und Editor sowie globale Werkzeuge gegenüber Projekt-devShells; Shell ist zsh, Prompt zunächst Starship.
+- Prompt-Alternativen bei späterem Bedarf: [zsh-eigener Prompt mit vcs_info](https://zsh.sourceforge.io/Doc/Release/User-Contributions.html#Version-Control-Information), [Pure](https://github.com/sindresorhus/pure) oder [Powerlevel10k](https://github.com/romkatv/powerlevel10k) (laut Projekt nur eingeschränkter Support). Zuerst [Starship-Konfiguration und Presets](https://starship.rs/config/) ausprobieren.
 - Separate Versionsgruppen erst bei konkretem Bedarf.
 - Geheimnisse und Zugangsdaten erst mit festgelegtem Schlüssel-/Backup-Konzept einbinden.
 

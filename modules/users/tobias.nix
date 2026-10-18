@@ -7,6 +7,7 @@
       self.modules.homeManager.herdr
       self.modules.homeManager.npm
       self.modules.homeManager.zsh
+      self.modules.homeManager.starship
       self.modules.homeManager.git
     ];
 

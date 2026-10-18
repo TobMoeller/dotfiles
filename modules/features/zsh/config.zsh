@@ -24,8 +24,5 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias gs='git status -sb'
 
-# Keep the familiar Powerlevel10k prompt, editable directly in the checkout.
-source "$ZDOTDIR/p10k.zsh"
-
 # Optional machine-local additions, outside this repository.
 [[ ! -f "$ZDOTDIR/local.zsh" ]] || source "$ZDOTDIR/local.zsh"
