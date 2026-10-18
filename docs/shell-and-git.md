@@ -15,13 +15,16 @@ Sitzungsvariablen einschließlich `DOTFILES`, npm-Prefix und PATH.
 Optionale lokale Ergänzungen können in `~/.config/zsh/local.zsh` stehen.
 
 Enthalten sind Completion, geteilte History (50.000 Einträge), Vorschläge,
-Syntaxhervorhebung und ein nativer Prompt mit Verzeichnis und Git-Branch.
+Syntaxhervorhebung und der bisherige Powerlevel10k-Prompt aus den Legacy-Dotfiles.
+`modules/features/zsh/p10k.zsh` bleibt ebenfalls direkt verknüpft und bearbeitbar.
 Die History ignoriert Befehle mit führendem Leerzeichen; sie ist kein sicherer
 Aufbewahrungsort für Geheimnisse. Keine automatischen herdr-Sitzungen.
 
 Die Tastaturbelegung nutzt den Vi-Modus wie die frühere Konfiguration:
-Escape wechselt in den Befehlsmodus, `i` zurück zur Eingabe. Strg-R durchsucht
-die History, Strg-F übernimmt am Zeilenende einen Vorschlag. Aliase:
+Escape wechselt in den Befehlsmodus, `i` zurück zur Eingabe. Strg-P/Strg-N
+navigieren durch die History, Strg-R durchsucht sie und Strg-F übernimmt am
+Zeilenende einen Vorschlag. Anders als früher stammt der Vi-Modus zunächst
+direkt aus zsh; das zusätzliche zsh-vi-mode-Plugin ist nicht übernommen. Aliase:
 `ll`, `la`, `..`, `...` und `gs`.
 
 Das Git-Feature enthält nur gemeinsame Einstellungen und die Aliase
@@ -57,8 +60,12 @@ Danach für dieses Repository:
 
 ```bash
 git remote set-url origin git@github.com:TobMoeller/dotfiles.git
-git push -u origin rebuild/nixos-foundation
+git push -u origin nixos-foundation
 ```
 
 Der Push veröffentlicht den neuen Branch; `playground` und der Default-Branch
 bleiben erhalten.
+
+Der lokale Branch hieß zunächst `rebuild/nixos-foundation`. GitHub enthält
+bereits `rebuild`, was diesen Namen wegen eines Datei-/Verzeichniskonflikts
+verhindert. Deshalb wurde der lokale Branch in `nixos-foundation` umbenannt.

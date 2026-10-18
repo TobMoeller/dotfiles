@@ -118,3 +118,14 @@ Für denselben Zwischencommit ergänzt: native Plasma-Konfiguration mit `LidActi
 - Git: erzeugte Konfiguration auf Name, E-Mail, Aliase, `init.defaultBranch` und `push.autoSetupRemote` geprüft.
 - Aktiviert: noch nicht; kein Systemwechsel durch den Agenten.
 - `origin` auf SSH umgestellt. Benutzer bestätigt hinterlegten öffentlichen Schlüssel und übernimmt wegen der Passphrase selbst Verbindungstest und Push; beides hier noch nicht bestätigt.
+
+## Prompt und History-Tasten korrigiert; Push-Konflikt
+
+Der Benutzer hat den zsh-/Git-Stand aktiviert (`/run/current-system` entspricht dem oben gebauten System). Beim ersten Push funktionierte die SSH-Authentifizierung, GitHub lehnte aber `rebuild/nixos-foundation` mit `directory file conflict` ab. Die vorhandene Remote-Referenz `origin/rebuild` erklärt die Namenskollision. Der lokale Branch wurde in `nixos-foundation` umbenannt; keine Remote-Referenzen gelöscht oder überschrieben.
+
+Der zunächst neu geschriebene Prompt entsprach nicht der erwarteten bisherigen Umgebung. Deshalb wurde gezielt die native Powerlevel10k-Konfiguration aus dem Legacy-Checkout übernommen. Strg-P und Strg-N navigieren ausdrücklich in der History; der Vi-Modus bleibt vorerst zsh-intern.
+
+- Ausgewertet: Flake-Prüfung und NixOS-Toplevel erfolgreich.
+- Gebaut: vollständiges System `/nix/store/1n1r0q8byfa08inwx2nx0wkixqdi79ab-nixos-system-nixos-26.05.20261015.26f4107`.
+- Geprüft: zsh-Syntax und Start mit Powerlevel10k/Legacy-Konfiguration; Strg-P/Strg-N im Vi-Eingabemodus korrekt gebunden.
+- Aktiviert: diese Prompt-Ergänzung noch nicht. Push des umbenannten Branches bleibt beim Benutzer.

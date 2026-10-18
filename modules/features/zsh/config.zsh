@@ -7,6 +7,8 @@ bindkey -v
 KEYTIMEOUT=10
 bindkey '^?' backward-delete-char
 bindkey '^R' history-incremental-search-backward
+bindkey '^P' up-line-or-history
+bindkey '^N' down-line-or-history
 bindkey '^[[A' up-line-or-history
 bindkey '^[[B' down-line-or-history
 bindkey '^[[H' beginning-of-line
@@ -22,13 +24,8 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias gs='git status -sb'
 
-# A small prompt using only zsh's built-in Git integration.
-autoload -Uz vcs_info add-zsh-hook
-zstyle ':vcs_info:*' enable git
-zstyle ':vcs_info:git:*' formats ' (%b)'
-add-zsh-hook precmd vcs_info
-setopt PROMPT_SUBST
-PROMPT='%F{cyan}%~%f%F{yellow}${vcs_info_msg_0_}%f %(?.%F{green}.%F{red})%#%f '
+# Keep the familiar Powerlevel10k prompt, editable directly in the checkout.
+source "$ZDOTDIR/p10k.zsh"
 
 # Optional machine-local additions, outside this repository.
 [[ ! -f "$ZDOTDIR/local.zsh" ]] || source "$ZDOTDIR/local.zsh"

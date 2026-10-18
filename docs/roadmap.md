@@ -12,7 +12,8 @@
 - [ ] Suspend-then-Hibernate testen und als Desktop-Schlafaktion einrichten (zunächst nach einer Stunde im Akkubetrieb).
 - [x] Zwischencommit einschließlich getesteter Suspend-/Hibernate-Pfade und aktivierter kombinierter Schlafaktion erstellen; Übergangstest bleibt offen.
 - [x] SSH-Schlüssel vom Benutzer bei GitHub hinterlegt; `origin` auf `git@github.com:TobMoeller/dotfiles.git` umgestellt.
-- [ ] SSH-Verbindung prüfen und ersten Branch-Push durchführen (Benutzer; Schlüssel mit Passphrase).
+- [x] SSH-Verbindung zu GitHub erfolgreich authentifiziert (Benutzer).
+- [ ] Ersten Push von `nixos-foundation` durchführen (Benutzer; Schlüssel mit Passphrase). Der ursprüngliche Name kollidierte mit dem bestehenden Remote-Branch `rebuild`.
 - [x] Gemeinsame Git-Konfiguration und private ThinkPad-Identität deklarieren; Arbeitsidentität folgt beim Arbeitsgerät.
 - [x] zsh mit nativer Konfiguration deklarieren und bauen.
 - [ ] zsh/Git aktivieren und interaktiv im Alltag prüfen.
