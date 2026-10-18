@@ -50,6 +50,7 @@ Inaktivität wird gesperrt, nach elf Minuten der Bildschirm abgeschaltet.
 Ein zusätzlicher automatischer Idle-Suspend ist zunächst nicht konfiguriert.
 
 Größenänderungen sind ohne Animation; andere Animationen bleiben aktiv.
+Das Touchpad verwendet traditionelle Scrollrichtung (`natural-scroll` aus).
 Firefox-Fenster starten ausdrücklich als normale gekachelte Fenster, auch
 wenn Firefox zuvor maximiert oder im Vollbild beendet wurde. Diese Startregel
 wirkt auf neue Fenster; spätere manuelle Maximierung/Vollbild bleiben möglich.

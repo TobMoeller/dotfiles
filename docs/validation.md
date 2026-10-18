@@ -166,3 +166,7 @@ Ghostty 1.3.1 und MesloLGS NF als ThinkPad-Home-Manager-Feature eingerichtet. Na
 - Gebaut: vollständiges System `/nix/store/gavxi8pc6xzm7f0h0drqw445di2mrbjv-nixos-system-nixos-26.05.20261015.26f4107`.
 - Geprüft: `ghostty +validate-config` für die native Datei erfolgreich; Niri-Konfiguration validiert.
 - Aktiviert: noch nicht. Grafik, Schrift und Shell-Integration im neuen Terminal sind anschließend interaktiv zu prüfen.
+
+## Touchpad-Scrollrichtung
+
+Auf Wunsch `natural-scroll` aus der nativen Niri-Datei entfernt. Der native Validator ist erfolgreich. Die Änderung betrifft ausschließlich die direkt verknüpfte Konfiguration; kein neuer Systembuild oder Systemwechsel erforderlich. Die Richtung ist anschließend am Touchpad zu bestätigen.
