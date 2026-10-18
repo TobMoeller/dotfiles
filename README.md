@@ -21,6 +21,7 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 - [Swap und Hibernate testen](docs/hibernate.md)
 - [zsh und Git](docs/shell-and-git.md)
 - [Erste Niri-/Noctalia-Sitzung](docs/niri.md)
+- [Steam, Proton und Gaming-Werkzeuge](docs/gaming.md)
 
 ## Aktueller Umfang
 

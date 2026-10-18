@@ -21,6 +21,7 @@
 - [ ] Starship später optimieren: Ein-/Zweizeiler, Farben, Git-Details, Projektmodule, Vi-Modus-Anzeige und Verhalten in herdr. Befehlslaufzeit bleibt auf Wunsch immer sichtbar. Native TOML-Datei: `modules/features/starship/starship.toml`.
 - [x] zsh/Git aktiviert; Grundbedienung geprüft. Weitere Optimierungen folgen einzeln.
 - [ ] Ghostty aktivieren und mit zsh/Starship/herdr prüfen; native Konfiguration, Catppuccin Mocha und MesloLGS NF als Ausgangspunkt.
+- [x] Ghostty samt nativer Konfiguration und Schrift validieren und bauen.
 - [ ] Neovim-Konfiguration aus `playground` gezielt überführen (eigener größerer Schritt): native Lua-Dateien, Plugins, LSP, Completion und Projektwerkzeuge.
 - [ ] Gewohnte zsh-Shortcuts im Vi-Insertmodus ergänzen (Strg-A/E, History-/Löschbefehle); Caps Lock zu Escape remappen.
 - [ ] Grafischen Boot-/LUKS-Bildschirm mit Plymouth einrichten.
@@ -31,7 +32,8 @@
 - [ ] Gewünschte Touchpad-Gesten prüfen: drei Finger links/rechts für Zurück/Vor, vier Finger horizontal für Workspaces, vertikal Übersicht. Niri 26.04 hat feste Gesten; eine Lösung muss die eingebauten Aktionen ersetzen, statt zusätzlich auszulösen.
 - [x] Workspace-Tasten entschieden: Super+I/U bleiben; Super+J/K fokussieren Fenster innerhalb einer Spalte.
 - [ ] Themes, Schriftgrößen und Hintergrundbilder für Niri/Noctalia/Ghostty abstimmen; Bildquellen und Lizenzen festhalten.
-- [ ] Gaming mit Steam/Proton und GPU-Offload prüfen.
+- [ ] Steam/Proton-Gaming aktivieren: Anmeldung, erstes Spiel, NVIDIA-Offload, GameMode und MangoHud prüfen; Gamescope anschließend separat testen.
+- [x] Steam, GE-Proton, GameMode, MangoHud, Gamescope und Protontricks deklarieren und System bauen.
 - [ ] Lokale KI: CUDA-/GPU-Unterstützung prüfen und eine erste Laufzeit auswählen (z. B. Ollama oder llama.cpp); Systemdienste und Projektumgebungen bewusst trennen.
 - [ ] Lokale KI: erstes Modell für 16 GiB VRAM auswählen und GPU-Nutzung, Geschwindigkeit, Speicherbedarf und Leistungsaufnahme messen; Chat-Oberfläche und Coding-Anbindung anschließend ergänzen.
 - [ ] Projekt-devShells mit Flakes vereinfachen: kleine Vorlagen, `nix develop` und optional direnv/nix-direnv; zunächst an einem echten Programmierprojekt testen, danach wiederverwendbare Templates bereitstellen.

@@ -13,11 +13,13 @@ in
       self.modules.nixos.zsh
       self.modules.nixos.niri
       self.modules.nixos.noctalia
+      self.modules.nixos.gaming
       ../../hosts/thinkpad/configuration.nix
       inputs.home-manager.nixosModules.home-manager
     ];
 
     users.users.tobias.shell = pkgs.zsh;
+    users.users.tobias.extraGroups = [ "gamemode" ];
 
     # Measured PCI addresses on this ThinkPad; PRIME uses decimal notation.
     hardware.nvidia.prime = {
@@ -48,6 +50,7 @@ in
           self.modules.homeManager.niri
           self.modules.homeManager.noctalia
           self.modules.homeManager.ghostty
+          self.modules.homeManager.gaming
         ];
         home = {
           username = "tobias";

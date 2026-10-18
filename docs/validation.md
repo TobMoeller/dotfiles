@@ -170,3 +170,12 @@ Ghostty 1.3.1 und MesloLGS NF als ThinkPad-Home-Manager-Feature eingerichtet. Na
 ## Touchpad-Scrollrichtung
 
 Auf Wunsch `natural-scroll` aus der nativen Niri-Datei entfernt. Der native Validator ist erfolgreich. Die Änderung betrifft ausschließlich die direkt verknüpfte Konfiguration; kein neuer Systembuild oder Systemwechsel erforderlich. Die Richtung ist anschließend am Touchpad zu bestätigen.
+
+## Steam und Gaming-Werkzeuge
+
+Auf ausdrücklichen Benutzerwunsch direkt Steam statt eines separat installierten Testspiels eingerichtet: Steam samt GE-Proton 11-1, GameMode, MangoHud, Gamescope und Protontricks. Host wählt beide Gaming-Module und die GameMode-Gruppe; natives MangoHud-Profil direkt ins Checkout verknüpft. Keine automatische Spielinstallation und keine Remote-Play-/Server-Firewallfreigaben.
+
+- Ausgewertet: Flake-Prüfung und NixOS-Toplevel erfolgreich.
+- Gebaut: vollständiges System `/nix/store/mrajkwhaw23bfsrhh2lgp21znl133rqh-nixos-system-nixos-26.05.20261015.26f4107` einschließlich Ghostty.
+- Geprüft: Steam, GameMode-Launcher, Gamescope und Protontricks als ausführbare Befehle im gebauten System vorhanden; native Niri-Konfiguration erneut gültig.
+- Aktiviert: noch nicht. Steam-Anmeldung, Spielinstallation, Proton-/GPU-/Overlay-Tests und GameMode-Laufzeitprüfung stehen am Gerät aus. Testrezept in `docs/gaming.md`.
