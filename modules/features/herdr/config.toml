@@ -1,0 +1,7 @@
+# Native, directly editable config. Reload/restart herdr after changing it.
+# Start small; port the playground vim-nav plugin and t/wt integration later.
+onboarding = false
+
+[keys]
+prefix = "ctrl+y"
+detach = "prefix+d"

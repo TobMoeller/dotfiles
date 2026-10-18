@@ -1,0 +1,13 @@
+# PowerDevil: LidAction=1 means sleep; SleepMode=3 means suspend-then-hibernate.
+# Idle timeouts and external-monitor handling retain Plasma defaults.
+[AC][SuspendAndShutdown]
+LidAction=1
+SleepMode=3
+
+[Battery][SuspendAndShutdown]
+LidAction=1
+SleepMode=3
+
+[LowBattery][SuspendAndShutdown]
+LidAction=1
+SleepMode=3

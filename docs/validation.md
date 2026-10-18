@@ -1,0 +1,111 @@
+# Prüfung des Grundgerüsts
+
+Am 2026-10-18 auf dem ThinkPad durchgeführt:
+
+- `nix flake check --no-build`: erfolgreich, einschließlich NixOS-Konfiguration.
+- `nix eval --raw .#nixosConfigurations.thinkpad.config.system.build.toplevel.drvPath`: erfolgreich.
+- `nix build --no-link --print-out-paths .#nixosConfigurations.thinkpad.config.system.build.toplevel`: erfolgreich.
+- Neue Nix-Dateien mit dem Flake-Formatter formatiert; die generierte Hardwaredatei blieb unverändert.
+- `cmp /etc/nixos/hardware-configuration.nix hosts/thinkpad/hardware-configuration.nix`: identisch.
+- `git diff --cached --check`: erfolgreich.
+- herdr 0.9.5 ist im gebauten Benutzerprofil enthalten; CLI startet und die verwendeten Konfigurationsschlüssel sind in der Standardkonfiguration vorhanden.
+
+Bei den Nix-Aufrufen war zusätzlich `--extra-experimental-features 'nix-command flakes'` erforderlich, da die neue Nix-Konfiguration noch nicht aktiviert ist.
+
+Gebautes System:
+
+```text
+/nix/store/7ap5db89hgx95sy62x2vks26vm5lzij7-nixos-system-nixos-26.05.20261015.26f4107
+```
+
+Nix meldet für die zusätzliche Ausgabe `modules` eine Warnung „unknown flake output“. Diese Ausgabe stammt absichtlich aus flake-parts und stellt die wiederverwendbaren Module bereit; sie gehört nicht zu den von Nix selbst standardisierten Ausgaben. Alle Prüfungen waren erfolgreich.
+
+Keine Aktivierung, kein Neustart und keine interaktive herdr-Sitzung durchgeführt. Boot, Grafik, Suspend und Home-Manager-Aktivierung am bestehenden Benutzerprofil müssen nach bewusster Aktivierung geprüft werden. Die direkt verknüpfte TOML-Datei ist bewusst nicht Bestandteil eines unveränderlichen Konfigurations-Snapshots.
+
+## Host-Auswahl und Rebuild-Script
+
+Am selben Tag wurde die Ausgabe von `nixosConfigurations.thinkpad` auf den tatsächlichen Hostnamen `nixosConfigurations.nixos` umgestellt. Ausgabe und `networking.hostName` verwenden dieselbe Bindung im Hostmodul. Die obigen ursprünglichen Prüfaufrufe dokumentieren den Stand vor dieser Umstellung.
+
+Erneut geprüft:
+
+- `nix flake check --no-build` und Auswertung von `nixosConfigurations.nixos.config.system.build.toplevel.drvPath`: erfolgreich.
+- `scripts/rebuild build`: erfolgreich; dieselbe Systemableitung und derselbe Systempfad wie oben.
+- `bash -n scripts/rebuild` und Hilfeausgabe: erfolgreich.
+- Automatische Host-Auswahl und explizite Auswahl mit `--host nixos` über `--dry-run`: erfolgreich, auch aus `/tmp` heraus.
+- Unbekannte Hosts, fehlende Hostnamen und mehrere Aktionen werden abgelehnt.
+
+Auch bei diesen Prüfungen wurde keine Konfiguration aktiviert. Der erste sudo-Probelauf der Aktivierung konnte mangels interaktiver Passworteingabe nicht ausgeführt werden; dafür steht `scripts/rebuild dry-activate` im Benutzerterminal bereit.
+
+## Vereinfachung nach der ersten Aktivierung
+
+Die obigen Script-Prüfungen beziehen sich auf die erste, umfangreichere Version. Der Helfer wurde anschließend auf Verzeichniswechsel und `sudo nixos-rebuild switch --flake .` reduziert. Host-Auswahl und Fehlerbehandlung übernimmt direkt `nixos-rebuild`. Bash-Syntax geprüft; die Vereinfachung wurde nicht erneut aktiviert.
+
+Beim Prüfen zeigte `/run/current-system` bereits auf den oben dokumentierten Systempfad: Die erste Aktivierung war inzwischen erfolgt. Flakes sind damit in der laufenden Konfiguration eingeschaltet. Für einen Probelauf gilt jetzt direkt `sudo nixos-rebuild dry-activate --flake .` aus dem Repository.
+
+## NVIDIA-Vorbereitung
+
+Am 2026-10-18:
+
+- NVIDIA/PRIME-Feature und PCI-Bus-IDs anhand der Hardware vorbereitet.
+- `nix flake check --no-build`: erfolgreich.
+- NVIDIA-Paketversion ausgewertet: `595.71.05` aus dem fixierten System-Nixpkgs.
+- NixOS-Toplevel ausgewertet und vollständig mit `nix build --no-link --print-out-paths .#nixosConfigurations.nixos.config.system.build.toplevel` gebaut.
+
+```text
+/nix/store/06gd0sgxk673ml651hvzqs65yh0xxw19-nixos-system-nixos-26.05.20261015.26f4107
+```
+
+Keine Aktivierung oder Änderung des Boot-Standards durchgeführt. Auf dem laufenden System ist weiterhin Nouveau geladen. Der neue Stand enthält auch die zuvor vorbereitete DOTFILES-/Bash-Einbindung. Treiberfunktion, Offload, externe Monitore und Suspend müssen nach dem Neustart geprüft werden; Anleitung in `thinkpad-hardware.md`. Swap und Hibernate sind für den anschließenden Schritt vorgesehen.
+
+## Erster Suspend-Test und Folgeversuch
+
+Nach Neustart bestätigte der Benutzer funktionierendes NVIDIA-SMI, Intel-Rendering, NVIDIA-Offload und Runtime-Suspend. Am 2026-10-18 schlug anschließend NVIDIA-Resume aus s2idle fehl: Kernel-Logs enthalten um 22:20:33 einen GSP-Panic (Xid 120), gefolgt von Xid 154 / GPU Reset Required. `nvidia-smi` erreicht die GPU seitdem nicht mehr.
+
+Ein gezielter Folgeversuch ist vorbereitet: nur auf dem ThinkPad `kernelSuspendNotifier=false` und `NVreg_UseKernelSuspendNotifiers=0`. NVIDIA 595.71.05, VRAM-Erhalt und Runtime-Energieverwaltung bleiben bestehen.
+
+- Flake-Prüfung und Toplevel-Auswertung erfolgreich.
+- Ausgewertete Konfiguration enthält Parameterwert `0` sowie die NVIDIA-Suspend-/Resume-Dienste.
+- Vollständiger Systembuild erfolgreich:
+
+```text
+/nix/store/204ahr7nk7djp1rj0dk9j639n5xfrvwq-nixos-system-nixos-26.05.20261015.26f4107
+```
+
+Nicht aktiviert; der Wiederholungstest nach Neustart steht aus. Noch keine Aussage, ob dieser Wechsel den Firmware-Absturz auf diesem Gerät behebt. Noch kein Swap/Hibernate eingerichtet und kein Zwischencommit erstellt.
+
+## Erfolgreicher Suspend-Workaround und vorbereiteter Hibernate-Test
+
+Mit `DynamicPowerManagement=1` und `UseKernelSuspendNotifiers=1` hat der Benutzer nach mehreren Suspend-Zyklen funktionierendes NVIDIA-SMI und GLX-Offload bestätigt. Für den Zyklus 22:53:19–22:56:18 wurden 174,47 Sekunden Hardware-Schlaf gemeldet, ohne neue Xid-Fehler. Die kurze Akku-Messung erfasste 0,39 Wh über 224 Sekunden einschließlich rund 45 Sekunden Wachzeit; daraus lässt sich kein genauer reiner Schlafverbrauch ableiten. Ohne Netzteil wurden keine laufenden Lüfter beobachtet.
+
+Für Swap/Hibernate am 2026-10-18 geprüft:
+
+- UEFI-Boot, Secure Boot deaktiviert, systemd im Initrd bereits aktiv.
+- Das entsperrte Root-Volume liefert udev eine ext4-Dateisystem-UUID für die EFI-gestützte Resume-Erkennung.
+- Flake-Prüfung und NixOS-Toplevel-Auswertung erfolgreich.
+- Ausgewertet: `/swapfile`, 81920 MiB, keine zusätzliche Zufallsverschlüsselung, systemd-Initrd, kein statisch festgelegtes Resume-Gerät oder Offset.
+- Vollständiger Build erfolgreich; Swap-Erstellungsdienst mit restriktiver Umask und generierte Sleep-Konfiguration geprüft.
+
+```text
+/nix/store/5qjac388dgg19v7d4g6ak5djxv90610h-nixos-system-nixos-26.05.20261015.26f4107
+```
+
+Dieser Stand wurde noch nicht aktiviert. Die Swapdatei existiert noch nicht; Hibernate und Wiederaufnahme wurden noch nicht getestet. Zuklappen/Idle wurden nicht auf Suspend-then-Hibernate umgestellt. Testanleitung: `docs/hibernate.md`. Der Zwischencommit folgt nach erfolgreicher Einrichtung.
+
+## Manueller Hibernate-Test erfolgreich
+
+Der Benutzer hat den oben gebauten Stand aktiviert und normal neu gestartet. `/swapfile` ist mit 80 GiB aktiv, root:root und Modus 0600; login1 meldet `CanHibernate=yes`.
+
+Am 2026-10-18 wurde Hibernate um 23:09:42 ausgelöst. Die wiederhergestellte Sitzung protokolliert um 23:12:45 `System returned from sleep operation 'hibernate'` und einen erfolgreichen Abschluss des Dienstes. Das Kernel-Journal enthält den Hibernate-Zyklus und die Entfernung von `HibernateLocation` nach der Wiederaufnahme. In diesem Zeitfenster gibt es keine neuen NVIDIA-Xid-Fehler.
+
+Der Benutzer bestätigt erhaltene Sitzung einschließlich Codex, funktionierendes Audio und Netzwerk. NVIDIA-SMI und GLX-Offload sind nach dem Wiederaufwachen erfolgreich. Aktiver Systempfad entspricht dem geprüften Build oben.
+
+Der manuelle Test ist damit erfolgreich. Die noch nicht umgestellte automatische Desktop-Schlafaktion und der Übergang von Suspend zu Hibernate bleiben separate nächste Schritte.
+
+## Automatische Schlafaktion vorbereitet
+
+Für denselben Zwischencommit ergänzt: native Plasma-Konfiguration mit `LidAction=1` und `SleepMode=3` in allen drei Energieprofilen sowie logind-Deckelaktion als Fallback. Die bestehende Stunde Verzögerung im Akkubetrieb bleibt erhalten.
+
+- Ausgewertet: NixOS-Toplevel erfolgreich; Flake-Prüfung erfolgreich (bekannte Warnung zum benutzerdefinierten Output `modules`).
+- Gebaut: vollständiges System erfolgreich unter `/nix/store/g5q510sxsz7zrll7n5bd6aq0kg9kqvxk-nixos-system-nixos-26.05.20261015.26f4107`.
+- Aktiviert: `/run/current-system` entspricht dem gebauten System; `powerdevilrc` zeigt direkt ins Checkout und `/etc/systemd/sleep.conf` enthält die konfigurierte Stunde sowie `HibernateOnACPower=false`. Der Benutzer bestätigt den Neustart von PowerDevil.
+- Kombinierter Übergang und Deckelaktion noch nicht getestet. Kurzer Test mit temporärer Zwei-Minuten-Verzögerung in `docs/hibernate.md` dokumentiert; er blockiert den Zwischencommit nicht.
