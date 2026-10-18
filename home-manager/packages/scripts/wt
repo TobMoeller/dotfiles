@@ -22,6 +22,17 @@
 #   wt rm           pick a worktree, tear it down (tmux session, docker
 #                   compose stack incl. volumes, git worktree)
 #   wt ls           list existing worktrees
+#   wt testdb [<repo/branch-dir>|<path>] [--fresh]
+#                   the worktree's own test database, ready to use: starts
+#                   its database + redis containers, waits until MariaDB
+#                   answers, then `php artisan migrate --seed --env=testing`
+#                   (--fresh: migrate:fresh instead). Idempotent; run it
+#                   again after adding a migration or a seeder. Default:
+#                   the worktree you are in. `wt add` does NOT run it (a
+#                   worktree made by hand starts no stack); /work runs it
+#                   once when the build starts. This is the only way the
+#                   pipeline's agents touch the test DB; it is allowlisted
+#                   as a whole.
 #   wt main [<repo/branch-dir>] [--keep-session] [--dry-run]
 #                   move a worktree's branch into the main checkout, then tear
 #                   the worktree down (default: the worktree you are in)
@@ -220,6 +231,77 @@ bootstrap_exit() {
     rm -f "$path/.wt-bootstrapping"
 }
 
+# true when the worktree at $1 has a docker compose file
+has_compose_file() {
+    [[ -f "$1/docker-compose.yml" || -f "$1/compose.yaml" || -f "$1/docker-compose.yaml" ]]
+}
+
+# value of KEY=value in env file $1 for key $2 (first match, no quotes handling
+# beyond stripping surrounding double quotes)
+env_value() {
+    sed -nE "s/^$2=\"?([^\"]*)\"?[[:space:]]*$/\1/p" "$1" | head -1
+}
+
+# wt testdb [<repo/branch-dir>|<path>] [--fresh]
+# The worktree's own test database, ready for phpunit: start database + redis
+# of its compose project, wait until MariaDB accepts connections, then
+# `php artisan migrate --seed --env=testing` (or migrate:fresh with --fresh).
+# One command, idempotent, no flags for the caller to get wrong -- this is
+# what the pipeline's agents and the orchestrator run instead of composing
+# docker/artisan commands themselves, so the permission layer sees exactly
+# one allowlisted spelling. Everything targets the ports from .env.testing,
+# which tools/setup-worktree.sh gave this worktree alone.
+cmd_testdb() {
+    local fresh=0 target="" path
+    while (( $# )); do
+        case "$1" in
+            --fresh) fresh=1 ;;
+            -*) die "wt testdb: unknown option $1" ;;
+            *) target=$1 ;;
+        esac
+        shift
+    done
+    if [[ -z "$target" ]]; then
+        path=$(git rev-parse --show-toplevel 2>/dev/null) || die "wt testdb: not inside a git worktree; pass <repo/branch-dir>"
+    elif [[ -d "$target" ]]; then
+        path=$(cd "$target" && pwd)
+    else
+        path="$WT_ROOT/$target"
+        [[ -d "$path" ]] || die "wt testdb: no worktree $target under $WT_ROOT"
+    fi
+    [[ -f "$path/.env.testing" ]] || die "wt testdb: $path has no .env.testing"
+    has_compose_file "$path" || die "wt testdb: $path has no docker compose file"
+
+    local host port db user pass
+    host=$(env_value "$path/.env.testing" DB_HOST); host=${host:-127.0.0.1}
+    port=$(env_value "$path/.env.testing" DB_PORT)
+    db=$(env_value "$path/.env.testing" DB_DATABASE)
+    user=$(env_value "$path/.env.testing" DB_USERNAME)
+    pass=$(env_value "$path/.env.testing" DB_PASSWORD)
+    [[ -n "$port" ]] || die "wt testdb: no DB_PORT in $path/.env.testing"
+
+    echo "wt testdb: $path · MariaDB $host:$port/$db"
+    ( cd "$path" && docker compose up -d database redis ) || die "wt testdb: docker compose up -d database redis failed"
+
+    # wait for MariaDB: a plain PDO connect with the test credentials, the
+    # same way phpunit will connect; artisan commands need the DB up already
+    local waited=0
+    until ( cd "$path" && php -r 'try { new PDO("mysql:host=" . $argv[1] . ";port=" . $argv[2] . ";dbname=" . $argv[3], $argv[4], $argv[5]); exit(0); } catch (Throwable $e) { exit(1); }' "$host" "$port" "$db" "$user" "$pass" 2>/dev/null ); do
+        if (( waited >= 120 )); then
+            die "wt testdb: MariaDB on $host:$port not reachable after 120 s (docker compose logs database)"
+        fi
+        sleep 3; waited=$((waited + 3))
+    done
+    (( waited )) && echo "wt testdb: database up after ${waited}s"
+
+    if (( fresh )); then
+        ( cd "$path" && php artisan migrate:fresh --seed --env=testing ) || die "wt testdb: migrate:fresh --seed --env=testing failed"
+    else
+        ( cd "$path" && php artisan migrate --seed --env=testing ) || die "wt testdb: migrate --seed --env=testing failed"
+    fi
+    echo "wt testdb: ready (migrated + seeded, port $port)"
+}
+
 # Worktree bootstrap: env setup, git-ignored file copies, vendor/node_modules,
 # then a generic .worktree-setup.sh build step (composer/npm install) which
 # needs those deps present. Invoked inside the worktree's own session (see
@@ -256,6 +338,10 @@ cmd_bootstrap() {
     if [[ -x "$path/.worktree-setup.sh" ]]; then
         ( cd "$path" && ./.worktree-setup.sh ) || setup_failed=1
     fi
+
+    # No containers and no database here: `wt add` is also used by hand, and a
+    # worktree should not start a stack nobody asked for. The pipeline brings
+    # the test DB up itself with `wt testdb` when the build starts.
 
     # marker for /work (and wt agent): the worktree is usable, or not
     if (( env_failed || setup_failed )); then
@@ -389,7 +475,7 @@ close_session() {
 
 stop_stack() {
     local path=$1
-    if [[ -f "$path/docker-compose.yml" || -f "$path/compose.yaml" || -f "$path/docker-compose.yaml" ]]; then
+    if has_compose_file "$path"; then
         echo "wt: tearing down docker compose stack ..."
         (cd "$path" && docker compose down --volumes --remove-orphans) || true
     fi
@@ -755,8 +841,9 @@ case "${1:-}" in
     back) shift; cmd_back "$@" ;;
     agent) shift; cmd_agent "$@" ;;
     lead) shift; cmd_lead "$@" ;;
+    testdb) shift; cmd_testdb "$@" ;;
     ls) cmd_ls ;;
     "") cmd_switch ;;
-    -h|--help) sed -n '3,52p' "$0" | sed 's/^# \{0,1\}//' ;;
-    *) die "unknown command: $1 (use add, rm, main, back, agent, lead, ls or no argument)" ;;
+    -h|--help) sed -n '3,76p' "$0" | sed 's/^# \{0,1\}//' ;;
+    *) die "unknown command: $1 (use add, rm, main, back, agent, lead, testdb, ls or no argument)" ;;
 esac

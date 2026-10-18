@@ -17,7 +17,7 @@ project's own CLAUDE.md instead.
   `commits: auto` — the default the pipeline writes when it creates the state
   file; I opt out per ticket with `/work <T> commits manual` or `manual` in a
   gate answer — that line is my explicit ask: the orchestrator commits each
-  verified plan step. Pushing stays behind a prompt.)
+  build-loop round and its own small fixes. Pushing stays behind a prompt.)
 
 ## Knowledge vault
 - Everything lives under the `~/code/knowledge/` Obsidian vault, as three separate

@@ -32,6 +32,21 @@ in
   claudeSkillGroups = [ "common" "red" ];
   claudeAgentGroups = [ "common" "red" ];
 
+  # The team's skills we actually use, linked by name from the shared
+  # ai-tooling checkout so every session (and the /work worker) can invoke
+  # them directly: the three ticket skills and the in-app docs skill. They are
+  # self-contained (shared sections inlined by the team's convention) and write
+  # nothing under ai-tooling's tickets/ folder. The rest of ai-tooling (its
+  # implementation track, specification, QA, UX, git helpers) is replaced by
+  # our pipeline or not part of our flow; /tickets lists what is linked.
+  claudeExternalSkills =
+    let ai = "${config.home.homeDirectory}/code/RED-telematik-manager/ai-tooling/.claude/skills"; in {
+      "feature-story-erstellen" = "${ai}/feature-story-erstellen";
+      "bug-ticket-erstellen" = "${ai}/bug-ticket-erstellen";
+      "epic-erstellen" = "${ai}/epic-erstellen";
+      "feature-doku-pflegen" = "${ai}/feature-doku-pflegen";
+    };
+
   # Read-only devtools-mcp permissions (Jira/Gitea/Confluence/TeamCity) merged
   # into ~/.claude/settings.json on this host only. Modifying tools still prompt.
   claudePermissionGroups = [ "red" ];

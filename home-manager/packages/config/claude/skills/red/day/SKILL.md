@@ -4,7 +4,7 @@ description: Daily organisation on top of the /work state files — morning: wha
 argument-hint: "[morgen | abend] [YYYY-MM-DD]"
 model: opus
 effort: low
-allowed-tools: Read Grep Glob Write Edit Skill Bash(gitday:*) Bash(wl:*) Bash(wl-copy:*) Bash(wl-paste --list-types) Bash(xclip:*) Bash(git worktree list:*) Bash(git log:*) Bash(git status:*) Bash(mkdir:*) mcp__devtools-mcp__get_datetime mcp__devtools-mcp__get_current_user mcp__devtools-mcp__search_jira mcp__devtools-mcp__read_jira_issue mcp__devtools-mcp__list_gitea_pull_requests mcp__devtools-mcp__search_gitea_pull_requests mcp__devtools-mcp__list_gitea_pull_request_reviews mcp__devtools-mcp__list_gitea_pull_request_comments
+allowed-tools: Read Grep Glob Write Edit Skill Bash(gitday:*) Bash(wl:*) Bash(wl-copy:*) Bash(wl-paste --list-types) Bash(xclip:*) Bash(git worktree list:*) Bash(git log:*) Bash(git status:*) Bash(mkdir:*) Bash(mv:*) mcp__devtools-mcp__get_datetime mcp__devtools-mcp__get_current_user mcp__devtools-mcp__search_jira mcp__devtools-mcp__read_jira_issue mcp__devtools-mcp__list_gitea_pull_requests mcp__devtools-mcp__search_gitea_pull_requests mcp__devtools-mcp__list_gitea_pull_request_reviews mcp__devtools-mcp__list_gitea_pull_request_comments
 ---
 
 # Day (red / work)
@@ -149,7 +149,7 @@ Nothing is written in the morning mode.
    # 2026-09-16
 
    ## Fakten
-   - RTM-1234 · 3 commits · verify → review · CHECKS grün
+   - RTM-1234 · 3 commits · build → review · Loop nach 2 Runden fertig
    - PR 1988 eröffnet
    - …
 
@@ -165,13 +165,35 @@ Nothing is written in the morning mode.
    is and rewrite only `## Fakten`, `## Status-Text` and `## Übertrag` (a
    rerun refines, it does not duplicate). `mkdir -p` the folder on first
    use. Don't commit the store unless asked.
+6. **Archiv-Kandidaten im work-log.** Ticket folders under
+   `~/code/knowledge/work-log/<repo>/<TICKET>/` are archive candidates when
+   the Jira ticket sits in statusCategory Done (Fertig or Won't Do) **and**
+   no open PR references the ticket any more (`search_gitea_pull_requests`
+   for the key, state open). For review folders (a colleague's PR) the bar
+   is lower: as soon as that PR is merged. The folders `_junk`, `misc`,
+   `daily`, `refinement` and `sprint-review` are not tickets and stay
+   untouched, as does `_archiv` itself.
+   - List the candidates, one line per ticket: key · Jira status · last PR
+     (number and state). **Do not move anything on your own.** Only after
+     an explicit „ja" from the user, move each folder with
+     `mv ~/code/knowledge/work-log/<repo>/<TICKET>
+     ~/code/knowledge/work-log/_archiv/<repo>/<TICKET>` (`mkdir -p` the
+     repo folder first). The repo level is mandatory: `wl` looks for
+     `*/*/state.md` at depth 3, so a folder directly under `_archiv/`
+     would keep showing up in `wl`. Never delete anything.
+   - Decided by Tobias on 2026-10-15; the first run that day moved 75
+     folders, so the rule is in force, not a proposal.
 
 ## Stay in scope
 
 - Read-only against Jira and Gitea. No transitions, no comments, no Slack.
 - No project source files are read or changed — `gitday` is the only view on
   the code.
-- Write only `work-log/daily/<date>.md`. State files belong to `/work`;
-  if the overview reveals a stale one, say so and leave it.
+- Write only `work-log/daily/<date>.md`. The one other write is the
+  evening archive step: moving whole ticket folders into
+  `work-log/_archiv/<repo>/<TICKET>/` with `mv`, and only after the user
+  said yes to the listed candidates — never on your own, never a delete.
+  State files belong to `/work`; if the overview reveals a stale one, say
+  so and leave it.
 - Keep it short. The morning overview is read in a minute; the status text
   is read by a team in ten seconds.

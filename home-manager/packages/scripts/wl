@@ -67,7 +67,7 @@ if [[ -n "$ticket" ]]; then
     state=$(ls "$WORK_LOG"/*/"$ticket"/state.md 2>/dev/null | head -1 || true)
     [[ -n "$state" ]] || { echo "wl: no state.md for $ticket under $WORK_LOG" >&2; exit 1; }
     echo "state:    $state"
-    echo "phase:    $(fm "$state" phase) · gate: $(fm "$state" gate) $(fm "$state" gate_id) · step: $(fm "$state" step) · round: $(fm "$state" round) · commits: $(fm "$state" commits) · updated: $(fm "$state" updated)"
+    echo "phase:    $(fm "$state" phase) · gate: $(fm "$state" gate) $(fm "$state" gate_id) · round: $(fm "$state" round) · commits: $(fm "$state" commits) · updated: $(fm "$state" updated)"
     echo "branch:   $(fm "$state" branch)"
     wt=$(fm "$state" worktree); wt=${wt/#\~/$HOME}
     echo "worktree: ${wt:-?} · session: $(session_info "$wt")"
@@ -97,7 +97,7 @@ while IFS= read -r state; do
     gate=$(fm "$state" gate)
     gid=$(fm "$state" gate_id)
     [[ "$gate" == "open" && -n "$gid" ]] && gate="open:$gid"
-    step=$(fm "$state" step)
+    step=$(fm "$state" round)
     updated=$(fm "$state" updated)
     wt=$(fm "$state" worktree); wt=${wt/#\~/$HOME}
     next=$(section "$state" "Nächster Schritt" | sed '/^$/d' | head -1 | cut -c1-70)
@@ -117,9 +117,9 @@ fi
 [[ ${#rows[@]} -gt 0 ]] || { echo "wl: keine Tickets in $WORK_LOG"; exit 0; }
 
 # gate: open first, then by phase order, then ticket
-phase_order='{"assess":0,"spec":1,"plan":2,"implement":3,"verify":4,"review":5,"accept":6,"done":7,"parked":8,"frei":9}'
+phase_order='{"assess":0,"build":1,"review":2,"accept":3,"done":4,"parked":5,"frei":6,"spec":7,"plan":7,"implement":7,"verify":7}'
 {
-    echo "TICKET|PHASE|GATE|SCHRITT|UPDATED|SESSION|NÄCHSTER SCHRITT"
+    echo "TICKET|PHASE|GATE|RUNDE|UPDATED|SESSION|NÄCHSTER SCHRITT"
     printf '%s\n' "${rows[@]}" \
       | jq -R -r --argjson p "$phase_order" '
           split("|") | {t:.[0], ph:.[2], g:.[3], st:.[4], u:.[5], s:.[6], n:.[7]}

@@ -56,9 +56,10 @@ failures untouched by the diff: report them, do not fix them.
 ## 3. Fan out three independent reviewers
 
 Spawn **three `reviewer` subagents in one message** (Agent tool,
-`subagent_type: reviewer`; the profile in `~/.claude/agents/reviewer.md`
-carries the rules to read, the two review dimensions, the findings
-discipline and the output format), so they run in parallel. Each is blind
+`subagent_type: reviewer`, **Modus: pr**; the profile in
+`~/.claude/agents/reviewer.md` carries the rules to read, the two review
+dimensions, the findings discipline and the output format), so they run
+in parallel. Each is blind
 to the others — do not share one reviewer's output with another. Brief each
 with only what it cannot know:
 
@@ -86,10 +87,10 @@ For each merged finding, actively try to refute it before touching anything:
   guarded elsewhere on the call path, unreachable input, or an existing test
   proves the behavior.
 
-With more than ~10 merged findings, fan the verification out instead: a
-`step-verifier` subagent in „Modus: widerlegen" per batch of findings (at
-most 5 in parallel), each returning a `WIDERLEGT: ja|nein · Beleg` line per
-finding. Only findings that survive move on.
+You do this yourself, also with many findings: work the merged list in
+batches by file, one Beleg line per finding (`widerlegt: <Beleg>` or
+`bestätigt: <Beleg>`). No verifier agent; the caller of a review owns the
+judgement. Only findings that survive move on.
 
 ## 6. Fix directly
 
@@ -112,5 +113,9 @@ Final summary in German, ordered by file:
   failure scenario), what the fix was.
 - **Verworfen:** one compact line total ("N Findings verworfen, z. B. …") —
   no detail walls for refuted findings.
-- **Offen:** the judgment-call items with a one-line recommendation each.
+- **Offen:** only the judgment-call items from step 6 (a fix the user must
+  decide, never an unverified point: what you could not settle is either
+  fixed or refuted), each as a checkbox `- [ ]` with the Hergang from the
+  outside in in two or three sentences (entry point, what happens, where it
+  goes wrong, what the consequence is) and a one-line recommendation.
 - Close with the check status after fixing (PHPStan/Pint/tests green or not).

@@ -10,9 +10,12 @@
 # allow. Anything else stays a prompt for the human.
 #
 # Deliberately narrow: no redirects, no pipes, no subshells, no `;`, no lone
-# `&`, no full test suite, no push. The only migrate is the test-DB bootstrap
-# `php artisan migrate --seed --env=testing` (exact), the only compose start is
-# `docker compose up -d [service …]` against the worktree's own stack.
+# `&`, no full test suite, no push. The test DB is prepared with `wt testdb`
+# (the one command the agents are told to use; it starts the worktree's own
+# database + redis and runs the testing-env migrate + seed; /work runs it at
+# the build entry, `wt add` does not start any containers); the bare
+# `php artisan migrate --seed --env=testing` (exact) and `docker compose up -d
+# [service …]` against the worktree's own stack stay allowed as its parts.
 # Extend the list here, not with Bash(*).
 #
 # Version-controlled in the dotfiles repo and symlinked to
@@ -37,7 +40,7 @@ if printf '%s' "$command" | grep -Eq '[;|<>`]|\$\(|\|\|'; then
   exit 0
 fi
 
-safe='^((\./)?vendor/bin/phpunit( [^ ]+)*|(\./)?vendor/bin/pint( --test)?( [^ ]+)*|(\./)?vendor/bin/phpstan analyse( [^ ]+)*|php artisan test( [^ ]+)*|php artisan route:list( [^ ]+)*|php artisan migrate:status|composer dump-autoload( -o)?|composer validate|npm run (lint|type-check)( [^ ]+)*|git (status|diff|log|show|branch|rev-parse|merge-base|ls-files|stash list)( [^ ]+)*|git add( [^ ]+)+|docker compose (ps|logs)( [^ ]+)*|docker compose up -d( [a-z0-9][a-z0-9_-]*)*|php artisan migrate --seed --env=testing)$'
+safe='^((\./)?vendor/bin/phpunit( [^ ]+)*|(\./)?vendor/bin/pint( --test)?( [^ ]+)*|(\./)?vendor/bin/phpstan analyse( [^ ]+)*|php artisan test( [^ ]+)*|php artisan route:list( [^ ]+)*|php artisan migrate:status|composer dump-autoload( -o)?|composer validate|npm run (lint|type-check)( [^ ]+)*|git (status|diff|log|show|branch|rev-parse|merge-base|ls-files|stash list)( [^ ]+)*|git add( [^ ]+)+|docker compose (ps|logs)( [^ ]+)*|docker compose up -d( [a-z0-9][a-z0-9_-]*)*|php artisan migrate --seed --env=testing|wt testdb( --fresh)?( [^ ]+)?( --fresh)?)$'
 
 # Every segment must match; a leading `cd <this worktree> &&` is tolerated.
 ok=1

@@ -32,6 +32,9 @@
       "Bash(wt ls)",
       "Bash(wt agent:*)",
       "Bash(wt lead:*)",
+      "Bash(wt testdb:*)",
+      "Bash(git rebase --autosquash:*)",
+      "Bash(git rebase --abort)",
       "ListAgents",
       "SendMessage",
       "Bash(gitday:*)",
@@ -155,15 +158,15 @@
       "Source control: Gitea at git.sys.redicals.de, org RED-telematik-manager and all repos under it. The team works on feature branches feat/RTM-…/… and fix/RTM-…/… and merges via pull requests into develop.",
       "Key internal services: Jira, Confluence, TeamCity and TestRail, all reached only through the devtools-mcp MCP server. Reading them is routine; writing to them (comments, transitions, PRs, reviews) is gated by permissions.ask rules and always needs Tobias' answer.",
       "Trusted repo: the main checkout under ~/code/RED-telematik-manager/ and every git worktree of it under ~/code/worktrees/<repo>/<branch>. The worktrees are the intended working directories of autonomous ticket sessions; each has its own docker compose project (COMPOSE_PROJECT_NAME) and test database.",
-      "Trusted local stores: ~/code/knowledge/work-log/ (per-ticket pipeline artifacts: state.md, plan.md, spec.md, handover.md) and ~/code/knowledge/work-brain/ (team knowledge). Both are private git repos, committed locally, never pushed to a personal remote.",
+      "Trusted local stores: ~/code/knowledge/work-log/ (per-ticket pipeline artifacts: state.md, ticket.md, handover.md, review.md) and ~/code/knowledge/work-brain/ (team knowledge). Both are private git repos, committed locally, never pushed to a personal remote.",
       "Sensitive data locations: .env files, ~/.ssh, ~/.claude/.credentials.json, and any customer data reachable through the app's database. None of it may enter work-log, work-brain, a commit, a comment or an artifact."
     ],
     "allow": [
       "$defaults",
       "Running the project's own checks inside a worktree under ~/code/worktrees/ is routine: ./vendor/bin/phpunit with a path or filter, ./vendor/bin/pint, ./vendor/bin/phpstan, php artisan test, composer dump-autoload, npm run lint, npm run type-check.",
-      "Migrating and seeding a worktree's own test database with `php artisan migrate --seed --env=testing` inside ~/code/worktrees/ is routine: it targets only that worktree's own compose stack (its own MariaDB container and port from .env.testing), never a shared database.",
+      "Preparing a worktree's own test database with `wt testdb` (optionally `--fresh`) is routine and the intended way: the script starts only that worktree's database and redis containers and runs the testing-env migration and seed against the port from its .env.testing, never a shared database. The bare `php artisan migrate --seed --env=testing` inside ~/code/worktrees/ is the same operation and equally routine.",
       "Starting, inspecting or stopping the docker compose stack of a worktree (its own COMPOSE_PROJECT_NAME) without removing volumes is routine; it never touches the main checkout's stack.",
-      "git add and git commit of the session's own work on a ticket branch (feat/RTM-…, fix/RTM-…) inside its worktree after the step was verified is routine when the ticket's state.md records commits: auto; the commit-guard PreToolUse hook enforces that record.",
+      "git add and git commit of the session's own work on a ticket branch (feat/RTM-…, fix/RTM-…) inside its worktree is routine when the ticket's state.md records commits: auto; the commit-guard PreToolUse hook enforces that record. Folding a later change into the commit it belongs to with `git commit --fixup=<sha>` followed by `git rebase --autosquash <merge-base>` (non-interactive) on that same branch is the pipeline's normal way to keep commits cut by change; it rewrites only the ticket branch's unmerged commits, never anything pushed to develop, and the force-push afterwards is Tobias' own hand.",
       "The /lead coordinator session starting or prompting a ticket's worker session through the wt agent script is routine; wt agent refuses when the worker is busy or blocked."
     ],
     "soft_deny": [

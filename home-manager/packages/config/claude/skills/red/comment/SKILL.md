@@ -66,6 +66,13 @@ stays English.
   locate the spot and, if the fix is a rename or an existing class to use, one for
   the replacement. Never test method names, line numbers or call chains. When
   naming existing code as the fix, use its real name, not a paraphrase.
+- **Every verb has its object, every noun its referent.** The reader sees one
+  line of a diff, not the review. „Leeren" is not a statement; „den
+  Firmware-Cache des Konnektors leeren" is. A word that means two different
+  things in this change (one package deleted vs. the whole cache cleared, two
+  drivers, two tables, two jobs) is spelled out with its variant at every use,
+  never as a shorthand the review coined for itself. Same for „zurücksetzen",
+  „aufräumen", „neu laden", „der Job", „der Status", „das Feld": which one.
 - **State the consequence, not the derivation.** A finding names what goes wrong
   and, if it is not obvious, the fix. A reply to a review point explains only a
   deviation or a rejection, in one verifiable sentence. Whoever did what was asked

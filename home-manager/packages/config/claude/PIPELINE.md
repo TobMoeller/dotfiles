@@ -8,19 +8,26 @@ Datei wird nachgezogen.
 ## In einem Satz
 
 Ich (Tobias) spreche mit `/lead` darüber, welche Tickets heute laufen. Jedes
-Ticket bekommt einen Worktree und eine eigene Claude-Session, in der `/work`
-die Arbeit an Spezialisten delegiert, jeden Schritt unabhängig prüfen lässt
-und regulär nur einmal auf mich wartet: bevor irgendetwas das Gerät
-verlässt (Abnahme). Vor dem Bauen hält sie nur, wenn eine fachliche Frage
-offen ist, die kein Agent aus Code und Doku beantworten kann.
+Ticket bekommt einen Worktree und eine eigene Claude-Session. Darin
+analysiert `/work` das Ticket selbst, lässt es von einem Loop aus drei
+Agents bauen (Implementer, Refactorer, Logik-Review), lässt den fertigen
+Stand von zwei unabhängigen Reviewern prüfen, bewertet deren Befunde
+selbst, schreibt die Übergabe und wartet regulär nur einmal auf mich:
+bevor irgendetwas das Gerät verlässt. Vor dem Bauen hält sie nur, wenn das
+Ticket eine Lücke hat oder ein größerer Umbau absehbar ist; das bespreche
+ich dann mit der Session, die das Ticket kennt.
+
+Seit 2026-10-07 ist das der einzige Fluss. Keine Größenklassen, keine
+Spec-Phase, kein Plan, keine Schritt-Prüfung. Anlass und Messgrößen
+stehen unter Offene Punkte.
 
 ## Die drei Ebenen
 
 | Ebene | Wo | Was sie tut | Was sie nie tut |
 |---|---|---|---|
-| `/lead` | eine Session pro Tag, herdr-Space `lead`, cwd `work-log` (`wt lead`) | Tagesplan, Worker starten, Gate-Nachrichten empfangen und Antworten weiterreichen, „done" nachprüfen, Tagesnotiz führen | Code, Reviews, Jira-Schreibzugriff, Permission-Prompts beantworten |
-| `/work` (Worker) | eine Session pro Ticket, im Worktree | State-Maschine: liest und schreibt `state.md`, brieft Agents, committet verifizierte Schritte, meldet Gates an den Lead | selbst Code lesen oder ändern |
-| Spezialisten | Subagents des Workers | je eine Aufgabe mit festem Ergebnisblock | Zustand halten, miteinander reden |
+| `/lead` | eine Session pro Tag, herdr-Space `lead`, cwd `work-log` (`wt lead`) | Tagesplan, Worker starten, Gate-Nachrichten empfangen, „done" nachprüfen, Tagesnotiz führen | Code, Reviews, Jira-Schreibzugriff, Permission-Prompts beantworten |
+| `/work` (Worker) | eine Session pro Ticket, im Worktree | analysiert das Ticket (`ticket.md`), stellt Bugs nach, brieft die Agents, bewertet ihre Ergebnisse, führt Review-Befunde zusammen und widerlegt sie, fixt Kleinigkeiten, schneidet und faltet Commits, schreibt `handover.md`, entwirft Folgetickets, ist mein Gesprächspartner | Feature-Code und Tests schreiben, pushen, PR anlegen, mergen |
+| Agents | Subagents des Workers, jeder behält seine Session über die Runden | je eine Station mit festem Ergebnisblock | Zustand halten, miteinander reden, committen |
 
 Lead und Worker sind getrennte Claude-Sessions und sprechen über
 `SendMessage` miteinander (`ListAgents` zeigt die Namen). Der Lead schreibt
@@ -30,136 +37,167 @@ dorthin jeden Gate-Block und die Done-Zeile. Der Lead antwortet mit
 `state.md`. herdr bleibt die Sicht von außen (idle, working, blocked) und
 der Ort, an dem ich Permission-Prompts beantworte.
 
-Der Lead läuft auf Fable (er spricht mit mir und urteilt; `wt lead` startet
-ihn mit `--model fable`, Override `WT_LEAD_MODEL=opus`). Die Spezialisten
-(alle Opus 5.5, Auditor auf Fable):
+Der Lead läuft auf Fable, der Worker und die Agents auf Opus.
 
-| Agent | Aufgabe | Gibt zurück |
-|---|---|---|
-| `analyst` | Ticket verstehen, Code lesen, Spec schreiben, echte Fragen finden (technische in die Spec, fachliche in `fragen.md`), Aufgaben für mich benennen, meine Rückfragen beantworten (Antwort nur im Chat) | `spec.md`, `fragen.md`, DoD, TLDR |
-| `planner` | Spec → `plan.md` mit kleinen Schritten, je ein Test und ein Commit | `plan.md` |
-| `plan-verifier` | drei Modi: Spec gegen Ticket, Code und Regeln prüfen, Fragen einordnen (SPEC-Prüfung) · jede Frage an mich prüfen, bevor sie mich erreicht (Fragen-Prüfung) · Plan gegen Spec, DoD, Regeln und Code prüfen | pass / fail / unsicher · Fragen fachlich/technisch · pro Frage pass/fail |
-| `implementer` | genau einen Plan-Schritt bauen, Checks grün, nicht committen | Diff, Checks |
-| `step-verifier` | drei Modi: ein Schritt · ganzer Branch · Review-Befunde widerlegen (in `/review` als Über-Review: zusammenführen, widerlegen, Schwere setzen) | pass / fail / unsicher · WIDERLEGT-Liste |
-| `reviewer` | unabhängiger Reviewer des ganzen Branches (zwei parallel, drei bei L; drei in `/pre-review` und `/review`) | Befunde |
-| `writer` | `handover.md`, offene Abnahme-Fragen in `fragen.md`, PR-Titel (kein Body), Jira-Kommentar in der `comment`-Stimme | Texte |
-| `auditor` | Schiedsrichter bei Konflikt oder Unsicherheit, maximal zweimal pro Ticket; dazu einmal pro Spec-Runde für die technischen Fragen und für Fragen, die die Fragen-Prüfung nicht bestehen; beantwortet Rückfragen zu seinen eigenen Fragen (nur im Chat) | A / B / anders / Tobias; Urteile in der Spec unter Entscheidungen, Fragen an mich in `fragen.md` |
+| Agent | Station | Darf | Gibt zurück |
+|---|---|---|---|
+| `implementer` | Loop 1 | baut das ganze Ticket aus `ticket.md`: Funktionalität und je DoD-Item ein Test, der ohne die Änderung rot wäre; liest von den Regeln nur die Testkonventionen; in Runde ≥ 2 setzt er die Befunde des Logik-Reviews pro Id um oder weist sie mit Beleg zurück | Dateien, Checks, technische Entscheidungen, Abweichung, ggf. eine fachliche Frage |
+| `refactorer` | Loop 2 | liest alle Regeln der berührten Pfade als Hauptaufgabe und ändert den Code direkt: Schicht, Muster, Benennung, Fehlerbehandlungs-Eigentum, Testkonventionen; lässt dieselben Tests laufen; Bestandscode nur als mechanische Folge oder auf direkte Regel, sonst Eskalation mit Vorschlag und Reichweite | Umbauten mit Regelbeleg, Bestands-Änderungen, Commit-Zeile, ggf. Eskalation |
+| `reviewer` Modus logik | Loop 3, lesend | prüft, ob jedes DoD-Item einen Test mit Nachweis hat, führt die Tests der berührten Klassen und Aufrufer aus, sucht Fehlerszenarien als Kette von außen nach innen, prüft Diff gegen SOLL | Befunde mit Schwere, DoD-Nachweise |
+| `reviewer` Modus voll ×2 | Voll-Review, lesend | jeder der ganze Stand gegen Regeln, Logik, Struktur und Scope; blind zueinander, nichts aufgeteilt | Befunde mit Schwere |
 
 ## Die Phasen
 
 ```
-assess+spec ──SPEC──▶ plan ──▶ implement ──▶ verify ──CHECKS──▶ review ──▶ accept ──PR──ABNAHME──▶ done
-   analyst            planner    implementer    step-verifier     reviewer ×2   writer
-   plan-verifier      plan-      (+ step-       (Modus branch)    step-verifier plan-verifier
-   (Modus spec)       verifier   verifier       ↺ Nacharbeit      (widerlegen)  (Modus fragen)
-   auditor (techn.)              bei M, L)                        ↺ Nacharbeit
-   plan-verifier
-   (Modus fragen)
-
-SPEC hält nur bei einer geprüften fachlichen Frage; sonst läuft es durch bis PR.
+assess ──FRAGEN?──▶ build ──────────────────────────▶ review ──────────────────▶ accept ──PR──▶ ──ABNAHME──▶ done
+Worker:            Implementer → Refactorer →        Reviewer ×2 (voll)        Worker: handover.md
+ticket.md          Reviewer (logik)                  Worker: zusammenführen,
+(Hergang, DoD,     ↺ bis kein major/blocker,         widerlegen, Kleinigkeiten
+Scope, Fragen)     ein Commit pro Runde,             fixen, Größeres → Loop
+                   max 3 Runden, dann ESK            ↺ max 2 Runden, dann ESK
 ```
 
-1. **assess + spec.** Der Analyst liest Ticket und Code und schreibt
-   `spec.md` (bei Größe S zehn Zeilen, bei Bugs eine Diagnose in
-   `plan.md`). Technische Fragen stehen dort unter „Entscheidungen". Nur
-   die fachlichen Fragen, die Code, Doku und Ticket nicht beantworten,
-   kommen nach `fragen.md`, je Frage ein kurzer Abschnitt. Dazu Aufgaben,
-   die nur ich erledigen kann.
-2. **SPEC-Prüfung.** Ein Plan-Verifier im Modus spec prüft die Spec blind
-   gegen Ticket, Code und Regeln und ordnet die Fragen ein (zwei Runden,
-   dann Auditor). Technische Fragen entscheidet der Auditor in einem
-   Aufruf. Bleibt eine fachliche Frage, prüft ein Plan-Verifier im Modus
-   fragen sie, bevor sie mich erreicht (siehe unten). Bleibt keine
-   geprüfte fachliche Frage und keine Aufgabe „vor dem Bauen" offen, geht
-   es ohne Halt in die Planung; Prüfung und Ergebnis stehen im Log. Sonst
-   hält die Pipeline am SPEC-Gate.
-3. **plan.** Planner schreibt die Schritte, Plan-Verifier prüft sie blind.
-   Zwei Runden, dann Auditor.
-4. **implement.** Pro Schritt: Implementer baut und testet, bei M und L prüft
-   der Step-Verifier blind (drei Runden), dann staged und committet der
-   Worker den Schritt. Bei S entfällt der Verifier pro Schritt.
-5. **verify (CHECKS).** Step-Verifier im Branch-Modus: jedes DoD-Item hat
-   einen Nachweis, keine Datei außerhalb des Plans, Tests der berührten
-   Klassen und ihrer Aufrufer grün. Zwei Runden, Nacharbeit dazwischen.
-6. **review.** Zwei Reviewer (drei bei L oder auf Wunsch), blind zueinander.
-   Ihre Befunde werden von einem Step-Verifier im Widerlege-Modus gegen den
-   Code geprüft. Was übrig bleibt, wird ein Nacharbeit-Schritt;
-   Ermessensfragen landen in `## Offene Fragen`.
-7. **accept (PR, dann ABNAHME).** Der Writer schreibt `handover.md` und offene
-   Abnahme-Fragen nach `fragen.md`; die Fragen gehen durch die
-   Fragen-Prüfung. Dann hält der Worker kurz am Gate PR: Er bittet mich,
-   den Branch zu pushen und den PR nach `develop` ohne Beschreibung
-   anzulegen (Befehl und Titel stehen im Gate). Das ist nicht Teil der
-   Abnahme, sondern nur meine Review-Fläche in Gitea. Nach `pr da` prüft
-   er Branch und PR nur lesend, dann kommt ABNAHME, und ich entscheide.
-   Dort sehe ich auch zum ersten Mal, was die Agents in der Spec-Phase für
-   mich entschieden haben, und was ich vor dem Deploy noch tun muss.
+1. **assess.** Der Worker liest Ticket und Subsystem selbst und schreibt
+   `ticket.md`: das Ticket in einem Satz, den **Hergang** als Kette von
+   außen nach innen (Auslöser, Klassen in Reihenfolge mit `file:line`, die
+   Stelle, an der das Ticket ansetzt), die DoD wörtlich aus dem Ticket,
+   Scope in/out, Einstieg und Hinweise für die Agents, Fragen an mich,
+   Aufgaben für mich, Entscheidungen. Die Prüfliste dafür (A1 bis A8 in
+   `kriterien.md`): jede Behauptung des Tickets am Code verifiziert, jede
+   SOLL-Aussage mit prüfbarem Kriterium, Geschwister-Stellen gesucht,
+   Datenannahmen benannt, jede Änderung an geteiltem Code als Frage,
+   sichtbares undefiniertes Verhalten als Frage. Ein Ticket, das sich nicht
+   als Kette rekonstruieren lässt, hat eine Lücke. Alles über den Wortlaut
+   des Tickets hinaus ist Frage oder `out:`, nie DoD. Breite: was der
+   Hergang braucht, kein Sweep über das Repo. **Bugs werden vor dem Bauen
+   nachgestellt** (A9): die Kette bis zur Zeile, der konkrete Auslöser, der
+   Test, der rot werden müsste. Ruht das Ticket auf einem Vorfall (Logzeile,
+   Kibana), liefere ich den Beleg: der Worker legt mir die fertige
+   Kibana-Abfrage oder das Prod-SQL unter „Für Tobias · vor dem Bauen" hin,
+   dazu die Frage, ob wir trotzdem bauen, das Ticket mit den Belegen an den
+   Ersteller zurückgeben oder ins Team tragen. RTM-3836 hat gezeigt, warum:
+   zwei Monate Log ohne den zitierten Fehler, erst nach der Abnahme
+   bemerkt.
+2. **FRAGEN.** Gibt es eine Frage, einen Umbau-Hinweis oder eine Aufgabe
+   „vor dem Bauen", hält die Pipeline und ich entscheide im Gate, mit dem
+   Worker, der den Hergang kennt; Rückfragen beantwortet er selbst aus
+   seiner Analyse. Kein Prüfagent dazwischen. Sonst kein Halt.
+3. **build.** Der Loop. Implementer baut Funktionalität und Tests, roh.
+   Refactorer bringt das in Form, mit allen Regeln im Kontext, ändert
+   direkt, lässt die Tests laufen; was an Bestandscode größer wäre,
+   eskaliert er statt es zu tun. Der Worker committet die Runde.
+   Logik-Review prüft Nachweise, Tests und Fehlerszenarien, lesend. Bleibt
+   kein Befund der Schwere major oder blocker, ist der Loop fertig; sonst
+   gehen die Befunde pro Id an den Implementer, dann Refactorer über das
+   Delta, dann derselbe Reviewer, alle in ihren Sessions. Höchstens drei
+   Runden, dann ESK. Zurückweisungen eines Befunds entscheidet der Worker
+   am Code. Eine fachliche Frage aus dem Bau heraus hält am FRAGEN-Gate,
+   der Stand bleibt stehen.
+4. **review.** Zwei Reviewer parallel, blind, identischer Brief, jeder der
+   ganze Stand. Der Worker führt zusammen (gleiche Stelle, gleiche
+   Behauptung → ein Befund, Zähler als Information, nichts fällt weg, weil
+   nur einer es sah), widerlegt am Code mit seinem Ticket-Wissen, setzt
+   die Schwere. Kleinigkeiten ohne Verhaltensänderung fixt er selbst,
+   Checks, Commit. major und blocker gehen als eine Loop-Runde zurück,
+   danach Voll-Review erneut mit denselben Reviewern. Ende, wenn nichts
+   major/blocker offen ist; nicht gefixte minor stehen als Hinweise in der
+   Übergabe. Zwei Runden, dann ESK. Befangenheit: einen Scope-Befund weist
+   er nur mit einer Ticket-Stelle zurück, nie mit seiner eigenen
+   `ticket.md`; einen Konflikt zwischen beiden Reviewern und seiner
+   Widerlegung sehe ich in der Übergabe mit beiden Positionen.
+5. **accept.** Der Worker schreibt `handover.md`: In 30 Sekunden, Hergang
+   der Änderung von außen nach innen, Diff mit Warum, DoD-Matrix, Checks,
+   Entscheidungen unterwegs (seine, die des Implementers, die Umbauten des
+   Refactorers), Hinweise der Reviewer, Offen, Für dich zu tun,
+   Prüfverlauf, Commits, PR-Titel. Dann Gate PR: ich pushe und lege den PR
+   ohne Beschreibung an, der Worker prüft lesend. Dann ABNAHME.
 
-**Nacharbeit** ist immer dasselbe: ein angehängter Schritt `### N+k.
-Nacharbeit <Quelle>` in `plan.md`, der durch die normale Implement-Schleife
-läuft. Egal ob die Quelle CHECKS, ein Review-Befund oder meine Notiz ist.
+**Nacharbeit** ist immer dasselbe: meine Notiz wird ein Befund mit Id,
+eine Loop-Runde (Implementer, Refactorer, Logik), Voll-Review mit
+denselben Reviewern, Übergabe mit „Diff seit letzter Abnahme", Push, neue
+Abnahme. Meine Notiz zählt nicht gegen das Rundenlimit.
 
 ## Die Gates
 
 Ein Gate ist ein Block `## Gate` in der `state.md` des Tickets plus ein
 beendeter Turn. Kein Dialog. **Beantwortet wird im Ticket-Tab:** der Worker
 druckt den Block in seinem Space, dort antworte ich mit `/work RTM-xxxx
-<Antwort>`, frage nach, diskutiere, oder schreibe die Antwort in `fragen.md`
-und sage `siehe fragen.md`. Der Lead bekommt nur eine Zeile (Gate offen,
+<Antwort>`, frage nach, diskutiere, oder schreibe die Antwort in `ticket.md`
+und sage `siehe ticket.md`. Der Lead bekommt nur eine Zeile (Gate offen,
 Gate beantwortet, done) für die Tagesnotiz und sagt mir, in welchem Space
-die Antwort erwartet wird. Antworte ich trotzdem beim Lead, reicht er die
-Antwort weiter. `wl RTM-xxxx` zeigt den offenen Block, `wl --open` alle.
+die Antwort erwartet wird. `wl RTM-xxxx` zeigt den offenen Block, `wl
+--open` alle.
 
-**Welche Fragen mich erreichen.** Jede Frage trägt eine Klasse. Fünf
-Klassen gehen immer an mich, nach genau einer Prüfung ihrer Form (Beleg
-vorhanden oder als Vermutung markiert, Optionen vollständig, Schreibregeln),
-nie nach Runden, in denen Agents entscheiden, ob ich sie sehen darf:
+**Welche Fragen mich erreichen.** Jede Frage trägt eine Klasse und geht
+direkt an mich, nach der Formprüfung des Workers selbst (Hergang zuerst,
+Optionen in Datei und Gate identisch, Belege, Vermutungen markiert, keine
+vorausgesetzte Agenten-Entscheidung). Kein Agent entscheidet, was ich sehe.
 
 | Klasse | Bedeutung |
 |---|---|
-| `Lücke` | das Ticket lässt etwas offen oder widerspricht sich, die Spec musste raten |
+| `Lücke` | das Ticket lässt etwas offen, widerspricht sich oder setzt etwas voraus, das der Code widerlegt |
 | `Aufwand` | eine Vorgabe kostet weit mehr als das Ticket vermuten lässt, oder eine einfachere Lösung erfüllt den Zweck |
 | `Nutzer` | eine Vorgabe ist für Nutzer oder Betrieb ungünstig |
 | `Daten` | die Lösung ruht auf einer Annahme über echte Daten; das Statement liegt bei, Antwort vor dem Bauen |
 | `Produkt` | Verhalten, das weder Ticket noch Code festlegen und das Nutzer sehen |
+| `Umbau` | die saubere Lösung braucht mehr als das Ticket vermuten lässt: geteilte Klasse, mehrere Aufrufer, Migration; aus der Analyse oder vom Refactorer |
 
-Die sechste Klasse, `technisch` (zwei tragfähige Designs), entscheidet der
-Auditor. Was mich nicht erreicht: unmarkierte Vermutungen und als Produktfrage
-verkleidete Designfragen.
+Was mich nicht erreicht: unmarkierte Vermutungen, technische Wahlen ohne
+Reichweite über das Ticket hinaus (die trifft der Implementer, der
+Refactorer und das Review prüfen sie). Was mich immer erreicht: ein
+Widerspruch im Ticket und jede Option, die Verhalten für Abläufe außerhalb
+des Tickets ändert, egal wie technisch sie aussieht (gelernt an RTM-3919
+und RTM-3883).
 
 | Gate | Art | Wann | Was ich entscheide | Antwort |
 |---|---|---|---|---|
-| **SPEC** | weich (Spec-Prüfung durch Agents gegen S1–S6); hart, sobald eine Frage der fünf Klassen oder eine Aufgabe „vor dem Bauen" offen ist | nach assess+spec | die Fragen an mich, in einem Rutsch | `ok` (alles wie empfohlen) · `1: <Option oder eigener Text> 2: <…>` (abweichend, Rückfrage oder Kontext; Rest wie empfohlen) · `siehe fragen.md` · `nein: <Notiz>` · jeweils `manual` anhängen = ich committe selbst |
-| **CHECKS** | weich | nach implement | nichts, der Branch-Verifier entscheidet | keine, nach zwei Fehlrunden wird daraus LIMIT |
+| **FRAGEN** | hart, nur wenn es Fragen, einen Umbau oder eine Aufgabe „vor dem Bauen" gibt | nach assess; aus dem Loop heraus bei einer fachlichen Frage des Implementers | die Fragen an mich, in einem Rutsch | `ok` (alles wie empfohlen) · `1: <Option oder eigener Text> 2: <…>` (abweichend, Rückfrage oder Kontext; Rest wie empfohlen) · `siehe ticket.md` · `diskussion <n>` · `nein: <Notiz>` · jeweils `manual` anhängen = ich committe selbst |
+| **ESK** | hart | der Refactorer eskaliert ein Bestands-Refactoring, ein Rundenlimit ist erschöpft, ein Widerspruch zum Ticket beim Bauen | die eine Frage oder „Wie weiter?" | `1: A` · `1: <eigener Text>` · `redo <phase>` · `park <Notiz>` · `diskussion 1` |
 | **PR** | hart, kurz, nicht Teil der Abnahme | nach review, `handover.md` liegt vor; nach jeder Nacharbeit erneut (dann nur Push) | nichts, ich pushe und lege den PR an | `pr da` (Worker prüft Branch und PR lesend, trägt `pr:` ein, dann ABNAHME) · `ohne pr` · `parken` |
-| **ABNAHME** | hart, immer | nach PR | abnehmen oder zurückschicken | `abnehmen` (nackter PR-Link als Jira-Kommentar ohne Prompt; der PR bleibt offen, mergen tue ich) · `abnehmen ohne-jira` · `nacharbeiten <Notiz>` (`siehe PR` = meine Kommentare im PR) · `parken` · offene Fragen wie bei SPEC |
-| **ESK** | hart | der Auditor sagt „Tobias" und die Frage besteht die Fragen-Prüfung | die eine Frage, die kein Agent aus Code und Doku klären konnte | freier Satz · `siehe fragen.md` · `diskussion 1` |
-| **LIMIT** | hart | ein Rundenlimit ist erschöpft | wie weiter | `redo <phase>` · `park <Notiz>` · freier Satz als Entscheidung |
+| **ABNAHME** | hart, immer | nach PR | abnehmen oder zurückschicken | `abnehmen` (nackter PR-Link als Jira-Kommentar ohne Prompt; der PR bleibt offen, mergen tue ich) · `abnehmen ohne-jira` · `nacharbeiten <Notiz>` (`siehe PR` = meine Kommentare im PR) · `parken` · offene Punkte wie bei FRAGEN |
 
-**Fertig-Kriterien und Befund-Register.** Was ein Artefakt erfüllen muss,
-steht in `~/.claude/skills/red/work/kriterien.md` (S1–S6 Spec, P1–P6 Plan,
-I1–I5 Schritt, B1–B5 Branch), nicht im Kopf des Verifiers. In Runde 1
-prüft der Verifier jede Zeile mit ja oder nein und führt alles auf, was ihm
-auffällt; ein Nein ist ein Befund, alles andere ein Hinweis, der mitgegeben
-wird und keine Runde kostet. Jeder Befund bekommt eine Id im Register
-`pruefung/befunde.md` und wird fortan nur noch über die Id angesprochen:
-der Autor antwortet `umgesetzt` oder `zurückgewiesen: <Beleg>`,
-Zurückweisungen gehen gesammelt an den Auditor, dessen Urteil ist final und
-steht im Register. Runde 2 prüft die offenen Ids nach, nicht das Dokument
-neu. Kippt dasselbe Kriterium ein zweites Mal, entscheidet der Auditor
-statt einer dritten Runde. Entschiedene Ids tauchen in keiner späteren
-Prüfung wieder auf, außer mit neuem Beleg als neue Zeile.
+**Befund-Register.** Jeder Befund eines Reviewers und jede Nacharbeit-Notiz
+von mir bekommt eine Id in `pruefung/befunde.md` und wird fortan nur über
+die Id angesprochen: der Implementer antwortet `umgesetzt` oder
+`zurückgewiesen: <Beleg>`, Zurückweisungen entscheidet der Worker am Code,
+das Re-Review bestätigt `erledigt` oder `offen`. Status: offen, umgesetzt,
+zurückgewiesen, widerlegt, gefixt (Orchestrator), Hinweis. Entschiedene Ids
+tauchen in keiner späteren Prüfung wieder auf, außer mit neuem Beleg als
+neue Zeile.
 
-Rundenlimits: Spec-Prüfung 2 · Plan 2 · pro Schritt 3 (nur M, L) · CHECKS 2
-· Auditor 2 pro Ticket für Konflikte (der geplante Aufruf für die
-technischen Spec-Fragen zählt nicht mit) · nach jedem Konflikt-Urteil genau
-eine weitere Verifier-Runde · Rückfragen von mir ohne Limit (ab der
-zweiten zur selben Frage geht die Diskussion in den Worker).
-**Commit-Modus.** `commits: auto` ist der Default aus der Vorlage und meine
-stehende Entscheidung: der Worker committet jeden verifizierten Schritt.
-Abwählen pro Ticket mit `/work RTM-xxxx commits manual`, mit `manual` in
-einer Gate-Antwort oder im Start-Prompt über den Lead („ich committe
-selbst"). Zurück nur mit `commits auto` von mir.
+**Schwere.** blocker: falsche oder verlorene Daten, Autorisierungslücke,
+eine Struktur, die nach dem Merge wieder aufgerissen werden müsste. major:
+heute erreichbares falsches Verhalten, DoD-Item ohne Nachweis,
+Regelverletzung mit Folge, jede Änderung über den Ticket-Scope hinaus.
+minor: Regelverletzung ohne Folge, schwacher Test, der trotzdem beweist.
+Nichts darunter; eine Vorliebe ohne Regel oder Vorbild ist kein Befund.
+
+Rundenlimits: Loop 3 Runden · Voll-Review 2 Runden · jeweils dann ESK ·
+meine Nacharbeit-Notiz startet die Zählung neu · Rückfragen von mir ohne
+Limit (ab der zweiten zur selben Frage geht die Diskussion in den
+Worker). Erwartete Form für ein normales Ticket: Analyse im Worker,
+Implementer, Refactorer, Logik-Review, null bis eine weitere Loop-Runde
+mit denselben drei Agents, zwei Voll-Reviewer, null bis ein Re-Review, also
+6 bis 10 Agent-Aufrufe.
+
+**Commits.** `commits: auto` ist der Default aus der Vorlage und meine
+stehende Entscheidung: der Worker committet. Abwählen pro Ticket mit
+`/work RTM-xxxx commits manual`, mit `manual` in einer Gate-Antwort oder im
+Start-Prompt über den Lead („ich committe selbst"). Zurück nur mit
+`commits auto` von mir.
+
+Die Commits sind nach gemachter Änderung geschnitten, nicht nach Runde
+(C1 bis C5 in `kriterien.md`): zuerst Domain- und Datenanteil, dann
+logisch gruppiert der Service-Layer, dann HTTP, dann der Rest; Bestandscode
+ohne direkten Feature-Bezug als eigener `chore`, regelgetriebene Umbauten
+als eigener `refactor`. Den Schnitt liefert der Refactorer, der Worker
+führt ihn aus. Jede spätere Änderung (weitere Loop-Runde, Fix aus dem
+Voll-Review, CI-Fix am neuen Code, Nacharbeit nach der Abnahme) wird mit
+`git commit --fixup` und `git rebase --autosquash` in den Commit gefaltet,
+zu dem sie gehört, bis zum Merge nach `develop`, auch nach dem Push; den
+Force-Push mache ich am PR-Gate (`--force-with-lease`). Abgewichen wird
+nur, wenn der Fixup im Rebase kollidiert: dann bleibt ein eigener
+`fix`-Commit, und die Übergabe sagt warum.
 
 ### So sieht ein Gate aus
 
@@ -169,120 +207,82 @@ Antworten als Liste mit je einem Befehl pro Zeile), nie in einem
 Code-Block: Claude Code zeigt Code-Blöcke einfarbig und ohne Formatierung.
 In `state.md` steht derselbe Inhalt in der Dateiform darunter.
 
-Jeder Gate-Block (in `state.md` und als Nachricht an den Lead) ist in 30
-Sekunden entscheidbar, in einfachem Deutsch, ohne Klassennamen und Codes
-oberhalb der Details, höchstens 20 Zeilen, Leerzeilen zwischen den Blöcken:
+Jeder Gate-Block ist in 30 Sekunden entscheidbar, in einfachem Deutsch,
+Hergang zuerst, ohne Klassennamen und Codes oberhalb der Details, höchstens
+25 Zeilen, Leerzeilen zwischen den Blöcken:
 
 ```
-SPEC · <Datum Uhrzeit>
+FRAGEN · <Datum Uhrzeit>
 
 TLDR: <ein Satz: das Problem mit Umfang und was gebaut wird>
 
 Frage 1 · <Titel>
-- <Kurzfassung wörtlich aus fragen.md, 3–5 Stichpunkte: Problem, Optionen, Empfehlung mit Risiko>
-→ fragen.md#frage-1
+- <Hergang: wer stößt den Fall an, welche Klassen folgen, wo sagt das Ticket X und der Code zeigt Y>
+- <Optionen: A = das Ticket wörtlich → Folge · B → Folge>
+- <Empfehlung mit Grund · Risiko>
+→ ticket.md#frage-1
 
 Für dich zu tun: <nur was nur ich kann, mit „vor dem Bauen" / „vor dem Deploy">
 
 Antwort: <eine Zeile, jede Antwort mit ihrer Folge>
-Details: <eine Zeile: Größe, Branch, Pfad zu fragen.md, Hinweise>
+Details: <eine Zeile: Branch, Runde, Pfad zu ticket.md, Hinweise>
 ```
 
-PR, ABNAHME, ESK und LIMIT nutzen dieselbe Form (PR ohne Fragen, nur
-Push-Befehl und PR-Titel unter „Für dich zu tun"; ABNAHME aus `handover.md`
-und den Abnahme-Fragen in `fragen.md`; LIMIT mit „Wie weiter?" direkt im
-Block, Belege darunter in `state.md`).
+ESK, PR und ABNAHME nutzen dieselbe Form (ESK mit der einen Frage oder
+„Wie weiter?" und Belegen darunter in `state.md`; PR ohne Fragen, nur
+Push-Befehl und PR-Titel unter „Für dich zu tun"; ABNAHME aus
+`handover.md`).
 
 ### Fragen, Antworten, Rückfragen
 
-`fragen.md` im Ticket-Ordner ist nur dafür da, mir Fragen zu stellen, und
-hält fest, was ich darauf geantwortet habe. Dort stehen die Fragen der
-Agents an mich, offene und entschiedene, sonst nichts: keine Antworten auf
-meine Rückfragen, keine technischen Fragen, die Agents
-selbst entschieden haben (die stehen in der Spec unter „Entscheidungen"
-und im Log und erreichen mich in `handover.md`).
-
-Pro Frage ein kurzer Abschnitt, Trennlinie dazwischen (Vorlage
-`skills/red/work/fragen-template.md`):
-
-- `## Frage n · <Titel>`
-- **Kurzfassung:** 3–5 Stichpunkte, die Eckpfeiler der Entscheidung,
-  wörtlich auch im Gate.
-- **Details:** Problem in Klartext mit Umfang · Optionen mit Auswirkungen ·
-  Empfehlung mit Grund und eigenem Risiko · knappe Belegzeilen
-  (`Datei:Zeile` oder Ticketstelle), Vermutungen als solche markiert.
-  Höchstens etwa 25 Zeilen.
-- Die Optionen sind in Chat und Datei identisch: gleiche Menge, gleiche
-  Buchstaben, gleiche Namen.
-- `Antwort:` leer, hier schreibe ich hinein.
-
-Eine Frage, die ich gesehen habe, wird nie gelöscht oder gekürzt; ich muss
-mich später auf genau diese Frage und meine Antwort beziehen können. Bei
-der Entscheidung bekommt die Überschrift den Status `— entschieden:
-<Option> (<Datum>)`, und in der Zeile `Antwort:` steht meine Antwort
-wörtlich mit Quelle (`Antwort (Chat, <Datum>): …`; im Dokument bleibt mein
-Text stehen). Zusätzlich steht die Entscheidung im Log der `state.md` und
-in der Spec. Ins Gate kommen nur die offenen Abschnitte.
-
-**Fragen-Prüfung.** Keine Frage erreicht mich ungeprüft. Vor jedem Gate
-mit Fragen (SPEC, ABNAHME, ESK) prüft ein Plan-Verifier im Modus fragen
-jede Frage: (a) ist sie wirklich fachlich, also nicht aus Code, Doku oder
-Ticket beantwortbar, (b) stimmen die Belege, (c) ist das Problem real
-belegt und nicht ausgedacht, (d) sind die Optionen vollständig und in
-Chat und Datei identisch, (e) sind die Schreibregeln eingehalten. Fällt
-eine Frage durch, kommt sie nicht zu mir: aus Code beantwortbar → der
-Analyst entscheidet sie; ausgedacht → Risiko in der Spec oder weg; sonst
-einmal Nachbesserung, danach entscheidet der Auditor. Das gilt auch für
-die Fragen des Writers und des Auditors.
+`ticket.md ## Fragen` hält die Fragen der Pipeline an mich, offene und
+entschiedene, mit meinen Antworten. Pro Frage: Klasse, Hergang (zwei bis
+vier Sätze von außen nach innen), Optionen (A ist das Ticket wörtlich),
+Empfehlung mit eigenem Risiko, Belege, eine Zeile `Antwort:`. Eine Frage,
+die ich gesehen habe, wird nie gelöscht oder gekürzt; bei der Entscheidung
+bekommt die Überschrift `— entschieden: <Option> (<Datum>)`, und in der
+Antwort-Zeile steht meine Antwort wörtlich mit Quelle. Ins Gate kommen nur
+die offenen.
 
 Antworten gehen beide Wege: im Chat (direkt oder über den Lead) oder im
 Dokument in der Zeile `Antwort:`, dann `/work RTM-xxxx` bzw. `siehe
-fragen.md` an den Lead. Im Dokument heißt eine leere Antwort „noch
-offen", nicht „ok".
+ticket.md`. Im Dokument heißt eine leere Antwort „noch offen", nicht „ok".
 
-Eine **Rückfrage** öffnet keine neue Runde. Die Antwort bekomme ich
-direkt im Chat, im Worker oder über den Lead; sie wird nicht in
-`fragen.md` geschrieben, und meine Rückfrage wird nie zu einer neuen
-Frage an mich. Nur wenn sich dadurch die Frage selbst ändert (Optionen,
-Empfehlung, Umfang), wird ihr Abschnitt neu geschrieben; die vorige
-Fassung bleibt wörtlich darunter eingeklappt stehen. Er wird neu
-geprüft, und die neue Kurzfassung kommt ins Gate. Das Gate bleibt offen,
-bis ich entscheide. Ab der **zweiten Rückfrage** zur selben Frage, oder
-wenn ich `diskussion <n>` sage, wandert die Frage in den Worker-Space: der
-Lead meldet nur noch „Diskussion im Worker · Space X (wt → wählen)" und
-hält sich raus, bis das nächste Gate oder done kommt. Im Worker schreibe
-ich einfach drauflos; die Antworten stehen nur im Chat, und er läuft erst
+Eine **Rückfrage** öffnet keine neue Runde. Der Worker beantwortet sie
+selbst, aus seiner Analyse, der `ticket.md`, dem Diff und einem gezielten
+Blick in die zitierten Stellen; die Antwort steht nur im Chat, und meine
+Rückfrage wird nie zu einer neuen Frage an mich. Nur wenn sich dadurch die
+Frage selbst ändert, wird ihr Abschnitt neu geschrieben, die vorige Fassung
+bleibt eingeklappt darunter. Ab der **zweiten Rückfrage** zur selben Frage,
+oder wenn ich `diskussion <n>` sage, wandert die Frage in den Worker-Space:
+der Lead hält sich raus, ich schreibe drauflos, der Worker läuft erst
 weiter, wenn ich entschieden habe.
 
-**Schreibregeln** für alles, was ich lese (`fragen.md`, Gate,
-`handover.md`):
-
-- keine unerklärten Kürzel, Fehlercodes oder Klassennamen, immer Klartext
-  daneben („Fremdschlüssel-Fehler der Datenbank (MySQL 1452)")
-- Umfang nennen: was betroffen ist und was nicht
-- Leerzeilen zwischen Blöcken, Listen statt Fließtext, kurze Sätze
-- Evidenz und Vermutung immer getrennt
-- jede Empfehlung nennt ihr eigenes Risiko
-- Eingriffe mit Verlustpotenzial (Locks, die Jobs verwerfen; Löschungen)
-  brauchen echte Evidenz, sonst steht „nicht belegt" als Risiko da
-
-Der Plan-Verifier prüft diese Regeln in der Fragen-Prüfung mit.
+**Schreibregeln** für alles, was ich lese (`ticket.md`, Gate, Eskalation,
+`handover.md`, Antworten auf Rückfragen): Hergang zuerst, von außen nach
+innen (Auslöser, Klassen in Reihenfolge, Problemstelle), erst dann Optionen
+und Schwere · keine unerklärten Kürzel, Fehlercodes oder Klassennamen,
+immer Klartext daneben · Umfang nennen: was betroffen ist und was nicht ·
+Leerzeilen zwischen Blöcken, Listen statt Fließtext, kurze Sätze · Evidenz
+und Vermutung immer getrennt · jede Empfehlung nennt ihr eigenes Risiko ·
+Eingriffe mit Verlustpotenzial brauchen echte Evidenz, sonst steht „nicht
+belegt" als Risiko da.
 
 ## Was ohne mich passiert und was nicht
 
-Ohne Prompt: lesen, Tests, Lint, Edits im Worktree, `git add`, `git commit`
-nach verifiziertem Schritt (wenn `commits: auto`; die Message ist genau die
-Zeile aus `plan.md`, ohne Trailer), Subagents starten, Nachrichten zwischen
-Lead und Worker, der eigene Compose-Stack, Jira-Schreibzugriffe (Kommentar,
-Transition, Felder, neues Ticket, Verknüpfung), die ich im Chat angefordert
-habe oder die der Schritt vorsieht (der nackte PR-Link bei ABNAHME): meine
-Anweisung ist die Freigabe, ein zweiter Prompt bringt nichts.
+Ohne Prompt: lesen, Tests, Lint, Edits im Worktree (Agents im Loop, der
+Worker nur für Kleinigkeiten aus dem Voll-Review), `git add`, `git commit`
+nach jeder Loop-Runde und nach einem Kleinigkeits-Fix (wenn `commits:
+auto`; die Message ist genau die Commit-Zeile, ohne Trailer), Subagents
+starten, Nachrichten zwischen Lead und Worker, der eigene Compose-Stack,
+Jira-Schreibzugriffe, die ich im Chat angefordert habe oder die der
+Schritt vorsieht (der nackte PR-Link bei ABNAHME): meine Anweisung ist die
+Freigabe, ein zweiter Prompt bringt nichts.
 
 Immer mit Prompt im Worker-Space (das ist der Zweck, nicht ein Fehler):
 jeder Schreibzugriff auf Gitea und Confluence außerhalb der Pipeline,
 `wt rm`/`wt main`/`wt back`, `docker compose down` mit Volumes,
 Branch löschen, Dateien unter `.claude/` oder `.env` in einem Worktree.
-`rm` fragt nicht mehr, der Hook dafür war nur Arbeit.
 
 Nur ich: pushen und den PR anlegen (der Worker fordert das am Gate PR an
 und prüft danach nur lesend), und **mergen, immer**, auch nach der
@@ -299,52 +299,52 @@ erzwingen das unabhängig vom Permission-Modus.
 
 | Datei | Schreibt | Inhalt |
 |---|---|---|
-| `state.md` | `/work` | Frontmatter (phase, gate, step, round, commits, reviewers, session, …), `## Gate`, `## DoD`, `## Entscheidungen`, `## Offene Fragen` (fachlich/technisch), `## Für Tobias`, `## Commits`, `## Log` |
-| `spec.md` | Analyst; Auditor und `/work` tragen Entscheidungen ein | die Spec, bei S kurz; technische Fragen und alle Entscheidungen unter „Entscheidungen"; fachliche Fragen nur als Verweis |
-| `fragen.md` | Analyst, Auditor, Writer; `/work` markiert entschiedene Fragen und trägt meine Antwort wörtlich ein | die Fragen an mich, offen und entschieden: Kurzfassung, Details, `Antwort:`; nichts davon wird gelöscht |
-| `plan.md` | Planner, `/work` (Nacharbeit) | Schritte, DoD-Mapping, Diagnose bei Bugs |
-| `handover.md` | Writer | die Abnahmefläche: In 30 Sekunden, Diff mit Warum, DoD-Matrix, Checks, Reviewer, Prüfverlauf, Offen, Commits, PR-Titel (für den PR, den ich am Gate PR ohne Beschreibung anlege), Diff seit letzter Abnahme |
-| `review.md` | `/review`, `/pre-review` | fremde Reviews (drei Reviewer, Über-Review, pro Befund n/3 und Urteil), von `/work` nicht angefasst |
-| `pruefung/` | `/work` über `wl-write` | der Prüfverlauf: `verlauf.md` mit einer Zeile pro Agent-Aufruf (Phase, Runde, Agent, Ergebnis, Befund-Ids, Ausgang), `befunde.md` als Register (Id, Kriterium, Quelle, Befund, Status, Entscheidung) und je Aufruf eine Datei `NN-<phase>-<agent>-rN.md`, die `wl-write runde` selbst aus dem Agent-Transkript füllt (Brief und Abschlussbericht wörtlich, nichts wird vom Orchestrator abgetippt). `wl RTM-xxxx --runden` zeigt die Tabelle mit API-Aufrufen, Cache-Tokens und Dauer aus den Transkripten, `--sum` eine Zeile pro Phase, `wl-write befund RTM-xxxx list alle` das Register. Zeitstempel und Nummern schreibt ausschließlich `wl-write` mit der Systemuhr; ein Phasenwechsel ist ein Aufruf (`wl-write phase`). |
+| `state.md` | `/work` | Frontmatter (phase, gate, round, commits, session, Agent-Ids, pr, …), `## Nächster Schritt`, `## Gate`, `## Offene Fragen` (Index für `wl`), `## Commits`, `## Gates`, `## Log` |
+| `ticket.md` | `/work` | die Analyse: Ticket in einem Satz, Hergang, DoD mit Nachweisen, Scope, Einstieg und Hinweise, Fragen mit meinen Antworten (nichts davon wird gelöscht), Für Tobias, Entscheidungen (Worker, Implementer, Refactorer, Review, Tobias) |
+| `handover.md` | `/work` | die Abnahmefläche: In 30 Sekunden, Hergang der Änderung, Diff mit Warum, DoD-Matrix, Checks, Entscheidungen unterwegs, Hinweise der Reviewer, Offen, Für dich zu tun, Prüfverlauf, Commits, PR-Titel, Diff seit letzter Abnahme |
+| `review.md` | `/review`, `/pre-review` | fremde Reviews (zwei bis drei Reviewer, vom Aufrufer zusammengeführt und widerlegt), von `/work` nicht angefasst |
+| `pruefung/` | `/work` über `wl-write` | der Prüfverlauf: `verlauf.md` mit einer Zeile pro Agent-Aufruf (Phase, Runde, Agent, Ergebnis, Befund-Ids, Ausgang), `befunde.md` als Register (Id, Schwere, Quelle, Befund, Status, Entscheidung) und je Aufruf eine Datei `NN-<phase>-<agent>-rN.md` aus dem Agent-Transkript (Brief und Abschlussbericht wörtlich). `wl RTM-xxxx --runden` zeigt die Tabelle mit API-Aufrufen, Cache-Tokens und Dauer, `--sum` eine Zeile pro Phase, `wl-write befund RTM-xxxx list alle` das Register. Zeitstempel und Nummern schreibt ausschließlich `wl-write` mit der Systemuhr. |
+
+Ein `spec.md` aus einem früheren `/spec` ist Kontext für die Analyse, kein
+Ersatz für `ticket.md`.
 
 `wl` liest die `state.md`-Dateien: `wl` (Tabelle), `wl --open` (nur
 wartende), `wl RTM-xxxx` (Gate, nächste Schritte, letzte Log-Zeilen).
 
 ## Worktree und Sessions
 
-- **Agent-Sessions werden für Wiederholungsrunden fortgesetzt.** Ein
-  Verifier, Reviewer, Analyst oder Planner, der den Code einmal gelesen
-  hat, bekommt seine Runde 2 (nach fail, Zurückweisung, Auditor-Urteil oder
-  Nacharbeit) als Nachricht an seine Agent-Id: 3 bis 5 Aufrufe statt 10 bis
-  15, und der Cache ist noch warm. Frisch gestartet wird bei jeder neuen
-  Phase, wenn die Worker-Session gewechselt hat, wenn die letzte Zeile des
-  Agents im Prüfverlauf älter als 60 Minuten ist, oder wenn der erste Brief
-  inhaltlich falsch war. Die Ids stehen in `state.md` (`verifier_id`,
-  `reviewer_ids`, …); `wl RTM-xxxx --runden` rechnet einem fortgesetzten
-  Agent nur die Aufrufe seit seiner vorigen Zeile zu.
-
+- **Agent-Sessions werden über die Runden fortgesetzt.** Die drei
+  Loop-Agents und die zwei Voll-Reviewer bekommen ihre Runde n+1 als
+  Nachricht an ihre Agent-Id: 3 bis 5 Aufrufe statt 10 bis 15, und der
+  Cache ist noch warm. Frisch gestartet wird, wenn die Worker-Session
+  gewechselt hat, wenn die letzte Zeile des Agents im Prüfverlauf älter als
+  60 Minuten ist, oder wenn der erste Brief inhaltlich falsch war. Die Ids
+  stehen in `state.md` (`implementer_id`, `refactorer_id`, `logik_id`,
+  `reviewer_ids`).
 - `wt add <repo> <branch>` legt Branch, Worktree, herdr-Space und Bootstrap
-  an (eigener Compose-Stack, eigene Test-DB). Am Ende schreibt der Bootstrap
-  `.wt-ready` in den Worktree, bei Fehler `.wt-failed`. Das ist eine
-  Bereitschaftsmarke, kein Lock: `wt agent` wartet darauf, `/work` prüft sie
-  vor dem ersten Implementer-Schritt. Ältere Worktrees ohne Marke gelten als
-  bereit, wenn `vendor/` und `.env` da sind.
+  an: eigener Compose-Stack konfiguriert, eigene Ports, `vendor/` kopiert;
+  keine Container, keine Datenbank, das macht erst `wt testdb` am
+  Loop-Eintritt. Am Ende schreibt der Bootstrap `.wt-ready` in den
+  Worktree, bei Fehler `.wt-failed`. Das ist eine Bereitschaftsmarke, kein
+  Lock: `wt agent` wartet darauf, `/work` prüft sie vor dem ersten
+  Loop-Durchlauf. Ältere Worktrees ohne Marke gelten als bereit, wenn
+  `vendor/` und `.env` da sind.
 - `wt agent <repo>/<branch-dir> [--resume|--fresh] -- <Prompt>` ist die
   Automatisierung, die `/lead` nutzt: startet Claude im Root-Pane des
-  Spaces (nach dem Bootstrap, dessen Ausgabe darüber stehen bleibt; kein
-  Split), wenn keiner läuft, oder spricht die laufende Session an.
+  Spaces, wenn keiner läuft, oder spricht die laufende Session an.
   Verweigert, wenn der Worker arbeitet oder in einem Prompt hängt.
 - Ich kann alles auch von Hand machen: `wt`, in den Space, `claude`, dann
-  `/work RTM-xxxx`. Eine von Hand gestartete Claude-Session im Space ist
-  für herdr der Worker, `wt agent` findet sie und spricht sie an. `/work`
-  liest immer `state.md`, deshalb ist egal, wer die Session gestartet hat.
+  `/work RTM-xxxx`. `/work` liest immer `state.md` und `ticket.md`,
+  deshalb ist egal, wer die Session gestartet hat.
 - Eine Session pro Ticket: `/work` trägt seine Session-Id in `state.md`
   ein und stoppt, wenn eine andere Session dort steht und die Datei in den
   letzten zehn Minuten geschrieben wurde.
 - Neu oder fortsetzen: `claude --continue` im Worktree setzt die letzte
   Session dieses Tickets fort. Fortsetzen bei Gate-Antwort oder Nacharbeit
-  am selben Tag, frisch bei Phasenwechsel oder nach einem Tag Pause.
-  `--fresh` auf eine laufende Session schickt `/clear`.
+  am selben Tag; frisch nach einem Tag Pause. Eine frische Session hat die
+  Analyse nicht mehr im Kopf, aber in `ticket.md`; für eine tiefe
+  Rückfrage liest sie die zitierten Stellen nach. `--fresh` auf eine
+  laufende Session schickt `/clear`.
 - Live-Test im Haupt-Checkout: `/worktree-move` (`wt main`) zieht den Branch
   in den Haupt-Checkout, `wt back` zurück.
 
@@ -356,7 +356,7 @@ morgens   wt lead            → Space „lead" (cwd work-log), frische Session,
                                /day morgen, Ticketliste, Worker starten (wt agent)
 tagsüber  im Ticket-Space     → der Worker zeigt sein Gate, ich antworte dort
                                (/work RTM-x <…>), frage nach, diskutiere, lese
-                               fragen.md; Permission-Prompts ebenfalls dort
+                               ticket.md; Permission-Prompts ebenfalls dort
           im Lead-Space       → eine Zeile pro Ereignis (Gate offen, beantwortet,
                                done) mit dem Space, in dem die Antwort erwartet wird;
                                /lead status für die Übersicht
@@ -373,7 +373,8 @@ seine Dateien liegen und keine Projektregeln geladen werden.
 
 Was der Lead bei „done" nachprüft, bevor er es mir meldet: Commits im
 `git log` des Worktrees, gepushter Branch über `git ls-remote`, PR aus
-`state.md` in Gitea (offen, nicht gemergt). Ein Worker-Bericht ist eine Behauptung.
+`state.md` in Gitea (offen, nicht gemergt). Ein Worker-Bericht ist eine
+Behauptung.
 
 ## Stolpersteine
 
@@ -384,12 +385,27 @@ Was der Lead bei „done" nachprüft, bevor er es mir meldet: Commits im
   `~/code/RED-telematik-manager/RED-telematik-manager/.claude/settings.local.json`
   entfernen; `auto` kommt dann aus `~/.claude/settings.json`. herdr ist
   unschuldig, `herdr agent start` ruft `claude` ohne Flags auf.
+- **Test-DB.** Hat bei RTM-3919, RTM-3776 und RTM-3836 je eine Runde oder
+  einen Umweg über mich gekostet, weil Agents und Orchestrator eigene
+  Docker- und Artisan-Befehle zusammengesetzt haben, die der Auto-Modus
+  dann abgelehnt hat. Seit 2026-10-07 gibt es dafür genau einen Befehl:
+  `wt testdb` (Container des Worktrees hoch, auf MariaDB warten, `migrate
+  --seed --env=testing`; `--fresh` baut neu). `wt add` startet bewusst
+  keine Container, ich nutze es auch von Hand; der Orchestrator ruft `wt
+  testdb` einmal am Loop-Eintritt, jeder Agent nach einer neuen Migration
+  oder einem Seeder. Der Befehl ist als Ganzes erlaubt. Taucht das Thema
+  noch einmal auf, ist es ein Fehler in `wt testdb`, nicht in einem Brief.
+- **Testumfang lokal.** Die Suite ist zu groß für diesen Rechner. Agents
+  lassen nur die Tests der berührten Klassen und ihrer Aufrufer laufen, nie
+  die Suite und keine breiten Sweeps über `tests/`. Ein Test anderswo, der
+  in der CI rot wird (RTM-3836: `BelongsToConnectorTest` am neuen Index),
+  ist Sache der CI und wird danach nachgezogen.
 
 Weitere Umgebungs-Eigenheiten, die eine Runde gekostet haben (VPN,
-Jira-Ausfall, Test-DB, Fixtures), gehören in die work-brain-Notiz
-`pipeline-stolpersteine`.
-Der Lead liest sie beim Start, der Analyst vor der Spec. Angelegt wird sie
-über `/brain`, sobald der erste echte Eintrag da ist.
+Jira-Ausfall, Fixtures), gehören in die work-brain-Notiz
+`pipeline-stolpersteine`. Der Lead liest sie beim Start, der Worker vor der
+Analyse. Angelegt wird sie über `/brain`, sobald der erste echte Eintrag
+da ist.
 
 ## Offene Punkte
 
@@ -397,15 +413,33 @@ Der Lead liest sie beim Start, der Analyst vor der Spec. Angelegt wird sie
   Zeilenkommentare im PR (`nacharbeiten siehe PR`, der Worker liest sie
   nur). Beides geht; welcher Weg der normale wird, entscheide ich nach den
   ersten Tickets.
-- **Umfang der Pipeline bei kleinen Tickets.** RTM-3899 (Bugfix, drei
-  Zeilen) hat rund 9 Mio. Cache-Tokens gekostet; Spec-Prüfung, Planner,
-  Plan-Prüfung und zweiter Reviewer haben dabei nichts verändert. Vorschlag
-  einer S-Kurzstrecke (Analyst, Implementer, eine Branch-Prüfung, Writer)
-  liegt vor; ob alle Schritte generell nötig sind, ist noch zu diskutieren.
-  Für große Tickets: Spec und Plan einmal, Etappen mit Teil-Abnahme, nicht
-  jeden Chunk durch die ganze Pipeline.
+- **Neuer Fluss seit 2026-10-07, Versuch.** Anlass: RTM-3899 (9 Mio.
+  Tokens für drei Zeilen), RTM-3919 (10,4 Mio., die Hälfte ohne Wirkung
+  auf das Ergebnis; der einzige Architekturfehler kam aus der Spec-Phase,
+  weil eine Scope-Frage als technisch galt und der Auditor sie vor mir
+  entschied) und RTM-3883 (7,3 Mio., 44 % ohne Wirkung; der Planner hat den
+  Code in Prosa geschrieben, der Implementer nur abgetippt; ein neues
+  API-Feld wurde ohne Gate gebaut). In beiden Tickets null Ertrag der
+  Review-Phase und der sieben Schritt-Prüfungen. Dazu die Beobachtung, dass
+  die Agents gute Logik und schwache Architektur liefern, weil die Regeln
+  im Kontext untergehen: daher der Refactorer als eigene Station.
+  Messgrößen pro Ticket aus `wl --runden --sum` und `pruefung/befunde.md`:
+  Cache-Tokens gesamt; Loop-Runden; Umbauten des Refactorers und ob eine
+  Eskalation kam; Befunde des Logik-Reviews und des Voll-Reviews mit
+  Schwere, davon umgesetzt, widerlegt, vom Worker gefixt; ob ich bei
+  ABNAHME noch etwas zurückdrehen musste; ob eine Frage erst beim Bauen
+  auftauchte. Zurück zum alten Flow: Commit `8433c20` (`pipeline`) in den
+  dotfiles.
+- **Auditor-Gedächtnis.** Der Auditor ist aus der Pipeline raus. Seine
+  Musterdateien unter `~/.claude/agent-memory/auditor/` halten Urteile
+  fest, die nie abgenommen wurden; das Verzeichnis kann weg.
+- **Repo-Regel schärfen.** `.claude/rules/backend/architecture.md:34`
+  erlaubt formal „fangen, Zustand setzen, weiterwerfen" in einer Aktion.
+  Meine Haltung: eine Aktion reagiert nicht auf ihr eigenes Scheitern, der
+  Aufrufer besitzt die Fehlerbehandlung. Bis das im Repo steht, prüft der
+  Refactorer es als Fehlerbehandlungs-Eigentum.
 - Ob der Lead kleine Operationen (Jira-Transition) nach Go selbst
-  ausführen darf; Push und Merge bleiben in jedem Fall bei mir. Erst nachjustieren, wenn der Umweg über den Worker klemmt.
+  ausführen darf; Push und Merge bleiben in jedem Fall bei mir.
 - Der Nachrichtenweg Lead ↔ Worker ist noch nicht im echten Lauf getestet:
   ob eine Nachricht an eine wartende Session dort wie eine Eingabe wirkt, und
   was passiert, wenn der Worker gerade in einem Permission-Prompt hängt.

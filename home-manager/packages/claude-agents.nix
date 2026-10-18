@@ -10,20 +10,25 @@
 # override earlier ones on a name collision, so list shared groups first:
 #   claudeAgentGroups = [ "common" "red" ];   # red's agents win over common's
 #
-# Same mechanism as ./claude-skills.nix, for the specialists the /work and
-# /lead skills delegate to (analyst, planner, implementer, verifiers, reviewer,
-# writer) and the auditor they escalate to.
+# Same mechanism as ./claude-skills.nix, for the agents the /work skill
+# delegates to (implementer, refactorer, reviewer; the reviewer also serves
+# /review and /pre-review).
 
 let
   live = "${config.home.homeDirectory}/code/tobmoeller/dotfiles/home-manager/packages/config/claude/agents";
   repo = ./config/claude/agents;
 
   # group -> { "<name>.md" = "<live target path>"; ... }
+  # A group whose directory does not exist (git drops empty directories, so a
+  # group whose last agent was removed vanishes from the flake source) links
+  # nothing instead of failing the evaluation.
   groupAgents = group:
+    let dir = repo + "/${group}"; in
+    if !builtins.pathExists dir then { } else
     lib.mapAttrs
       (file: _: "${live}/${group}/${file}")
       (lib.filterAttrs (file: type: type == "regular" && lib.hasSuffix ".md" file)
-        (builtins.readDir (repo + "/${group}")));
+        (builtins.readDir dir));
 in {
   options.claudeAgentGroups = lib.mkOption {
     type = lib.types.listOf lib.types.str;

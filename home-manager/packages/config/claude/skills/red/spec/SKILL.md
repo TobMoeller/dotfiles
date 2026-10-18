@@ -97,4 +97,4 @@ Adapt the headings to the task — drop sections that don't apply, add ones that
 
 This is specification and planning, not implementation. **Do not change source files** in the project and don't post anything to Jira/Confluence/Figma — only write under `~/code/knowledge/work-log/`. Don't commit the store unless the user asks.
 
-When the spec is settled, say that `/work <TICKET>` will treat this `spec.md` as the finished spec phase: it stops at its `SPEC` gate only if product questions are still open, otherwise it goes straight on to the plan (with `commits: auto` as the default commit mode; `/work <TICKET> commits manual` opts out).
+When the spec is settled, say that `/work <TICKET>` will read this `spec.md` as context for its own analysis (`ticket.md`): it stops at its `FRAGEN` gate only if questions for Tobias remain, otherwise it goes straight into the build loop (with `commits: auto` as the default commit mode; `/work <TICKET> commits manual` opts out).

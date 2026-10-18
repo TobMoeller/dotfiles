@@ -28,11 +28,24 @@ in {
     description = "Skill groups to link into ~/.claude/skills; later groups override earlier on name clash.";
   };
 
+  # Skills that live in another checkout (the team's ai-tooling repo) but
+  # should be available by name in every session, so a /work worker can run
+  # them directly instead of sending Tobias to that checkout. Linked live, so
+  # the team's updates apply without a switch; adding or removing a name needs
+  # a switch. A missing checkout leaves a dangling link, nothing worse.
+  options.claudeExternalSkills = lib.mkOption {
+    type = lib.types.attrsOf lib.types.str;
+    default = { };
+    description = "Skills from other checkouts to link into ~/.claude/skills: { <skill-name> = \"/absolute/path/to/skill-dir\"; }. Override group skills of the same name.";
+  };
+
   config.home.file =
     let
       # Fold groups in order so a later group replaces an earlier skill of the
-      # same name, leaving exactly one symlink per name (the override).
-      merged = lib.foldl' (acc: g: acc // groupSkills g) { } config.claudeSkillGroups;
+      # same name, leaving exactly one symlink per name (the override); the
+      # external skills come last and win a name clash.
+      merged = (lib.foldl' (acc: g: acc // groupSkills g) { } config.claudeSkillGroups)
+        // config.claudeExternalSkills;
     in
     lib.mapAttrs'
       (name: target: lib.nameValuePair ".claude/skills/${name}" {

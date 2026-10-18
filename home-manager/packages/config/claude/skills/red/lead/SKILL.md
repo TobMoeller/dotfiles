@@ -93,8 +93,8 @@ Per ticket, in the given order:
    <TICKET>` (fresh/resume per the table below; a decision Tobias gave goes
    into the prompt as a second sentence in plain German, „Tobias committet
    selbst" when he said so). The worker reports back by message when it
-   reaches a gate. Tobias is no longer asked to approve the spec: a ticket
-   without a product question runs from spec to `ABNAHME` without a stop.
+   reaches a gate. A ticket without a question, Umbau hint or blocking
+   task runs from the analysis to the `PR` gate without a stop.
 3. A `wt: worker is …` error means the worker was busy: report it, do not
    retry blindly.
 4. Two or more tickets: start them all, then **check**.
@@ -104,10 +104,15 @@ short slug, and tell him it runs without `/work`'s gates — a plain session
 in a worktree with his description as the prompt. Do not invent a ticket.
 
 Review ticket (`/review PR <n>` instead of `/work`): a review worker has no
-gates and sends no notice. „Fertig" is `review.md` or `rereview.md` in
-`work-log/<repo>/<TICKET>/` or the worker's idle hint — then one line to
-Tobias with the file path. A re-review goes to the existing review session
-(see „Neu oder fortsetzen").
+gates. It sends two notices: `<TICKET> · Review fertig · <n> Befunde (…) ·
+<Pfad>` (or `Re-Review fertig`) once `review.md`/`rereview.md` is written —
+then one line to Tobias with the file path — and `<TICKET> · Review
+abgeschlossen · <was gepostet wurde>` once Tobias has posted the findings in
+the worker's space — then check the worktree and remove it with `wt rm`
+(rule under „Stay in scope"). Fallback when no notice arrives (older
+sessions): „Fertig" is `review.md` or `rereview.md` in
+`work-log/<repo>/<TICKET>/` or the worker's idle hint. A re-review goes to
+the existing review session (see „Neu oder fortsetzen").
 
 ### check — stay informed, verify done
 
@@ -120,22 +125,27 @@ one-line notices to you; you do not poll:
 - `<TICKET> · <GATE> · <TLDR> · Antwort im Space <repo>/<branch-dir>` — a
   gate opened. Print the line, add a `## Verlauf` line, and tell Tobias in
   one sentence where to answer (`wt` → pick the space). Do not fetch or
-  summarise the gate block or `fragen.md`; the worker shows them.
+  summarise the gate block or `ticket.md`; the worker shows them.
 - `<TICKET> · <GATE> beantwortet · <Kurzform>` — he answered in the worker.
   `## Verlauf` line, one status line to him only if he is talking to you
   right now.
 - `<TICKET> · done · <Statuszeile>` — verify it (below), then report.
-- `<TICKET> · SPEC ohne Gate bestanden · Worker bitte im Worktree …
-  starten` — the spec passed without a stop in the main checkout. Run
-  **start** step 2 for that worktree with `--fresh`, one `## Verlauf`
-  line.
+- `<TICKET> · Analyse ohne Gate · Worker bitte im Worktree … starten` —
+  the analysis passed without a stop in the main checkout. Run **start**
+  step 2 for that worktree with `--fresh`, one `## Verlauf` line.
+- `<TICKET> · Review fertig · <n> Befunde (…) · <Pfad>` (or `Re-Review
+  fertig`) — a review worker wrote its file. `## Verlauf` line, one line to
+  Tobias with the path; he reads and posts in the worker's space.
+- `<TICKET> · Review abgeschlossen · <was gepostet wurde>` — Tobias closed
+  the review there. `## Verlauf` line, then check the worktree and `wt rm`
+  it per the rule under „Stay in scope"; anything unclean → ask.
 
 If Tobias answers a gate **here** anyway (he is in this space and says
 „RTM-4100 ok" or „1: B für 4100"), relay it exactly as `/work <TICKET>
 <Antwort>` via `SendMessage` to the worker's `session_name`, with
 `notify_when_idle: true`, and say that follow-ups to that question are
 better asked in the worker's space. Never answer a question back yourself,
-never read `fragen.md` to explain a worker's gate.
+never read `ticket.md` to explain a worker's gate.
 - **A worker's „done" is a claim, not a fact.** Before you report a ticket
   as done, check: `git -C <worktree> log --oneline -3` shows the commits
   the log lines name; `git -C <worktree> ls-remote --heads origin
@@ -182,7 +192,7 @@ says otherwise:
 |---|---|---|
 | No transcript in the worktree | fresh | nothing to resume; `/work` reads `state.md` |
 | Answering a gate or a Nacharbeit note, same day, phase unchanged | message the running worker | its context holds the current step; cheapest continuation |
-| Phase changed since that session (spec passed yesterday, now implement) | `--fresh` | the old context is about the old phase; `state.md` and `plan.md` are the cheaper briefing |
+| Session older than a day, phase changed since (analysis yesterday, build today) | `--fresh` | the old context is stale; `state.md` and `ticket.md` are the cheaper briefing. Same day, same phase: message the running worker, its analysis is still in its context |
 | Session older than a day, or a resumed worker stopped again without a gate | `--fresh` | stale context; disk state is authoritative |
 | Tobias says „von vorn" / „frisch" | `--fresh` | his call |
 
