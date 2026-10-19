@@ -11,6 +11,7 @@
 - [x] Hibernate manuell mit erhaltener Sitzung, NVIDIA, Audio und Netzwerk getestet.
 - [x] Suspend-then-Hibernate als Deckelaktion eingerichtet und unter Niri mit automatischem Übergang nach einer Stunde sowie erfolgreichem Resume getestet (2026-10-19).
 - [x] Zwischencommit einschließlich Suspend und Hibernate erstellt; kombinierter Übergang inzwischen ebenfalls bestätigt.
+- [ ] Gestaffelte Generationen-Aufbewahrung umsetzen: letzte 5 Generationen, je ein Stand pro Tag für 3 Tage, pro Woche für 4 Wochen und pro Monat für 3 Monate; Überschneidungen zusammenfassen. Zusätzlich laufendes System, Boot-Ziel und einen markierten bewährten Stand schützen. Erst Vorschau prüfen, dann Ausdünnung, Garbage Collection und Aktualisierung des Bootmenüs ergänzen. Noch keine automatische Löschung eingerichtet.
 - [x] SSH-Schlüssel vom Benutzer bei GitHub hinterlegt; `origin` auf `git@github.com:TobMoeller/dotfiles.git` umgestellt.
 - [x] SSH-Verbindung zu GitHub erfolgreich authentifiziert (Benutzer).
 - [ ] Ersten Push von `nixos-foundation` durchführen (Benutzer; Schlüssel mit Passphrase). Der ursprüngliche Name kollidierte mit dem bestehenden Remote-Branch `rebuild`.
@@ -42,6 +43,8 @@
 - [ ] Lokale KI: erstes Modell für 16 GiB VRAM auswählen und GPU-Nutzung, Geschwindigkeit, Speicherbedarf und Leistungsaufnahme messen; Chat-Oberfläche und Coding-Anbindung anschließend ergänzen.
 - [x] devShell für das Dotfiles-Repo und kleine unabhängige Projektvorlage bereitstellen; direnv/nix-direnv mit Shell-Anbindung deklarieren.
 - [ ] direnv aktivieren und im Alltag prüfen; erste stackspezifische devShell in einem Anwendungsprojekt einrichten und testen.
+- [ ] Weitere eigenständige Projektvorlagen bereitstellen, zuerst PHP mit passender Composer-Version; weitere Stacks nach Bedarf. Die Basisvorlage bleibt klein.
+- [ ] Container-Setup entscheiden: Docker, rootless Docker oder Podman anhand der benötigten Compose-/Projekt-Workflows vergleichen und anschließend gezielt konfigurieren.
 - [ ] `brain` und Obsidian überführen: Repo/Vault-Pfad festlegen, Notizen synchronisieren, Plugins und portable Konfiguration prüfen; persönliche Inhalte und Zugangsdaten außerhalb der öffentlichen Dotfiles halten.
 - [ ] Gemeinsame Skills für Codex/GPT und Claude pflegen: gemeinsame Quellen, unterstützte Dateiformate und Symlinks/Adapter prüfen; an einem Skill testen und produktspezifische Regeln getrennt halten.
 - [ ] Aktualisierte playground-Pipeline (`44ab6f2`) gezielt überführen: `wt agent/lead`, Bootstrap-Hooks und Bereitschaftsmarker, `wt testdb`, `main/back` sowie `wl`, `wl-write`, `wl-runden` und `gitday` prüfen. Die neue native Worktree-Verwaltung ersetzt diese zusätzlichen Abläufe noch nicht; mit Projekt-devShells und gemeinsamen Skills abstimmen.

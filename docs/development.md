@@ -51,6 +51,17 @@ an ihr benötigen erneut `direnv allow`; es gibt keine pauschale Freigabe für
 `~/code`. `direnv deny` entzieht die Freigabe. Ohne direnv funktioniert
 `nix develop` weiterhin.
 
+Die Vorlage liefert eine `.gitignore` mit `/.direnv/` mit. Bei vorhandenen
+Projekten diesen Eintrag in die bestehende Datei übernehmen. `.gitignore`
+betrifft nur Git; sie schützt keine Dateien vor Löschbefehlen.
+
+`rm -rf -- .direnv` im Projekt entfernt den lokalen Cache samt seinen
+Verknüpfungen, ohne deren Ziele im `/nix/store` zu löschen. Der Cache wird beim
+nächsten Laden neu erzeugt. Um das automatische Laden zu stoppen, stattdessen
+`direnv deny` verwenden. Auch das vollständige Projektverzeichnis lässt sich
+normal löschen; seine `.direnv`-Verknüpfungen löschen keine gemeinsam genutzten
+Nix-Pakete. Nicht mehr referenzierte Store-Pfade bereinigt später Nix-GC.
+
 ## Ein neues Projekt beginnen
 
 In einem leeren Projektverzeichnis:
@@ -82,6 +93,11 @@ Die Basisvorlage enthält zunächst nur Git und definiert Ausgaben für
 x86_64/aarch64 auf Linux und macOS. Zusätzliche Pakete müssen auf den jeweils
 gewünschten Plattformen verfügbar sein. Andere Plattformen werden durch die
 Ausgabe allein noch nicht praktisch getestet.
+
+Der `systems`-Block zählt unterstützte Plattformen auf; er installiert keine
+weiteren Betriebssysteme und baut bei `nix develop` nur die lokale Ausgabe.
+Für ein reines ThinkPad-Projekt reicht `systems = [ "x86_64-linux" ];`.
+Die vier Einträge halten die Vorlage auch für Linux auf ARM und Macs nutzbar.
 
 In einem Git-Repository berücksichtigt Nix neue Dateien erst, wenn sie mit
 `git add` erfasst wurden; ein Commit ist zum Ausprobieren nicht nötig.
