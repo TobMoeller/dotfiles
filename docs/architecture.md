@@ -64,7 +64,7 @@ zsh-Integration bereit. `modules/features/starship/starship.toml` wird direkt
 als `~/.config/starship.toml` verknüpft. Tastenkürzel bleiben im zsh-Feature;
 ein anderer Prompt erfordert keine Änderung der Shell-Bedienung.
 
-`modules/features/herdr/config.toml` bleibt normales TOML. Home Manager installiert herdr und verknüpft die Datei über `mkOutOfStoreSymlink` direkt mit dem Checkout. Es gibt keine Abhängigkeit auf die alten t/wt-Skripte oder ein noch nicht eingerichtetes zsh.
+`modules/features/herdr/config.toml` bleibt normales TOML. Home Manager installiert herdr mit fzf/jq und verknüpft die Datei über `mkOutOfStoreSymlink` direkt mit dem Checkout. Dasselbe Feature verknüpft `scripts/t` und `scripts/wt` nach `~/.local/bin` und registriert den lokalen vim-nav-Helfer aus dem Checkout bei der Aktivierung. Die native Konfiguration verwendet die zsh des gemeinsamen Benutzerprofils. Projekte werden über ihre Verzeichnisse ausgewählt; Worktrees verwaltet herdr selbst. Es gibt keine Laufzeitabhängigkeit auf das Legacy-Repository.
 
 Standardpfad ist `~/code/tobmoeller/dotfiles`. Ein Host kann in seinem Home-Manager-Modul `dotfiles.repositoryPath` auf einen anderen absoluten Pfad setzen. Der Pfad muss bei Aktivierung und Nutzung existieren. Umzug des Checkouts erfordert eine entsprechende Anpassung und erneute Aktivierung.
 

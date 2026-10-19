@@ -27,7 +27,8 @@
 - [ ] Caps-Lock-Remapping aktivieren und die Insertmodus-Tastenkürzel interaktiv prüfen.
 - [ ] Steam-Fensterbedienung prüfen: native Menüs/Titelleiste des Clients und Login-Dialogs von Niris Dekorationen unterscheiden. Keine globale Dekorationsumstellung als vermeintliche Steam-spezifische Lösung.
 - [ ] Grafischen Boot-/LUKS-Bildschirm mit Plymouth einrichten.
-- [ ] herdr-Tastenkürzel, vim-nav und t/wt-Integration aus playground gezielt übernehmen.
+- [x] herdr-Tastenkürzel, vim-nav und Projekthelfer `t` gezielt übernehmen; `wt` verwendet die native Worktree-Verwaltung.
+- [ ] herdr aktivieren und im Alltag mit Ghostty testen; Neovim-Seite der Split-Navigation beim Editor-Umzug ergänzen. Danach Projekt-devShells angehen.
 - [ ] Niri/Noctalia als zusätzliche Sitzung aktivieren und ersten Login prüfen (Terminal, Launcher, Portale, Audio, WLAN, Helligkeit, Sperre und Deckelaktion).
 - [x] Niri/Noctalia-Grundkonfiguration deklarieren, mit nativen Validatoren prüfen und System bauen.
 - [ ] Niri/Noctalia im Alltag optimieren: Skalierung/Monitore, Shortcuts, Theme, Clipboard und Screenshots.
@@ -41,6 +42,7 @@
 - [ ] Projekt-devShells mit Flakes vereinfachen: kleine Vorlagen, `nix develop` und optional direnv/nix-direnv; zunächst an einem echten Programmierprojekt testen, danach wiederverwendbare Templates bereitstellen.
 - [ ] `brain` und Obsidian überführen: Repo/Vault-Pfad festlegen, Notizen synchronisieren, Plugins und portable Konfiguration prüfen; persönliche Inhalte und Zugangsdaten außerhalb der öffentlichen Dotfiles halten.
 - [ ] Gemeinsame Skills für Codex/GPT und Claude pflegen: gemeinsame Quellen, unterstützte Dateiformate und Symlinks/Adapter prüfen; an einem Skill testen und produktspezifische Regeln getrennt halten.
+- [ ] Aktualisierte playground-Pipeline (`44ab6f2`) gezielt überführen: `wt agent/lead`, Bootstrap-Hooks und Bereitschaftsmarker, `wt testdb`, `main/back` sowie `wl`, `wl-write`, `wl-runden` und `gitday` prüfen. Die neue native Worktree-Verwaltung ersetzt diese zusätzlichen Abläufe noch nicht; mit Projekt-devShells und gemeinsamen Skills abstimmen.
 - [ ] MacBook und red nach Bestandsaufnahme einzeln anbinden.
 - [ ] Raspberry-Modelle, Betriebssysteme und gewünschte Update-Linien erfassen.
 

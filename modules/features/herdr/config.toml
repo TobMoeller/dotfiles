@@ -1,7 +1,87 @@
-# Native, directly editable config. Reload/restart herdr after changing it.
-# Start small; port the playground vim-nav plugin and t/wt integration later.
+# Native, directly editable config. See docs/herdr.md for keys and reload.
 onboarding = false
+
+[terminal]
+default_shell = "zsh"
+shell_mode = "auto"
+new_cwd = "follow"
+
+[update]
+# The executable is updated through the pinned Nix input.
+version_check = false
+
+[theme]
+name = "catppuccin"
+
+[worktrees]
+directory = "~/code/worktrees"
 
 [keys]
 prefix = "ctrl+y"
 detach = "prefix+d"
+new_tab = "prefix+c"
+previous_tab = "prefix+p"
+next_tab = "prefix+n"
+split_vertical = "prefix+v"
+split_horizontal = "prefix+minus"
+focus_pane_left = "prefix+h"
+focus_pane_down = "prefix+j"
+focus_pane_up = "prefix+k"
+focus_pane_right = "prefix+l"
+previous_workspace = "alt+k"
+next_workspace = "alt+j"
+previous_agent = "alt+h"
+next_agent = "alt+l"
+
+# In navigate mode, j/k selects workspaces; arrow left/right selects panes.
+navigate_workspace_down = "j"
+navigate_workspace_up = "k"
+navigate_pane_left = ""
+navigate_pane_down = ""
+navigate_pane_up = ""
+navigate_pane_right = ""
+
+# Use Herdr's native worktree UI, including its deletion confirmation.
+rename_workspace = ""
+open_worktree = "prefix+shift+w"
+new_worktree = "prefix+shift+a"
+remove_worktree = "prefix+shift+k"
+
+[[keys.command]]
+key = "prefix+f"
+type = "popup"
+command = "t"
+width = "80%"
+height = "80%"
+
+# As in playground: Vim/fzf receives these keys, otherwise navigate panes.
+# Use prefix+h/j/k/l instead if you want to keep Ctrl+hjkl for the shell.
+[[keys.command]]
+key = "ctrl+h"
+type = "plugin_action"
+command = "vim-nav.left"
+
+[[keys.command]]
+key = "ctrl+j"
+type = "plugin_action"
+command = "vim-nav.down"
+
+[[keys.command]]
+key = "ctrl+k"
+type = "plugin_action"
+command = "vim-nav.up"
+
+[[keys.command]]
+key = "ctrl+l"
+type = "plugin_action"
+command = "vim-nav.right"
+
+[ui]
+pane_borders = "auto"
+pane_gaps = true
+confirm_close = true
+agent_panel_sort = "spaces"
+status_indicators = "symbols"
+
+[ui.toast]
+delivery = "system"

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Herdr manages Git worktrees and their workspace grouping natively.
+# Examples: wt list; wt create --branch feature; wt open --path /path/to/worktree
+set -euo pipefail
+exec herdr worktree "$@"

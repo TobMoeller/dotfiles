@@ -1,0 +1,30 @@
+id = "vim-nav"
+name = "Vim/fzf-aware pane navigation"
+version = "0.2.0"
+min_herdr_version = "0.9.5"
+description = "Forward Ctrl+hjkl to Vim/fzf; otherwise focus a Herdr pane"
+platforms = ["linux", "macos"]
+
+[[actions]]
+id = "left"
+title = "Navigate left (Vim/fzf/Herdr)"
+contexts = ["global"]
+command = ["bash", "navigate.sh", "left"]
+
+[[actions]]
+id = "down"
+title = "Navigate down (Vim/fzf/Herdr)"
+contexts = ["global"]
+command = ["bash", "navigate.sh", "down"]
+
+[[actions]]
+id = "up"
+title = "Navigate up (Vim/fzf/Herdr)"
+contexts = ["global"]
+command = ["bash", "navigate.sh", "up"]
+
+[[actions]]
+id = "right"
+title = "Navigate right (Vim/fzf/Herdr)"
+contexts = ["global"]
+command = ["bash", "navigate.sh", "right"]

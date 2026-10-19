@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Select a checkout under ~/code, or open an explicitly supplied directory.
+set -euo pipefail
+
+if (( $# > 1 )); then
+  echo 'Usage: t [directory]' >&2
+  exit 2
+fi
+
+if (( $# == 1 )); then
+  selected="$1"
+else
+  # .git can be a directory (repository) or a file (linked worktree).
+  # Depth covers code/owner/repo and code/worktrees/repo/branch.
+  selected="$(find "$HOME/code" -mindepth 2 -maxdepth 4 -name .git -prune -print |
+    sed 's|/.git$||' | sort -u | fzf --prompt='Project > ')" || exit 0
+fi
+
+[[ -n "$selected" ]] || exit 0
+cd -- "$selected"
+selected="$PWD"
+label="${selected##*/}"
+
+if [[ "${HERDR_ENV:-}" != 1 ]]; then
+  # Outside Herdr, use a persistent per-project session. Include the absolute
+  # path checksum so projects with the same directory name remain distinct.
+  checksum="$(printf '%s' "$selected" | cksum | cut -d ' ' -f1)"
+  session="$(printf '%s' "$label" | LC_ALL=C tr -c 'a-zA-Z0-9_-' '_')-$checksum"
+  exec herdr --session "$session"
+fi
+
+# In Herdr (including the project popup), reuse the current session.
+workspace="$(herdr pane list | jq -r --arg path "$selected" \
+  '[.result.panes[] | select(.cwd == $path) | .workspace_id][0] // empty')"
+if [[ -n "$workspace" ]]; then
+  exec herdr workspace focus "$workspace"
+fi
+exec herdr workspace create --cwd "$selected" --label "$label" --focus

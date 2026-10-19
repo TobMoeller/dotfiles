@@ -33,3 +33,15 @@ Das Script setzt voraus, dass Flakes aktiviert sind und `DOTFILES` gesetzt ist, 
 Home Manager nimmt `~/.local/bin` in den persönlichen PATH auf. npm verwendet über `NPM_CONFIG_PREFIX` den Prefix `~/.local`: Pakete liegen unter `~/.local/lib/node_modules`, ihre Befehle unter `~/.local/bin`. Die bestehende `.npmrc` bleibt erhalten; die Umgebungsvariable legt den Prefix auch auf frisch eingerichteten Geräten fest.
 
 Eigene Repo-Scripts werden gezielt als Symlinks in `~/.local/bin` bereitgestellt. Es gibt keine Kopien und keinen Sync-Schritt; Änderungen an der Quelldatei gelten unmittelbar. Auf dem ThinkPad verknüpft Home Manager `dotfiles-rebuild` mit `$DOTFILES/scripts/rebuild`. Dieser NixOS-Helfer wird im Hostmodul ausgewählt.
+
+## t und wt
+
+Das herdr-Feature verknüpft beide Scripts in `~/.local/bin`:
+
+- `t`: Git-Projekt unter `~/code` mit fzf auswählen; alternativ `t /pfad`.
+  In herdr einen Workspace öffnen/wiederfinden, außerhalb eine Projektsitzung starten.
+- `wt`: Argumente direkt an `herdr worktree` weiterreichen, z. B.
+  `wt create --branch feature/example` oder `wt list`.
+
+Tasten, Worktree-Menüs und Unterschiede zwischen Sitzungen und Workspaces
+stehen in [der herdr-Anleitung](../docs/herdr.md).
