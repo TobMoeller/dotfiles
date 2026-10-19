@@ -9,8 +9,8 @@
 - [x] System-Suspend/Resume mit coarse-grained Runtime-PM (0x01) und Standard-Notifier wiederholt getestet: NVIDIA-Offload funktioniert nach dem Aufwachen. Akku-Verbrauch im längeren Schlaf noch nicht abschließend gemessen.
 - [x] 80-GiB-Swapdatei im verschlüsselten Root-Dateisystem und Wiederaufnahme beim Boot eingerichtet.
 - [x] Hibernate manuell mit erhaltener Sitzung, NVIDIA, Audio und Netzwerk getestet.
-- [ ] Suspend-then-Hibernate testen und als Desktop-Schlafaktion einrichten (zunächst nach einer Stunde im Akkubetrieb).
-- [x] Zwischencommit einschließlich getesteter Suspend-/Hibernate-Pfade und aktivierter kombinierter Schlafaktion erstellen; Übergangstest bleibt offen.
+- [x] Suspend-then-Hibernate als Deckelaktion eingerichtet und unter Niri mit automatischem Übergang nach einer Stunde sowie erfolgreichem Resume getestet (2026-10-19).
+- [x] Zwischencommit einschließlich Suspend und Hibernate erstellt; kombinierter Übergang inzwischen ebenfalls bestätigt.
 - [x] SSH-Schlüssel vom Benutzer bei GitHub hinterlegt; `origin` auf `git@github.com:TobMoeller/dotfiles.git` umgestellt.
 - [x] SSH-Verbindung zu GitHub erfolgreich authentifiziert (Benutzer).
 - [ ] Ersten Push von `nixos-foundation` durchführen (Benutzer; Schlüssel mit Passphrase). Der ursprüngliche Name kollidierte mit dem bestehenden Remote-Branch `rebuild`.

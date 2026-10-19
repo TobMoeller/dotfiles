@@ -188,3 +188,18 @@ Der ThinkPad-Host wählt das neue `caps-to-escape`-Feature mit keyd 2.6.0. Gewoh
 - Gebaut: vollständiges System `/nix/store/qrklwgqaf992q8rakrgvyqlrxarv1kcb-nixos-system-nixos-26.05.20261015.26f4107`.
 - Geprüft: erzeugte keyd-Datei enthält die gewünschte Caps-Lock-Zuordnung. zsh-Syntax und tatsächliche Widgets/Bindings für Strg-A/E/P/U sowie Vi-j erfolgreich geprüft.
 - Aktiviert: keyd noch nicht. Native zsh-Änderungen sind mit `exec zsh` nutzbar; das systemweite Remapping benötigt den Rebuild und einen echten Tastaturtest.
+
+## Automatisches Suspend-then-Hibernate im Alltag bestätigt
+
+Am 2026-10-19 Deckelschluss um 13:20:45, Suspend ab 13:20:49, automatischer
+Hibernate-Übergang um 14:20:52. Wiederaufnahme um 20:39:45 erfolgreich,
+`systemd-suspend-then-hibernate.service` sauber beendet. Kernel protokolliert
+Hibernate-Resume und Entfernung der EFI-Variable `HibernateLocation`;
+keine neue Boot-ID seit dem Start um 12:36 Uhr.
+
+NVIDIA-SMI und NVIDIA-Offload mit GLX liefern nach dem Resume erfolgreich
+die RTX 3080 Laptop GPU; keine neuen Xid-Fehler im betreffenden Zyklus.
+Aktiv ist das zuletzt gebaute System `qrklwgqaf992q8rakrgvyqlrxarv1kcb`.
+Swapdatei weiterhin aktiv mit 80 GiB. Energieverbrauch, Lüfter und weitere
+Alltagszyklen bleiben eigene Prüfungen. Nur Dokumentation geändert;
+keine neue Nix-Auswertung, kein Build und keine Systemaktivierung nötig.

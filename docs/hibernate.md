@@ -68,7 +68,7 @@ Nach dem Rebuild einmal ab- und anmelden, damit Plasma die neue Konfiguration si
 systemctl --user restart plasma-powerdevil.service
 ```
 
-Der kombinierte Übergang ist noch offen und kann nach dem Zwischencommit getestet werden. Damit dafür keine Stunde gewartet werden muss, die Verzögerung vorübergehend auf zwei Minuten verkürzen (nur bis zum Entfernen der Datei oder zum nächsten normalen Neustart):
+Der kombinierte Übergang wurde am 2026-10-19 im Alltag erfolgreich getestet (siehe unten). Für spätere kurze Wiederholungstests lässt sich die Verzögerung vorübergehend auf zwei Minuten verkürzen (nur bis zum Entfernen der Datei oder zum nächsten normalen Neustart):
 
 ```bash
 sudo mkdir -p /run/systemd/sleep.conf.d
@@ -102,7 +102,20 @@ Audio und Netzwerk prüfen. Die letzte Zeile stellt die konfigurierte Stunde wie
 - NVIDIA-SMI und NVIDIA-Offload funktionieren nach der Wiederaufnahme.
 - Das Kernel-Journal enthält den abgeschlossenen Hibernate-Zyklus und die anschließende Entfernung der EFI-Variable `HibernateLocation`.
 
-Damit ist die manuelle Wiederaufnahme auf diesem Gerät einmal erfolgreich getestet. Der automatische Übergang und längere Alltagszyklen sind damit noch nicht geprüft.
+Damit ist die manuelle Wiederaufnahme auf diesem Gerät einmal erfolgreich getestet. Der automatische Übergang wurde anschließend separat geprüft.
+
+## Automatischer Übergang am 2026-10-19 bestätigt
+
+- 13:20:45 Deckel geschlossen, 13:20:49 Beginn von Suspend-then-Hibernate.
+- 14:20:52 automatischer Übergang von Suspend zu Hibernate, nach rund einer Stunde.
+- 20:39:44 Deckel geöffnet, 20:39:45 erfolgreiche Wiederaufnahme und Abschluss des Dienstes.
+- Der Kernel protokolliert `hibernation exit` und das Entfernen von `HibernateLocation`; die Boot-ID entspricht weiterhin der Sitzung von 12:36 Uhr.
+- NVIDIA-SMI und NVIDIA-GLX-Offload nach der Wiederaufnahme erfolgreich; keine neuen NVIDIA-Xid-Fehler im Zyklus.
+
+Damit sind Deckelaktion, verzögerter Übergang und Wiederaufnahme für einen
+längeren Zyklus unter Niri bestätigt. Energieverbrauch und Lüfterverhalten
+bleiben davon getrennte offene Messungen; Audio und die eigentliche
+Bildschirmsperre wurden in diesem Prüfschritt nicht erneut interaktiv getestet.
 
 ## Grenzen
 
