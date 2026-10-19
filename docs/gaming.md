@@ -63,6 +63,19 @@ Es werden keine Remote-Play- oder Server-Ports geöffnet. Spiele mit Anti-Cheat
 oder speziellen Launchern müssen individuell auf Proton-Unterstützung geprüft
 werden. Ein konkreter erster Titel wird zusammen mit dem Benutzer gewählt.
 
+## Fensterleisten und Diagnose
+
+Niris globale Option `prefer-no-csd` fordert unterstützte Wayland-Anwendungen
+zum Weglassen ihrer eigenen Dekorationen auf. Sie ist keine Steam-spezifische
+Einstellung für die Menü-/Titelleiste. Steam zeichnet seine eigene Oberfläche;
+eine gezielte Anpassung ist noch offen. Super+Q schließt das fokussierte Fenster.
+
+Am 2026-10-19 um 01:07:25 wurde bei einer Diagnose des Agenten mit
+`steam --version` ein 32-Bit-`ldconfig` durch die Ausführungs-Sandbox beendet
+(`SIGSYS`/Seccomp). Das ist von einem Absturz beim normalen Steam-Start zu
+unterscheiden. Steam-Diagnosebefehle, die die FHS-Umgebung starten, künftig
+nicht in dieser eingeschränkten Sandbox ausführen.
+
 Quellen: [NixOS Steam](https://wiki.nixos.org/wiki/Steam),
 [GameMode](https://github.com/FeralInteractive/gamemode),
 [MangoHud](https://github.com/flightlessmango/MangoHud).
