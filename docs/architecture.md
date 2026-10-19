@@ -78,6 +78,16 @@ Dateiänderungen wirken nach dem Neuladen des Programms. Ein System-Rollback set
 
 ## Versionen und weitere Plattformen
 
+Das Feature `development` stellt zwei getrennte Bausteine bereit: Sein
+Home-Manager-Modul richtet direnv/nix-direnv für das Benutzerprofil ein;
+`perSystem.devShells.default` stellt Werkzeuge für die Arbeit an diesem
+Repository bereit. `flake.templates.default` verweist auf eine kopierbare
+Projekt-Flake unter `templates/devshell`. Die Projektvorlage braucht kein
+flake-parts und bindet weder Systemkonfiguration noch Dotfiles als Input ein.
+Ihr eigenes Lockfile erlaubt unabhängige Projektversionen. Die Shell-Automatik
+wird pro Checkout über `.envrc` gewählt und durch `direnv allow` freigegeben.
+Details und Befehle stehen in `docs/development.md`.
+
 Ein gemeinsames Lockfile, manuelle Aktivierung pro Gerät. Für einen früheren Stand verwenden wir den passenden Git-Commit einschließlich Lockfile. Geräte bleiben unverändert, bis dort eine neue Konfiguration aktiviert wird.
 
 Home Manager folgt hier dem System-Nixpkgs. herdr kommt separat aus dem ebenfalls fixierten Input `nixpkgs-tools` (unstable), da es im 26.05-Paketsatz noch nicht enthalten ist. Dieser Input ersetzt weder System-Nixpkgs noch den Home-Manager-Paketsatz. Er lässt sich gezielt mit `nix flake update nixpkgs-tools` aktualisieren. Für dauerhaft unterschiedliche Release-Linien pro Gerät lassen sich später getrennte Input-Gruppen ergänzen. `stateVersion` ist keine Auswahl der Paketversion.

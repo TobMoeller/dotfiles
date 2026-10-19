@@ -4,6 +4,7 @@
   flake.modules.homeManager.tobias = { config, ... }: {
     imports = [
       self.modules.homeManager.dotfiles
+      self.modules.homeManager.development
       self.modules.homeManager.herdr
       self.modules.homeManager.npm
       self.modules.homeManager.zsh

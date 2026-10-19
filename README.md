@@ -23,6 +23,7 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 - [Erste Niri-/Noctalia-Sitzung](docs/niri.md)
 - [Steam, Proton und Gaming-Werkzeuge](docs/gaming.md)
 - [herdr, Projekte und Worktrees](docs/herdr.md)
+- [Projekt-devShells und direnv](docs/development.md)
 
 ## Aktueller Umfang
 
@@ -30,6 +31,7 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 - Bestehende ThinkPad-Installation einschließlich Hardware, Verschlüsselung und Plasma als Basis; Hostname und Flake-Auswahl `nixos`, Geräteverzeichnis `thinkpad`.
 - Integrierter Home Manager für `tobias`.
 - herdr mit nativer TOML, Pane-Navigation, Projektauswahl und eingebauter Worktree-Verwaltung; Dateien direkt ins Checkout verknüpft.
+- Projektumgebungen mit `nix develop`, optionaler direnv-Automatik und einer kleinen Flake-Vorlage; das Dotfiles-Repo liefert eine devShell mit Nix-Formatter und ShellCheck.
 - Persönlicher PATH mit `~/.local/bin`, npm-Prefix `~/.local` und `dotfiles-rebuild` als verknüpfter Repo-Befehl eingerichtet.
 - zsh als ThinkPad-Login-Shell, Starship mit direkt bearbeitbarer TOML und gemeinsame Git-Einstellungen mit privater Host-Identität; Aktivierung siehe Shell-Dokumentation.
 - Ghostty mit nativer Konfiguration, Catppuccin Mocha und MesloLGS NF; Niri-Terminalkürzel verwenden Ghostty nach Aktivierung.

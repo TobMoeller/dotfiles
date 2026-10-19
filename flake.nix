@@ -22,6 +22,7 @@
         inputs.flake-parts.flakeModules.modules
         ./modules/system/base.nix
         ./modules/features/dotfiles.nix
+        ./modules/features/development.nix
         ./modules/features/herdr/default.nix
         ./modules/features/nvidia-prime.nix
         ./modules/features/npm.nix
