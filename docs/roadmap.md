@@ -23,7 +23,9 @@
 - [ ] Ghostty aktivieren und mit zsh/Starship/herdr prüfen; native Konfiguration, Catppuccin Mocha und MesloLGS NF als Ausgangspunkt.
 - [x] Ghostty samt nativer Konfiguration und Schrift validieren und bauen.
 - [ ] Neovim-Konfiguration aus `playground` gezielt überführen (eigener größerer Schritt): native Lua-Dateien, Plugins, LSP, Completion und Projektwerkzeuge.
-- [ ] Gewohnte zsh-Shortcuts im Vi-Insertmodus ergänzen (Strg-A/E, History-/Löschbefehle); Caps Lock zu Escape remappen.
+- [x] Gewohnte zsh-Shortcuts im Vi-Insertmodus ergänzt; Caps Lock → Escape über keyd deklariert.
+- [ ] Caps-Lock-Remapping aktivieren und die Insertmodus-Tastenkürzel interaktiv prüfen.
+- [ ] Steam-Fensterbedienung prüfen: native Menüs/Titelleiste des Clients und Login-Dialogs von Niris Dekorationen unterscheiden. Keine globale Dekorationsumstellung als vermeintliche Steam-spezifische Lösung.
 - [ ] Grafischen Boot-/LUKS-Bildschirm mit Plymouth einrichten.
 - [ ] herdr-Tastenkürzel, vim-nav und t/wt-Integration aus playground gezielt übernehmen.
 - [ ] Niri/Noctalia als zusätzliche Sitzung aktivieren und ersten Login prüfen (Terminal, Launcher, Portale, Audio, WLAN, Helligkeit, Sperre und Deckelaktion).

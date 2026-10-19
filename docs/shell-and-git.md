@@ -38,6 +38,24 @@ Zeilenende einen Vorschlag. Anders als früher stammt der Vi-Modus zunächst
 direkt aus zsh; das zusätzliche zsh-vi-mode-Plugin ist nicht übernommen. Aliase:
 `ll`, `la`, `..`, `...` und `gs`.
 
+Im Insertmodus funktionieren zusätzlich die gewohnten Tastenkürzel:
+
+| Kürzel | Aktion |
+| --- | --- |
+| Strg-A / Strg-E | Zeilenanfang / -ende |
+| Strg-B / Strg-F | Ein Zeichen zurück / vor |
+| Alt-B / Alt-F | Ein Wort zurück / vor |
+| Strg-U / Strg-K | Bis Zeilenanfang / -ende löschen |
+| Strg-W | Voriges Wort löschen |
+| Strg-Y | Gelöschten Text wieder einfügen |
+| Strg-D | Zeichen löschen bzw. Completion-Liste |
+
+`exec zsh` lädt die neuen Bindings; der Vi-Befehlsmodus bleibt unverändert.
+Das ThinkPad wählt außerdem `caps-to-escape`: keyd remappt Caps Lock zu Escape
+für normale Tastaturen in Niri, Plasma und Textkonsolen. Tab und die originale
+Escape-Taste bleiben erhalten. Das gilt nach dem Rebuild im laufenden System;
+die frühe LUKS-Eingabe im Initrd wird damit nicht umkonfiguriert.
+
 Das Git-Feature enthält nur gemeinsame Einstellungen und die Aliase
 `s`, `st`, `ci`, `co`. Neue Repositories verwenden `main`;
 `push.autoSetupRemote` erleichtert den ersten Push neuer Branches.

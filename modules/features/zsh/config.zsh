@@ -13,7 +13,18 @@ bindkey '^[[A' up-line-or-history
 bindkey '^[[B' down-line-or-history
 bindkey '^[[H' beginning-of-line
 bindkey '^[[F' end-of-line
-bindkey '^F' forward-char
+# Familiar editing shortcuts in insert mode; Escape's vi command mode stays vi.
+bindkey -M viins '^A' beginning-of-line
+bindkey -M viins '^E' end-of-line
+bindkey -M viins '^B' backward-char
+bindkey -M viins '^F' forward-char
+bindkey -M viins '^U' backward-kill-line
+bindkey -M viins '^K' kill-line
+bindkey -M viins '^W' backward-kill-word
+bindkey -M viins '^Y' yank
+bindkey -M viins '^D' delete-char-or-list
+bindkey -M viins '^[b' backward-word
+bindkey -M viins '^[f' forward-word
 
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'

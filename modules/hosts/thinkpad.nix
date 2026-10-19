@@ -14,6 +14,7 @@ in
       self.modules.nixos.niri
       self.modules.nixos.noctalia
       self.modules.nixos.gaming
+      self.modules.nixos.caps-to-escape
       ../../hosts/thinkpad/configuration.nix
       inputs.home-manager.nixosModules.home-manager
     ];

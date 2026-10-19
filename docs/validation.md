@@ -179,3 +179,12 @@ Auf ausdrücklichen Benutzerwunsch direkt Steam statt eines separat installierte
 - Gebaut: vollständiges System `/nix/store/mrajkwhaw23bfsrhh2lgp21znl133rqh-nixos-system-nixos-26.05.20261015.26f4107` einschließlich Ghostty.
 - Geprüft: Steam, GameMode-Launcher, Gamescope und Protontricks als ausführbare Befehle im gebauten System vorhanden; native Niri-Konfiguration erneut gültig.
 - Aktiviert: noch nicht. Steam-Anmeldung, Spielinstallation, Proton-/GPU-/Overlay-Tests und GameMode-Laufzeitprüfung stehen am Gerät aus. Testrezept in `docs/gaming.md`.
+
+## Tastatur und zsh-Bedienung
+
+Der ThinkPad-Host wählt das neue `caps-to-escape`-Feature mit keyd 2.6.0. Gewohnte Insertmodus-Tastenkürzel in der nativen zsh-Datei ergänzt; Vi-Befehlsmodus bleibt erhalten.
+
+- Ausgewertet: Flake-Prüfung und NixOS-Toplevel erfolgreich.
+- Gebaut: vollständiges System `/nix/store/qrklwgqaf992q8rakrgvyqlrxarv1kcb-nixos-system-nixos-26.05.20261015.26f4107`.
+- Geprüft: erzeugte keyd-Datei enthält die gewünschte Caps-Lock-Zuordnung. zsh-Syntax und tatsächliche Widgets/Bindings für Strg-A/E/P/U sowie Vi-j erfolgreich geprüft.
+- Aktiviert: keyd noch nicht. Native zsh-Änderungen sind mit `exec zsh` nutzbar; das systemweite Remapping benötigt den Rebuild und einen echten Tastaturtest.

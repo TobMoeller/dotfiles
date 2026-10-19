@@ -34,6 +34,7 @@
         ./modules/features/noctalia/default.nix
         ./modules/features/ghostty/default.nix
         ./modules/features/gaming/default.nix
+        ./modules/features/caps-to-escape.nix
         ./modules/users/tobias.nix
         ./modules/hosts/thinkpad.nix
       ];
