@@ -11,7 +11,8 @@
 - [x] Hibernate manuell mit erhaltener Sitzung, NVIDIA, Audio und Netzwerk getestet.
 - [x] Suspend-then-Hibernate als Deckelaktion eingerichtet und unter Niri mit automatischem Übergang nach einer Stunde sowie erfolgreichem Resume getestet (2026-10-19).
 - [x] Zwischencommit einschließlich Suspend und Hibernate erstellt; kombinierter Übergang inzwischen ebenfalls bestätigt.
-- [ ] Gestaffelte Generationen-Aufbewahrung umsetzen: letzte 5 Generationen, je ein Stand pro Tag für 3 Tage, pro Woche für 4 Wochen und pro Monat für 3 Monate; Überschneidungen zusammenfassen. Zusätzlich laufendes System, Boot-Ziel und einen markierten bewährten Stand schützen. Erst Vorschau prüfen, dann Ausdünnung, Garbage Collection und Aktualisierung des Bootmenüs ergänzen. Noch keine automatische Löschung eingerichtet.
+- [x] Gestaffelte Generationen-Aufbewahrung implementiert: letzte 5, je ein Stand für 3 Kalendertage, 4 Kalenderwochen und 3 Kalendermonate; zusätzlich laufendes System, gebooteten Stand, Boot-Ziel und markierten bewährten Stand schützen. Vorschau, Timer, GC und Bootmenü-Aktualisierung mit Tests eingerichtet.
+- [ ] Generationenbereinigung aktivieren, Vorschau prüfen und bewährten Stand markieren; erster tatsächlicher Bereinigungslauf und Bootmenü danach prüfen.
 - [x] SSH-Schlüssel vom Benutzer bei GitHub hinterlegt; `origin` auf `git@github.com:TobMoeller/dotfiles.git` umgestellt.
 - [x] SSH-Verbindung zu GitHub erfolgreich authentifiziert (Benutzer).
 - [ ] Ersten Push von `nixos-foundation` durchführen (Benutzer; Schlüssel mit Passphrase). Der ursprüngliche Name kollidierte mit dem bestehenden Remote-Branch `rebuild`.
@@ -28,6 +29,7 @@
 - [ ] Caps-Lock-Remapping aktivieren und die Insertmodus-Tastenkürzel interaktiv prüfen.
 - [ ] Steam-Fensterbedienung prüfen: native Menüs/Titelleiste des Clients und Login-Dialogs von Niris Dekorationen unterscheiden. Keine globale Dekorationsumstellung als vermeintliche Steam-spezifische Lösung.
 - [ ] Grafischen Boot-/LUKS-Bildschirm mit Plymouth einrichten.
+- [ ] Fingerabdrucksensor erfassen und Treibersupport prüfen; anschließend Anmeldung, Niri-/Noctalia-Entsperren und optional sudo über fprintd/PAM einrichten und testen. LUKS-Entsperrung beim Boot separat behandeln.
 - [x] herdr-Tastenkürzel, vim-nav und Projekthelfer `t` gezielt übernehmen; `wt` verwendet die native Worktree-Verwaltung.
 - [x] herdr aktiviert und erster Benutzertest erfolgreich.
 - [ ] Neovim-Seite der herdr-Split-Navigation beim Editor-Umzug ergänzen.

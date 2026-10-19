@@ -24,6 +24,7 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 - [Steam, Proton und Gaming-Werkzeuge](docs/gaming.md)
 - [herdr, Projekte und Worktrees](docs/herdr.md)
 - [Projekt-devShells und direnv](docs/development.md)
+- [Generationen aufbewahren und bereinigen](docs/generations.md)
 
 ## Aktueller Umfang
 

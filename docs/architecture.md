@@ -33,6 +33,12 @@ Eine äußere Feature-Datei kann sowohl NixOS- als auch Home-Manager-Teile berei
 
 `hosts/thinkpad/` enthält gewöhnliche gerätespezifische NixOS-Dateien. Insbesondere bleibt die generierte Hardwaredatei außerhalb des Baums der äußeren flake-parts-Module. Ein Modul muss nicht wiederverwendbar sein.
 
+Der ThinkPad wählt `generation-cleanup` als NixOS-Feature. Es installiert einen
+festen Python-Helfer und einen systemd-Timer für gestaffelte Aufbewahrung;
+seine Tests sind ein Flake-Check. `scripts/rebuild` verwendet denselben
+`flock`-Lock wie die Bereinigung. Aufbewahrung und Bedienung stehen in
+`docs/generations.md`.
+
 `modules/features/nvidia-prime.nix` stellt Treiber, Offload und Energieverwaltung bereit. Die PCI-Adressen der GPUs stehen dagegen im ThinkPad-Hostmodul. Auf einem anderen Hybrid-Gerät kann dasselbe Feature mit dessen eigenen Adressen verwendet werden; MacBook und Raspberry Pi importieren es nicht.
 
 Das Hibernate-Feature verwendet UEFI und systemd im Initrd für die automatische Wiederaufnahme. Die Swapdatei mit gerätespezifischer Größe steht im Hostmodul. Auf dem ThinkPad liegt sie im bestehenden verschlüsselten Root-Dateisystem. Details und der manuelle Test stehen in `docs/hibernate.md`; andere Geräte übernehmen dieses Feature erst nach Prüfung ihrer Boot- und Speicher-Konfiguration.

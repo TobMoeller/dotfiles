@@ -13,10 +13,14 @@ dotfiles-rebuild
 Das Script wechselt mit `cd "$DOTFILES"` ins Repository und führt genau diesen Befehl aus:
 
 ```bash
-sudo nixos-rebuild switch --flake .
+sudo flock /run/lock/dotfiles-system.lock nixos-rebuild switch --flake .
 ```
 
 `nixos-rebuild` selbst wählt anhand des laufenden Hostnamens die Konfiguration aus. Das Script hat keine eigene Argumentverarbeitung. `switch` baut, aktiviert und setzt die Generation als Boot-Standard.
+
+`flock` teilt eine Sperre mit der Generationenbereinigung, damit Rebuild und
+Bereinigung nicht gleichzeitig Profile oder Bootmenü verändern. Details und
+der Vorschau-Befehl stehen unter [Generationen](../docs/generations.md).
 
 Andere Abläufe lassen sich direkt aus dem Repository ausführen:
 

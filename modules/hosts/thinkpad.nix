@@ -8,6 +8,7 @@ in
     networking.hostName = hostName;
     imports = [
       self.modules.nixos.base
+      self.modules.nixos.generation-cleanup
       self.modules.nixos.nvidia-prime
       self.modules.nixos.hibernate
       self.modules.nixos.zsh

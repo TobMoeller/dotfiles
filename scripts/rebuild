@@ -2,4 +2,5 @@
 set -eu
 
 cd -- "$DOTFILES"
-sudo nixos-rebuild switch --flake .
+# Share the lock with generation cleanup, including while building.
+sudo flock /run/lock/dotfiles-system.lock nixos-rebuild switch --flake .
