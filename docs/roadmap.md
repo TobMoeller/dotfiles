@@ -6,6 +6,7 @@
 - [ ] Hardware erfassen: GPU-IDs, tatsächlich verfügbare VRAM-Größe, externe Monitoranschlüsse, BIOS-Grafikmodus.
 - [ ] Vulkan, externe Monitore und später CUDA am Gerät prüfen.
 - [ ] Dynabook-Dock: beide Dell S2725DC flackern auch bei WQHD/60 Hz und deaktiviertem VRR, rechts stärker. Notebook + linker Dell bei 60 Hz nach Abschalten des rechten laut Benutzer stabil. Den einzelnen aktiven Dell wieder auf 143,973 Hz gestellt; Stabilität bestätigen. Rechter bleibt deaktiviert. Versorgung mit Lenovo-Netzteil und direkte Monitorverbindung zum Eingrenzen prüfen; Dock-Modell/Kabel erfassen. Ethernet mit 1 Gbit/s und Focusrite-Ausgabe erkannt.
+- [ ] Dock-/Schlafvorfall vom 2026-10-20 untersuchen: echte Thunderbolt-Verbindung bestätigt; wiederholte Abbrüche, PCIe-Bridge nach Resume nicht bereit, ICM-Kommunikation fehlgeschlagen. Hibernate-Abbild wiederhergestellt, hoher Verbrauch und erzwungenes Ausschalten laut Benutzer trotzdem ungeklärt. Kontrollierter Vergleich mit Ubuntu, Lane-Anzahl und Firmware-/Kernelständen vorbereiten; Details in `docs/dock-diagnostics.md`.
 - [x] NVIDIA-Treiber, Intel-/NVIDIA-Offload und Runtime-Suspend nach Neustart geprüft.
 - [x] System-Suspend/Resume mit coarse-grained Runtime-PM (0x01) und Standard-Notifier wiederholt getestet: NVIDIA-Offload funktioniert nach dem Aufwachen. Akku-Verbrauch im längeren Schlaf noch nicht abschließend gemessen.
 - [x] 80-GiB-Swapdatei im verschlüsselten Root-Dateisystem und Wiederaufnahme beim Boot eingerichtet.

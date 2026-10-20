@@ -119,6 +119,15 @@ Bildschirmsperre wurden in diesem Prüfschritt nicht erneut interaktiv getestet.
 
 ## Grenzen
 
+Der Vorfall vom 2026-10-20 nach dem Dynabook-Dock-Ausfall ist noch offen:
+Suspend um 18:51, Hibernate-Übergang um 19:52 und Resume um 22:04 wurden
+protokolliert, gleichzeitig meldete der Thunderbolt-Controller ICM-Fehler.
+Der Benutzer beobachtete hohen Verbrauch und fehlendes Aufwachen und musste
+hart ausschalten. Das erfolgreiche Wiederherstellen der Sitzung beweist keinen
+zuverlässigen oder stromsparenden Gesamtzyklus. Analyse und nächste Tests stehen
+in [Dock-Diagnose](dock-diagnostics.md). Die früheren Tests ohne diese Störung
+bleiben einzelne erfolgreiche Versuche und keine allgemeine Zuverlässigkeitsgarantie.
+
 Die 80 GiB geben Reserve gegenüber 64 GiB RAM. Bereits anderweitig belegter Swap reduziert den verfügbaren Platz für das Hibernate-Abbild. Das Root-Volume muss sich im Initrd entsperren lassen und EFI-Variablen müssen schreibbar bleiben.
 
 ## Quellen
