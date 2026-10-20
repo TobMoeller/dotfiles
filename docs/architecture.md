@@ -65,6 +65,10 @@ Gaming teilt sich in NixOS-Integration für Steam/GameMode/Gamescope und einen
 Home-Manager-Teil für MangoHud mit nativer Overlay-Konfiguration. Die private
 Gruppenzugehörigkeit für GameMode steht im Host.
 
+Das separate Home-Manager-Feature `voice-chat` installiert Discord und
+TeamSpeak nur auf den ausdrücklich ausgewählten Hosts, aktuell dem ThinkPad.
+Die persönlichen App-Einstellungen verbleiben in den Anwendungen.
+
 Das separate Home-Manager-Feature `starship` stellt den Prompt und seine
 zsh-Integration bereit. `modules/features/starship/starship.toml` wird direkt
 als `~/.config/starship.toml` verknüpft. Tastenkürzel bleiben im zsh-Feature;

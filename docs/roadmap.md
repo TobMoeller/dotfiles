@@ -55,6 +55,7 @@
 
 ## Offene Entscheidungen
 
+- Benennung und Umfang eigener Verwaltungsbefehle besprechen: `nixos-generations` ist ein eigener Helfer, kein NixOS-Builtin; eventuell konsistent zu `dotfiles-generations` umbenennen. Vorerst unverändert lassen.
 - Geräte-Hostname; aktuell `nixos`, die Flake-Auswahl entspricht dem Hostnamen. Umbenennung über die `hostName`-Bindung im Hostmodul und einmalig `sudo nixos-rebuild switch --flake .#NEUER-NAME` aus dem Repository.
 - Globale Werkzeuge gegenüber Projekt-devShells; Shell ist zsh, Prompt Starship, Terminal Ghostty und Editor künftig Neovim.
 - Prompt-Alternativen bei späterem Bedarf: [zsh-eigener Prompt mit vcs_info](https://zsh.sourceforge.io/Doc/Release/User-Contributions.html#Version-Control-Information), [Pure](https://github.com/sindresorhus/pure) oder [Powerlevel10k](https://github.com/romkatv/powerlevel10k) (laut Projekt nur eingeschränkter Support). Zuerst [Starship-Konfiguration und Presets](https://starship.rs/config/) ausprobieren.

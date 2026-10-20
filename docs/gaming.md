@@ -1,5 +1,19 @@
 # Steam auf dem ThinkPad
 
+## Discord und TeamSpeak
+
+Das separate Home-Manager-Feature `voice-chat` stellt auf dem ThinkPad den
+offiziellen Discord-Client (`pkgs.discord`) und TeamSpeak 6
+(`pkgs.teamspeak6-client`, im fixierten Paketstand Beta) bereit.
+Nach `dotfiles-rebuild` lassen sie sich im Noctalia-Launcher über Discord
+beziehungsweise TeamSpeak öffnen; im Terminal heißen sie `discord` und
+`TeamSpeak`. Konten, Server und Audioeinstellungen werden direkt in den Apps
+verwaltet. Mikrofon und Ausgabegerät vor dem ersten Gespräch in der jeweiligen
+App testen. Push-to-talk bei nicht fokussiertem Fenster unter Niri separat
+prüfen. Der entfernte alte TeamSpeak-3-Client wird nicht eingebunden.
+
+## Gaming-Umfang
+
 Das Gaming-Feature richtet Steam samt 32-Bit-Grafikunterstützung und
 Controller-Regeln ein. GE-Proton wird über Nix bereitgestellt; reguläres
 Proton und Proton Experimental verwaltet Steam. GameMode, MangoHud,

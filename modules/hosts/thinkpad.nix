@@ -53,6 +53,7 @@ in
           self.modules.homeManager.noctalia
           self.modules.homeManager.ghostty
           self.modules.homeManager.gaming
+          self.modules.homeManager.voice-chat
         ];
         home = {
           username = "tobias";
