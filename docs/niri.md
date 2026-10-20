@@ -107,7 +107,7 @@ Anordnung, von links nach rechts:
 | Display | Modus | Skalierung | Position |
 | --- | --- | --- | --- |
 | ThinkPad, eDP-1 | 3840×2400, 60 Hz | 225 % | 0, 0 |
-| Dell S2725DC, GR9HQC4 | 2560×1440, vorläufig 60 Hz | 100 % | 1707, 0 |
+| Dell S2725DC, GR9HQC4 | 2560×1440, 143,973 Hz | 100 % | 1707, 0 |
 | Dell S2725DC, HM1XPB4 | Vorläufig ausgeschaltet | 100 % | 4267, 0 (reserviert) |
 
 Die Dells werden über Hersteller/Modell/Seriennummer erkannt, unabhängig von
@@ -123,12 +123,14 @@ ursprünglichen 59,951-Hz-Modus zurückgesetzt. Der Benutzer bestätigt auch dam
 Flackern auf beiden Displays, rechts deutlich stärker. VRR blieb deaktiviert.
 Der rechte Ausgang wurde anschließend kurz per IPC aus- und eingeschaltet;
 der Benutzer meldete danach stärkeres Flackern. Auf Wunsch wurde rechts
-ausgeschaltet; aktiv bleiben Notebook und linker Dell bei 60 Hz. Die
-Stabilität dieses Zwei-Display-Betriebs ist noch zu bestätigen.
+ausgeschaltet; Notebook und linker Dell bei 60 Hz waren laut Benutzer danach
+flackerfrei. Anschließend auf Wunsch den einzelnen aktiven Dell wieder auf
+143,973 Hz gestellt. Dessen Stabilität bei höherer Rate ist noch zu bestätigen;
+das Notebook bleibt bei 60 Hz und der rechte Dell ausgeschaltet.
 In den abgefragten Kernel-Logs erschienen keine
 NVRM-/Xid-/Display-Link-Fehler. Dock, Kabel, Versorgung und Softwarepfad sind
-damit noch nicht als Ursache voneinander unterschieden. Einen höheren Modus erst nach Klärung von
-Dock-Modell, Kabeln und gemeinsamer Verbindung erneut testen.
+damit noch nicht als Ursache voneinander unterschieden. Den gleichzeitigen
+Betrieb beider externen Monitore erst nach Klärung der Verbindung erneut testen.
 
 Die externen DP-Ausgänge liegen an der RTX 3080, das interne Display an
 Intel. Desktop-Ausgabe mit drei Displays wurde erkannt; daraus folgt keine

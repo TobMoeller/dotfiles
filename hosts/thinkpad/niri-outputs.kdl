@@ -8,9 +8,8 @@ output "eDP-1" {
 
 // Match monitor identity rather than dock-dependent DP connector numbers.
 output "Dell Inc. DELL S2725DC GR9HQC4" {
-    // Keep both docked displays at the original 60 Hz while investigating
-    // right-monitor flicker after the simultaneous 144 Hz test.
-    mode "2560x1440@59.951"
+    // Use the highest offered mode with only this external display enabled.
+    mode "2560x1440@143.973"
     scale 1
     position x=1707 y=0
 }
