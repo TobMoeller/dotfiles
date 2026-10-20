@@ -119,8 +119,12 @@ Prüfung am 2026-10-20: Beide Dells bieten maximal 143,973 Hz in WQHD an;
 165 Hz wird nicht angeboten. Beide wurden gleichzeitig auf 143,973 Hz
 umgestellt, danach meldete der Benutzer Flackern rechts. Rechts 59,951 Hz
 bei weiterhin links 143,973 Hz behob es nicht. Daher beide auf den
-ursprünglichen 59,951-Hz-Modus zurückgesetzt; Rückmeldung zur Stabilität steht
-noch aus. VRR blieb deaktiviert. Einen höheren Modus erst nach Klärung von
+ursprünglichen 59,951-Hz-Modus zurückgesetzt. Der Benutzer bestätigt auch damit
+Flackern auf beiden Displays, rechts deutlich stärker. VRR blieb deaktiviert.
+Der rechte Ausgang wurde anschließend kurz per IPC aus- und eingeschaltet;
+die Wirkung ist noch offen. In den abgefragten Kernel-Logs erschienen keine
+NVRM-/Xid-/Display-Link-Fehler. Dock, Kabel, Versorgung und Softwarepfad sind
+damit noch nicht als Ursache voneinander unterschieden. Einen höheren Modus erst nach Klärung von
 Dock-Modell, Kabeln und gemeinsamer Verbindung erneut testen.
 
 Die externen DP-Ausgänge liegen an der RTX 3080, das interne Display an
