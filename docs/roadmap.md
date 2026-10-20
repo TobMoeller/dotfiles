@@ -5,7 +5,7 @@
 - [x] Grundkonfiguration aktiviert und mehrfach neu gestartet; vorherige NixOS-Generationen bleiben verfügbar.
 - [ ] Hardware erfassen: GPU-IDs, tatsächlich verfügbare VRAM-Größe, externe Monitoranschlüsse, BIOS-Grafikmodus.
 - [ ] Vulkan, externe Monitore und später CUDA am Gerät prüfen.
-- [ ] Dynabook-Dock: beide Dell S2725DC flackern auch bei WQHD/60 Hz und deaktiviertem VRR, rechts stärker. Rechter Ausgang per IPC neu initialisiert, Wirkung noch offen. Versorgung mit Lenovo-Netzteil und direkte Monitorverbindung zum Eingrenzen prüfen; Dock-Modell/Kabel erfassen. Höhere Raten erst nach Stabilisierung erneut testen. Ethernet mit 1 Gbit/s und Focusrite-Ausgabe erkannt.
+- [ ] Dynabook-Dock: beide Dell S2725DC flackern auch bei WQHD/60 Hz und deaktiviertem VRR, rechts stärker; Neuinitialisierung rechts verschlimmerte es. Rechten Monitor auf Wunsch vorläufig deaktiviert, Notebook + linker Dell aktiv. Stabilität prüfen. Versorgung mit Lenovo-Netzteil und direkte Monitorverbindung zum Eingrenzen prüfen; Dock-Modell/Kabel erfassen. Höhere Raten erst nach Stabilisierung erneut testen. Ethernet mit 1 Gbit/s und Focusrite-Ausgabe erkannt.
 - [x] NVIDIA-Treiber, Intel-/NVIDIA-Offload und Runtime-Suspend nach Neustart geprüft.
 - [x] System-Suspend/Resume mit coarse-grained Runtime-PM (0x01) und Standard-Notifier wiederholt getestet: NVIDIA-Offload funktioniert nach dem Aufwachen. Akku-Verbrauch im längeren Schlaf noch nicht abschließend gemessen.
 - [x] 80-GiB-Swapdatei im verschlüsselten Root-Dateisystem und Wiederaufnahme beim Boot eingerichtet.

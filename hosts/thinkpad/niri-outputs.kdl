@@ -16,7 +16,9 @@ output "Dell Inc. DELL S2725DC GR9HQC4" {
 }
 
 output "Dell Inc. DELL S2725DC HM1XPB4" {
-    // Reducing only this display to 60 Hz did not resolve the flicker.
+    // Flicker persisted with both at 60 Hz and worsened after reinitializing
+    // this output. Keep notebook + left Dell active while investigating.
+    off
     mode "2560x1440@59.951"
     scale 1
     position x=4267 y=0

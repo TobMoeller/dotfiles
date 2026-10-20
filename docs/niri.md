@@ -108,7 +108,7 @@ Anordnung, von links nach rechts:
 | --- | --- | --- | --- |
 | ThinkPad, eDP-1 | 3840×2400, 60 Hz | 225 % | 0, 0 |
 | Dell S2725DC, GR9HQC4 | 2560×1440, vorläufig 60 Hz | 100 % | 1707, 0 |
-| Dell S2725DC, HM1XPB4 | 2560×1440, vorläufig 60 Hz | 100 % | 4267, 0 |
+| Dell S2725DC, HM1XPB4 | Vorläufig ausgeschaltet | 100 % | 4267, 0 (reserviert) |
 
 Die Dells werden über Hersteller/Modell/Seriennummer erkannt, unabhängig von
 wechselnden DP-Steckernamen am Dock. 1707 ist die aufgerundete logische Breite
@@ -122,7 +122,10 @@ bei weiterhin links 143,973 Hz behob es nicht. Daher beide auf den
 ursprünglichen 59,951-Hz-Modus zurückgesetzt. Der Benutzer bestätigt auch damit
 Flackern auf beiden Displays, rechts deutlich stärker. VRR blieb deaktiviert.
 Der rechte Ausgang wurde anschließend kurz per IPC aus- und eingeschaltet;
-die Wirkung ist noch offen. In den abgefragten Kernel-Logs erschienen keine
+der Benutzer meldete danach stärkeres Flackern. Auf Wunsch wurde rechts
+ausgeschaltet; aktiv bleiben Notebook und linker Dell bei 60 Hz. Die
+Stabilität dieses Zwei-Display-Betriebs ist noch zu bestätigen.
+In den abgefragten Kernel-Logs erschienen keine
 NVRM-/Xid-/Display-Link-Fehler. Dock, Kabel, Versorgung und Softwarepfad sind
 damit noch nicht als Ursache voneinander unterschieden. Einen höheren Modus erst nach Klärung von
 Dock-Modell, Kabeln und gemeinsamer Verbindung erneut testen.
