@@ -1,0 +1,23 @@
+// Notebook at the left; retain the two Dells' left/right order.
+// Position uses logical pixels: 3840 / 2.25 rounds up to 1707 for spacing.
+output "eDP-1" {
+    mode "3840x2400@60.000"
+    scale 2.25
+    position x=0 y=0
+}
+
+// Match monitor identity rather than dock-dependent DP connector numbers.
+output "Dell Inc. DELL S2725DC GR9HQC4" {
+    // Keep both docked displays at the original 60 Hz while investigating
+    // right-monitor flicker after the simultaneous 144 Hz test.
+    mode "2560x1440@59.951"
+    scale 1
+    position x=1707 y=0
+}
+
+output "Dell Inc. DELL S2725DC HM1XPB4" {
+    // Reducing only this display to 60 Hz did not resolve the flicker.
+    mode "2560x1440@59.951"
+    scale 1
+    position x=4267 y=0
+}

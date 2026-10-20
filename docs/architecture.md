@@ -54,6 +54,9 @@ Module können bestehende Optionen setzen. `lib.mkDefault` kennzeichnet bewusst 
 ## Native Konfiguration und direkte Symlinks
 
 Niri und Noctalia sind getrennte Features, die nur der ThinkPad-Host wählt.
+Die native Monitoranordnung steht hostbezogen in
+`hosts/thinkpad/niri-outputs.kdl`; der Host verknüpft sie separat und die
+gemeinsame Niri-Konfiguration lädt sie optional als `outputs.kdl`.
 NixOS richtet die Sitzung und Dienste ein, Home Manager installiert die
 nativen KDL-/TOML-Dateien. Noctalia startet aus der Niri-Konfiguration;
 Plasma verwendet weiterhin seine eigene Shell. Noctalia v5 kommt wie herdr

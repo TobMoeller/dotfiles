@@ -5,6 +5,7 @@
 - [x] Grundkonfiguration aktiviert und mehrfach neu gestartet; vorherige NixOS-Generationen bleiben verfügbar.
 - [ ] Hardware erfassen: GPU-IDs, tatsächlich verfügbare VRAM-Größe, externe Monitoranschlüsse, BIOS-Grafikmodus.
 - [ ] Vulkan, externe Monitore und später CUDA am Gerät prüfen.
+- [ ] Dynabook-Dock: rechter Dell S2725DC flackert nach dem Test beider Displays mit WQHD/144 Hz; Reduktion nur rechts auf 60 Hz half nicht. Beide wieder auf 60 Hz gesetzt, Stabilität noch bestätigen. Dock-Modell/Leistung und Kabel prüfen; höhere Raten erst danach erneut testen. Ethernet mit 1 Gbit/s und Focusrite-Ausgabe erkannt.
 - [x] NVIDIA-Treiber, Intel-/NVIDIA-Offload und Runtime-Suspend nach Neustart geprüft.
 - [x] System-Suspend/Resume mit coarse-grained Runtime-PM (0x01) und Standard-Notifier wiederholt getestet: NVIDIA-Offload funktioniert nach dem Aufwachen. Akku-Verbrauch im längeren Schlaf noch nicht abschließend gemessen.
 - [x] 80-GiB-Swapdatei im verschlüsselten Root-Dateisystem und Wiederaufnahme beim Boot eingerichtet.

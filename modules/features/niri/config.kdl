@@ -1,4 +1,7 @@
 // Super is Mod in a normal session. Changes are hot-reloaded by niri.
+// Hosts may provide native monitor settings next to this symlink.
+include optional=true "outputs.kdl"
+
 input {
     keyboard {
         xkb { layout "de"; }
@@ -76,6 +79,10 @@ binds {
     Mod+Down { focus-window-down; }
     Mod+Up { focus-window-up; }
     Mod+Right { focus-column-right; }
+    Mod+Alt+Left hotkey-overlay-title="Focus left monitor" { focus-monitor-left; }
+    Mod+Alt+Right hotkey-overlay-title="Focus right monitor" { focus-monitor-right; }
+    Mod+Shift+Left hotkey-overlay-title="Move window to left monitor" { move-window-to-monitor-left; }
+    Mod+Shift+Right hotkey-overlay-title="Move window to right monitor" { move-window-to-monitor-right; }
     Mod+Ctrl+H { move-column-left; }
     Mod+Ctrl+J { move-window-down; }
     Mod+Ctrl+K { move-window-up; }

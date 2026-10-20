@@ -67,6 +67,8 @@ in
         };
         home.file.".local/bin/dotfiles-rebuild".source =
           config.lib.file.mkOutOfStoreSymlink "${config.dotfiles.repositoryPath}/scripts/rebuild";
+        xdg.configFile."niri/outputs.kdl".source =
+          config.lib.file.mkOutOfStoreSymlink "${config.dotfiles.repositoryPath}/hosts/thinkpad/niri-outputs.kdl";
       };
     };
   };

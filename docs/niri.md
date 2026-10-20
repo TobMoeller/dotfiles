@@ -32,6 +32,8 @@ Anwendungen; eine Codex-Sitzung im Terminal gegebenenfalls später fortsetzen.
 | Mod+S | Control Center |
 | Mod+Komma | Noctalia-Einstellungen |
 | Mod+H/J/K/L oder Pfeiltasten | Fenster fokussieren |
+| Mod+Alt+Links/Rechts | Linken/rechten Monitor fokussieren |
+| Mod+Shift+Links/Rechts | Aktives Fenster auf linken/rechten Monitor verschieben |
 | Mod+Ctrl+H/J/K/L | Fenster/Spalten bewegen |
 | Mod+I/U | Workspace darüber/darunter |
 | Mod+1 bis Mod+5 | Workspace auswählen |
@@ -90,3 +92,55 @@ Desktop. Bei Problemen über das Sitzungsmenü abmelden und Plasma auswählen.
 Quellen: [Niri-Start](https://niri-wm.github.io/niri/Getting-Started.html),
 [Noctalia/Niri](https://docs.noctalia.dev/noctalia/compositor-settings/niri/),
 [Noctalia-Konfiguration](https://docs.noctalia.dev/noctalia/configuration/).
+
+## ThinkPad am Dynabook-Dock
+
+Die hostbezogene Datei `hosts/thinkpad/niri-outputs.kdl` wird über Home Manager
+als `~/.config/niri/outputs.kdl` verknüpft. Die gemeinsame Niri-Konfiguration
+lädt sie optional; andere Hosts benötigen keine Monitorkonfiguration. Für den
+neuen Symlink einmal `dotfiles-rebuild` ausführen. Native Änderungen werden
+danach direkt neu geladen. Bis dahin gelten die per IPC gesetzten Positionen
+und Modi nur für die laufende Sitzung.
+
+Anordnung, von links nach rechts:
+
+| Display | Modus | Skalierung | Position |
+| --- | --- | --- | --- |
+| ThinkPad, eDP-1 | 3840×2400, 60 Hz | 225 % | 0, 0 |
+| Dell S2725DC, GR9HQC4 | 2560×1440, vorläufig 60 Hz | 100 % | 1707, 0 |
+| Dell S2725DC, HM1XPB4 | 2560×1440, vorläufig 60 Hz | 100 % | 4267, 0 |
+
+Die Dells werden über Hersteller/Modell/Seriennummer erkannt, unabhängig von
+wechselnden DP-Steckernamen am Dock. 1707 ist die aufgerundete logische Breite
+des Notebook-Displays bei 225 %. Die externen Displays bleiben in ihrer
+bisherigen relativen Reihenfolge. Alle Oberkanten sind ausgerichtet.
+
+Prüfung am 2026-10-20: Beide Dells bieten maximal 143,973 Hz in WQHD an;
+165 Hz wird nicht angeboten. Beide wurden gleichzeitig auf 143,973 Hz
+umgestellt, danach meldete der Benutzer Flackern rechts. Rechts 59,951 Hz
+bei weiterhin links 143,973 Hz behob es nicht. Daher beide auf den
+ursprünglichen 59,951-Hz-Modus zurückgesetzt; Rückmeldung zur Stabilität steht
+noch aus. VRR blieb deaktiviert. Einen höheren Modus erst nach Klärung von
+Dock-Modell, Kabeln und gemeinsamer Verbindung erneut testen.
+
+Die externen DP-Ausgänge liegen an der RTX 3080, das interne Display an
+Intel. Desktop-Ausgabe mit drei Displays wurde erkannt; daraus folgt keine
+garantierte Spiele-Framerate. Spiele bei Bedarf wie in `docs/gaming.md`
+über NVIDIA-Offload starten.
+
+Ethernet war mit 1000 Mbit/s verbunden und die bevorzugte Standardroute
+(Metrik 100 gegenüber WLAN 600); die tatsächliche Internet-Übertragungsrate
+wurde nicht gemessen. Die Focusrite Scarlett Solo (3rd Gen.) war als
+Standardausgabe und Eingang 1/Mikrofon ausgewählt, TeamSpeak-Ausgabe darüber
+aktiv. Aufnahmepegel bei Bedarf im Sprachchat prüfen.
+
+Versorgung ausschließlich über das Dynabook-Dock: USB Power Delivery aktiv,
+Akku bei 65–66 % am Laden. Die Ladeleistung schwankte während der Prüfung;
+die maximal ausgehandelte Dock-Leistung ließ sich nicht verlässlich auslesen.
+Für Spiele das passende Lenovo-Netzteil zusätzlich anschließen. Laden im
+Desktopbetrieb belegt keine ausreichende Versorgung unter Spielelast.
+
+Die Mauskonfiguration setzt bisher kein eigenes Beschleunigungsprofil;
+Niris Standard ist `adaptive`. Eine explizite `mouse { accel-profile "flat"; }`
+würde die geschwindigkeitsabhängige Beschleunigung abschalten. Touchpad und
+TrackPoint lassen sich unabhängig davon konfigurieren.
