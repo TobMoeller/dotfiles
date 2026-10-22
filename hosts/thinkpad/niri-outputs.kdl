@@ -15,8 +15,7 @@ output "Dell Inc. DELL S2725DC GR9HQC4" {
 }
 
 output "Dell Inc. DELL S2725DC HM1XPB4" {
-    // Flicker persisted with both at 60 Hz and worsened after reinitializing
-    // this output. Keep notebook + left Dell active while investigating.
+    // Keep the right Dell disabled until the dock issues are resolved.
     off
     mode "2560x1440@59.951"
     scale 1

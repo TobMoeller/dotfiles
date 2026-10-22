@@ -112,6 +112,88 @@ Verbrauchsmessung fehlt. Die Benutzerbeobachtung wird dadurch nicht entkräftet.
    Verbrauch, Wiederaufnahme und Verhalten am Netzteil. Ein erfolgreiches
    Hibernate-Resume allein genügt nicht als Gesamtfreigabe.
 
+## Vergleich am 2026-10-22: Render-GPU
+
+Das Dock wurde erneut angeschlossen, diesmal unter Thunderbolt `1-1`.
+`rx_speed` und `tx_speed` waren jeweils `20.0 Gb/s`, mit jeweils zwei Lanes:
+damit sind 40 Gbit/s pro Richtung ausgehandelt. Der Akku meldete bei 60 %
+`Charging`, `AC/online=1`. Welcher physische Port und welches Netzteil verwendet
+wurden, ist noch nicht bestätigt. Im überprüften Logabschnitt gab es zunächst
+keine erneuten Thunderbolt-Abbrüche.
+
+Beide Dells wurden bei aktivem Notebook-Display mit 2560×1440 bei 59,951 Hz
+getestet, VRR war aus. Der Benutzer meldet weiterhin Flackern, besonders beim
+Verschieben von Fenstern zwischen Monitoren. Niri verwendet laut Startlog
+`/dev/dri/renderD128`; sysfs ordnet diesen Intel (`0x8086`) und `renderD129`
+NVIDIA (`0x10de`) zu.
+
+Für den nächsten Vergleich setzt `hosts/thinkpad/niri-outputs.kdl` vorübergehend
+`debug.render-drm-device` auf `/dev/dri/renderD129`. Beide Dells bleiben bei
+60 Hz aktiv, ebenso das interne Display. Der zuvor fehlende, bereits in Home
+Manager deklarierte Link `~/.config/niri/outputs.kdl` wurde angelegt. Niri
+validiert die komplette Konfiguration. **Die neue Render-GPU erfordert eine
+neue Sitzung; zum Zeitpunkt der Vorbereitung lag noch kein Testergebnis vor.**
+BIOS, PRIME-Modus und Treiber bleiben unverändert, die Intel-Ausgabe für das
+interne Display bleibt verfügbar. Die Render-Node-Nummer ist für diesen Boot
+geprüft und muss nach einem Neustart erneut zugeordnet werden.
+
+Zurück zu automatischer GPU-Auswahl: den temporären `debug`-Block entfernen
+und neu anmelden. Zurück zum vorherigen Monitorprofil: im rechten Dell-Block
+`off` ergänzen und links wieder `2560x1440@143.973` setzen. Monitoränderungen
+werden live geladen; die Render-GPU wechselt erst beim nächsten Sitzungsstart.
+
+### Ergebnis und erneuter Start am selben Abend
+
+- Neue Niri-Sitzung um 21:53:22: Startlog bestätigt `renderD129` (NVIDIA).
+  Benutzer meldet zunächst eine Verbesserung, beim Start von TeamSpeak jedoch
+  einen Absturz und danach den Ausfall des Docks. Eine stabile Freigabe des
+  Monitorbetriebs ist daraus nicht ableitbar.
+- Um 21:53:54 stürzt TeamSpeaks `hotkey_helper` mit SIGSEGV ab. In derselben
+  Sekunde wird das Thunderbolt-Gerät getrennt. Die zeitliche Nähe beweist
+  keine Kausalität. Niri läuft weiter; der alte Sitzungssocket war lediglich
+  nach der Neuanmeldung ungültig.
+- Danach wiederholte Abbrüche und `not ready 1023ms after resume; giving up`
+  an den Dock-Bridges unter beiden Thunderbolt-Domains. Welche Portwechsel
+  der Benutzer manuell ausführte, ist nicht vollständig erfasst.
+- Benutzer meldet Neustart gegen 22 Uhr; ein neuer Kernel-Boot ist bestätigt.
+  Ob zuvor vollständig heruntergefahren wurde, ist nicht bestätigt. NVIDIA
+  bleibt korrekt zugeordnet. Zunächst nur USB-2-Geräte und internes Display;
+  nach erneutem Verbinden wiederholt sich die Thunderbolt-Abbruchschleife.
+- Test: `power/control=on` für Host-NHI `0000:00:0d.3` und PCIe-Root-Port
+  `0000:00:07.2`. Beide werden aktiv, Abbrüche bleiben bestehen; eine externe
+  Anzeige erscheint nur kurz. Benutzer setzt beide anschließend auf `auto`
+  zurück; Rücksetzung aus sysfs bestätigt. Keine dauerhafte PM-Regel erstellt.
+- Nach Entfernen der zuvor sichtbaren USB-Peripherie bleiben die Abbrüche
+  bestehen. Der genaue Zeitpunkt des Abziehens der Monitorkabel ist nicht
+  gesondert protokolliert.
+- Dock-SKU nun bestätigt: **PS0120EA1PRP**, originales Dock-Kabel. Benutzer
+  bestätigt, dass dasselbe Dock mit dem Tuxedo-Notebook unter Ubuntu arbeitet.
+  Dies grenzt auf die ThinkPad-/Software-Kombination ein, unterscheidet aber
+  noch nicht zwischen Host-Hardware, Host-Firmware und Linux-Konfiguration.
+- Lokal installierte ThinkPad-Firmware: BIOS `1.32`, EC `1.18`. Die vorhandenen
+  LVFS-Metadaten bieten BIOS `1.35` an. Für `1.34` und `1.35` sind
+  Downgrade-Grenzen dokumentiert; in den gelesenen Hinweisen ist kein konkreter
+  Fix dieser Abbruchschleife genannt. Keine Firmware installiert oder vorgemerkt.
+
+Nächster aussagekräftiger Vergleich wäre ein Ubuntu-Live-System **auf dem
+ThinkPad selbst**, ohne Installation. So bleiben Notebook, Dock und Kabel
+gleich, während Kernel und Softwareumgebung wechseln. Ein Erfolg würde auf
+Unterschiede im Softwarestack hindeuten; ein Misserfolg allein beweist noch
+keinen Hardwaredefekt. BIOS-/Dock-Updates erst nach Versionsabgleich und
+gesonderter Entscheidung; Firmware-Flash nicht über die instabile Verbindung.
+
+### Dockversuch auf Benutzerwunsch beendet
+
+Am 2026-10-22 wird der Versuch beendet; weitere Dock-Tests sind vorerst nicht
+gewünscht. Der temporäre NVIDIA-Render-Override wurde entfernt und das bisherige
+Monitorprofil wiederhergestellt: Notebook aktiv, linker Dell bei 143,973 Hz,
+rechter Dell aus. Die Monitorkonfiguration wird live geladen, die automatische
+Render-GPU-Auswahl gilt erst beim nächsten regulären Sitzungsstart. Dafür wird
+die laufende Sitzung nicht beendet. Die beiden getesteten PM-Einstellungen
+stehen bereits wieder auf `auto`. Es wurden keine Firmwareupdates installiert.
+Mausbeschleunigung bleibt ausgeschaltet, die ergänzten Monitor-Shortcuts bleiben
+erhalten. Die Dock-Verbindung selbst ist damit nicht repariert.
+
 Dynabook veröffentlicht für die Familie **PS0120** einen Firmware-Hinweis zu
 externen Video-Ausfällen. Das ist ein Prüfpunkt, keine bereits bestätigte
 Zuordnung zur hier verwendeten Dock-SKU und keine Update-Empfehlung ohne

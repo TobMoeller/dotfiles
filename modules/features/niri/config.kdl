@@ -8,6 +8,9 @@ input {
         repeat-delay 300
         repeat-rate 30
     }
+    mouse {
+        accel-profile "flat"
+    }
     touchpad {
         tap
         // Traditional scrolling; omit natural-scroll to reverse the old setup.
@@ -79,6 +82,10 @@ binds {
     Mod+Down { focus-window-down; }
     Mod+Up { focus-window-up; }
     Mod+Right { focus-column-right; }
+    Mod+Shift+H hotkey-overlay-title="Focus left monitor" { focus-monitor-left; }
+    Mod+Shift+J hotkey-overlay-title="Focus monitor below" { focus-monitor-down; }
+    Mod+Shift+K hotkey-overlay-title="Focus monitor above" { focus-monitor-up; }
+    Mod+Shift+L hotkey-overlay-title="Focus right monitor" { focus-monitor-right; }
     Mod+Alt+Left hotkey-overlay-title="Focus left monitor" { focus-monitor-left; }
     Mod+Alt+Right hotkey-overlay-title="Focus right monitor" { focus-monitor-right; }
     Mod+Shift+Left hotkey-overlay-title="Move window to left monitor" { move-window-to-monitor-left; }
