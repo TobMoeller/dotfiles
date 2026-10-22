@@ -91,6 +91,14 @@ Dateiänderungen wirken nach dem Neuladen des Programms. Ein System-Rollback set
 
 ## Versionen und weitere Plattformen
 
+Das Neovim-Feature wird vom gemeinsamen Benutzerprofil ausgewählt. Nix
+installiert Editor, Plugins, ausgewählte Parser und Sprachserver; die native
+Lua-Konfiguration wird als vollständiges `~/.config/nvim` direkt ins Checkout
+verknüpft. Home Managers Provider-Konfiguration lädt der Editor-Wrapper separat,
+damit sie die native `init.lua` nicht ersetzt. Der offizielle Laravel-LSP ist
+als Release-PHAR mit Version und Hash fixiert. Details, Bedienung und die
+Großdatei-Behandlung stehen in `docs/neovim.md`.
+
 Das Feature `development` stellt zwei getrennte Bausteine bereit: Sein
 Home-Manager-Modul richtet direnv/nix-direnv für das Benutzerprofil ein;
 `perSystem.devShells.default` stellt Werkzeuge für die Arbeit an diesem

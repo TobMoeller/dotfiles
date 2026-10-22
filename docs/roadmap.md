@@ -26,7 +26,8 @@
 - [x] zsh/Git aktiviert; Grundbedienung geprüft. Weitere Optimierungen folgen einzeln.
 - [ ] Ghostty aktivieren und mit zsh/Starship/herdr prüfen; native Konfiguration, Catppuccin Mocha und MesloLGS NF als Ausgangspunkt.
 - [x] Ghostty samt nativer Konfiguration und Schrift validieren und bauen.
-- [ ] Neovim-Konfiguration aus `playground` gezielt überführen (eigener größerer Schritt): native Lua-Dateien, Plugins, LSP, Completion und Projektwerkzeuge.
+- [x] Neovim-Konfiguration aus `playground` (`44ab6f2`) mit nativer Lua überführt: vertraute Bedienung, LSP/Completion, herdr-Navigation und Test-Runner; Plugin-Altlasten bereinigt und Großdatei-Modus ergänzt. Offizieller Laravel-LSP fixiert installiert; Details und Prüfstand in `docs/neovim.md`.
+- [ ] Neovim aktivieren und in einem echten Laravel-/Hackathon-Projekt prüfen: LSP/Blade, Completion, Tests in herdr und große Dateien. Bei konkreter Verzögerung Profiling statt weiterer pauschaler Pluginwechsel.
 - [x] Gewohnte zsh-Shortcuts im Vi-Insertmodus ergänzt; Caps Lock → Escape über keyd deklariert.
 - [ ] Caps-Lock-Remapping aktivieren und die Insertmodus-Tastenkürzel interaktiv prüfen.
 - [ ] Steam-Fensterbedienung prüfen: native Menüs/Titelleiste des Clients und Login-Dialogs von Niris Dekorationen unterscheiden. Keine globale Dekorationsumstellung als vermeintliche Steam-spezifische Lösung.
@@ -34,7 +35,7 @@
 - [ ] Fingerabdrucksensor erfassen und Treibersupport prüfen; anschließend Anmeldung, Niri-/Noctalia-Entsperren und optional sudo über fprintd/PAM einrichten und testen. LUKS-Entsperrung beim Boot separat behandeln.
 - [x] herdr-Tastenkürzel, vim-nav und Projekthelfer `t` gezielt übernehmen; `wt` verwendet die native Worktree-Verwaltung.
 - [x] herdr aktiviert und erster Benutzertest erfolgreich.
-- [ ] Neovim-Seite der herdr-Split-Navigation beim Editor-Umzug ergänzen.
+- [x] Neovim-Seite der herdr-Split-Navigation ergänzt; Splitwechsel und CLI-Aufruf am Rand headless geprüft, echter herdr-Test nach Aktivierung offen.
 - [ ] Niri/Noctalia als zusätzliche Sitzung aktivieren und ersten Login prüfen (Terminal, Launcher, Portale, Audio, WLAN, Helligkeit, Sperre und Deckelaktion).
 - [x] Niri/Noctalia-Grundkonfiguration deklarieren, mit nativen Validatoren prüfen und System bauen.
 - [ ] Niri/Noctalia im Alltag optimieren: Skalierung/Monitore, Shortcuts, Theme, Clipboard und Screenshots.

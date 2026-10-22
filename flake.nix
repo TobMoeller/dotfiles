@@ -25,6 +25,7 @@
         ./modules/features/development.nix
         ./modules/features/generation-cleanup/default.nix
         ./modules/features/herdr/default.nix
+        ./modules/features/neovim/default.nix
         ./modules/features/nvidia-prime.nix
         ./modules/features/npm.nix
         ./modules/features/hibernate.nix

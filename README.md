@@ -24,6 +24,7 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 - [Erste Niri-/Noctalia-Sitzung](docs/niri.md)
 - [Steam, Proton und Gaming-Werkzeuge](docs/gaming.md)
 - [herdr, Projekte und Worktrees](docs/herdr.md)
+- [Neovim, Laravel-LSP und große Dateien](docs/neovim.md)
 - [Projekt-devShells und direnv](docs/development.md)
 - [Generationen aufbewahren und bereinigen](docs/generations.md)
 
