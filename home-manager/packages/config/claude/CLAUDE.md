@@ -36,6 +36,14 @@ project's own CLAUDE.md instead.
   is a freeform human-only zone — leave it alone unless I ask. In a subagent
   there is nobody to offer to: name the candidate in your result block instead.
 
+## Lead session
+- Who the lead is stands in `~/code/knowledge/work-log/.lead-session`: the bare
+  `ListAgents` name of today's `/lead` session (`work-log-xx`), written by the
+  lead at its start. When I say "tell the lead", "sag dem Lead Bescheid" or a
+  skill wants to message it: read that file, `ListAgents`, and send to that
+  name. Never ask me which session the lead is. Older `work-log-*` sessions in
+  the list are yesterday's leads. Name not listed → say so in one line and go on.
+
 ## Conventions
 <!-- Add cross-project preferences here as they come up. -->
 

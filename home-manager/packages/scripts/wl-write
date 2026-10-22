@@ -15,11 +15,16 @@
 #                                                     set frontmatter keys (phase, gate, gate_id, step, round, …), set updated:
 #   wl-write next   <TICKET> <text...>               replace the body of ## Nächster Schritt
 #   wl-write runde  <TICKET> <phase> <runde> <agent> <agent-id> <ergebnis> <befunde> <ausgang...>
+#                   [--set <key> <value>]... [--log "<text>"] [--next "<text>"]
 #                                                     append a row to pruefung/verlauf.md, print its Nr, and write
 #                                                     pruefung/<Nr>-<phase>-<agent>-r<runde>.md with the agent's brief
-#                                                     and final report copied from its transcript (nothing to retype)
+#                                                     and final report copied from its transcript (nothing to retype);
+#                                                     --set/--log/--next do the station's state.md bookkeeping in
+#                                                     the same call (agent id, log line, next step)
 #   wl-write befund <TICKET> add <phase> <kriterium> <quelle> <text...>
 #                                                     append a row to pruefung/befunde.md (Status offen), print its Id (B01…)
+#   wl-write befund <TICKET> add <phase> -- <kriterium> <quelle> <text...> [-- <kriterium> <quelle> <text...>]...
+#                                                     the same for several findings in one call, one Id per line
 #   wl-write befund <TICKET> set <Bnn[,Bnn…]> <status> [entscheidung...]
 #                                                     set Status (and Entscheidung) of one or more rows
 #   wl-write befund <TICKET> list [offen|alle]        print the rows (default: offen)
@@ -162,7 +167,16 @@ case "$cmd" in
         f="$pruef/verlauf.md"
         [[ -f "$f" ]] || printf '# %s — Prüfverlauf\n\n| Nr | Zeit | Phase | Runde | Agent | Agent-Id | Ergebnis | Befunde | Ausgang |\n|---|---|---|---|---|---|---|---|---|\n' "$ticket" > "$f"
         phase=${1:?}; runde=${2:?}; agent=${3:?}; id=${4:?}; ergebnis=${5:?}; befunde=${6:?}; shift 6
-        ausgang="$*"
+        pairs=(); logtext=""; next=""; words=()
+        while (($# > 0)); do
+            case "$1" in
+                --set)  [[ $# -ge 3 ]] || die "--set needs key and value"; pairs+=("$2" "$3"); shift 3 ;;
+                --log)  [[ $# -ge 2 ]] || die "--log needs a text"; logtext=$2; shift 2 ;;
+                --next) [[ $# -ge 2 ]] || die "--next needs a text"; next=$2; shift 2 ;;
+                *)      words+=("$1"); shift ;;
+            esac
+        done
+        ausgang="${words[*]:-}"
         ts=$(now)
         # cells may be re-padded by a table formatter (Obsidian), so allow any spacing
         nr=$(grep -cE '^\|[[:space:]]*[0-9]{2}[[:space:]]*\|' "$f" || true); nr=$(printf '%02d' $((nr + 1)))
@@ -175,6 +189,11 @@ case "$cmd" in
         } > "$report"
         echo "$nr"
         echo "$report"
+        if [[ -f "$state" ]]; then
+            ((${#pairs[@]} == 0)) || set_pairs "${pairs[@]}"
+            [[ -z "$next" ]] || replace_section "Nächster Schritt" "$next"
+            [[ -z "$logtext" ]] || log_line "$phase" "$logtext"
+        fi
         ;;
     befund)
         mkdir -p "$pruef"
@@ -183,11 +202,31 @@ case "$cmd" in
         sub=${1:?add|set|list}; shift
         case "$sub" in
             add)
-                phase=${1:?}; krit=${2:?}; quelle=${3:?}; shift 3
-                text="$*"; [[ -n "$text" ]] || die "befund text missing"
-                n=$(grep -cE '^\|[[:space:]]*B[0-9]{2}[[:space:]]*\|' "$f" || true); id=$(printf 'B%02d' $((n + 1)))
-                printf '| %s | %s | %s | %s | %s | %s | offen | |\n' "$id" "$(now)" "$phase" "$krit" "$quelle" "${text//|/∣}" >> "$f"
-                echo "$id"
+                phase=${1:?}; shift
+                add_row() { # krit quelle text
+                    local n id
+                    n=$(grep -cE '^\|[[:space:]]*B[0-9]{2}[[:space:]]*\|' "$f" || true); id=$(printf 'B%02d' $((n + 1)))
+                    printf '| %s | %s | %s | %s | %s | %s | offen | |\n' "$id" "$(now)" "$phase" "$1" "$2" "${3//|/∣}" >> "$f"
+                    echo "$id"
+                }
+                if [[ "${1:-}" == "--" ]]; then
+                    # batch: -- <krit> <quelle> <text...> [-- ...]
+                    shift
+                    group=()
+                    flush() {
+                        ((${#group[@]} >= 3)) || die "each -- group needs <kriterium> <quelle> <text>"
+                        add_row "${group[0]}" "${group[1]}" "${group[*]:2}"
+                    }
+                    while (($# > 0)); do
+                        if [[ "$1" == "--" ]]; then flush; group=(); else group+=("$1"); fi
+                        shift
+                    done
+                    flush
+                else
+                    krit=${1:?}; quelle=${2:?}; shift 2
+                    text="$*"; [[ -n "$text" ]] || die "befund text missing"
+                    add_row "$krit" "$quelle" "$text"
+                fi
                 ;;
             set)
                 ids=${1:?Bnn[,Bnn…]}; status=${2:?status}; shift 2

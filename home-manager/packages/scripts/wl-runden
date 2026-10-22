@@ -62,16 +62,17 @@ stats() {
 # rows of verlauf.md: | Nr | Zeit | Phase | Runde | Agent | Agent-Id | Ergebnis | Befunde | Ausgang |
 rows=()
 declare -A last_seen   # agent id → epoch of its previous row (continued agents)
+trim() { local s="$*"; s="${s#"${s%%[![:space:]]*}"}"; printf '%s' "${s%"${s##*[![:space:]]}"}"; }  # not xargs: a quote in the text breaks it
 while IFS='|' read -r _ nr zeit phase runde agent id ergebnis befunde ausgang _; do
-    nr=$(echo "$nr" | xargs); [[ "$nr" =~ ^[0-9]+$ ]] || continue
-    id=$(echo "$id" | xargs); zeit=$(echo "$zeit" | xargs)
+    nr=$(trim "$nr"); [[ "$nr" =~ ^[0-9]+$ ]] || continue
+    id=$(trim "$id"); zeit=$(trim "$zeit")
     # the row is written right after the agent returned: its calls end at the
     # row's minute (+90 s slack) and start after the id's previous row
     hi=$(( $(date -d "$zeit" +%s 2>/dev/null || echo 9999999800) + 90 ))
     lo=${last_seen[$id]:-0}
     last_seen[$id]=$hi
     IFS='|' read -r turns cache dauer <<< "$(stats "$id" "$lo" "$hi")"
-    rows+=("$nr|$(echo "$zeit"|xargs)|$(echo "$phase"|xargs)|$(echo "$runde"|xargs)|$(echo "$agent"|xargs)|$(echo "$ergebnis"|xargs)|$(echo "$befunde"|xargs)|$(echo "$ausgang"|xargs)|$turns|$cache|$dauer")
+    rows+=("$nr|$zeit|$(trim "$phase")|$(trim "$runde")|$(trim "$agent")|$(trim "$ergebnis")|$(trim "$befunde")|$(trim "$ausgang")|$turns|$cache|$dauer")
 done < "$verlauf"
 
 [[ ${#rows[@]} -gt 0 ]] || { echo "wl-runden: verlauf.md has no rows yet"; exit 0; }

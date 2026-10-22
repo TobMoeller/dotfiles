@@ -63,8 +63,11 @@ writes `handover.md`, Tobias pushes at `PR` and decides at `ABNAHME`.
 Agent profiles live in `../agents/<group>/<name>.md` and are linked into
 `~/.claude/agents` by `home-manager/packages/claude-agents.nix`
 (`claudeAgentGroups`, same override rule as skills). All agents run on
-Opus (`model: opus`, `effort` per profile); the lead
-session (`wt lead` passes `--model fable`) on Fable. The
+Opus (`model: opus`, `effort` per profile), and so does the lead
+session (`wt lead` passes `--model opus`; `WT_LEAD_MODEL=fable` switches
+it back for a comparison). One exception: `/work` spawns the second full
+reviewer with `model: fable` on the Agent call (experiment since
+2026-10-22, see PIPELINE.md). The
 session model itself comes from `permissions/red.json` (`"model": "opus"`,
 merged into settings.json), because a skill's own `model:` only lasts one
 turn. Every specialist ends with an `ERGEBNIS:` block the orchestrator

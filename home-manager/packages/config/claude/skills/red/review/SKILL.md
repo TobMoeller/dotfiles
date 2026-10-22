@@ -144,7 +144,8 @@ The file is a **walking aid for the Gitea diff view**: the user opens the PR, go
 - **Group findings under one `## \`path/to/File.php\`` heading per file**, in that order, with the findings as `###` sections underneath. One heading per file even when it holds only one finding — the user scrolls to the heading that matches the file they have open.
 - **Severity is triage metadata, not a sort key.** It stays in the finding title (`### [major] …`) so the user can judge what matters, but it never influences position. A `nit` in the first file comes before a `major` in the fifth.
 - **Findings with no anchor in the diff go last**, under a final `## Ohne Diff-Bezug` heading — e.g. a point about a file the PR does not touch (a sibling endpoint that *should* have been changed too), or a repo-wide observation. Gitea cannot attach a line comment to an unchanged file, so say in the comment text itself where it belongs (usually: attach it to the closest changed line and name the other file, or post it as a standalone remark). Never bury such a finding in the middle of the file order — it breaks the walk.
-- **Right after the status block, add a `## Reihenfolge (Gitea-Diff)` index as a checklist**: one line per file in diff order, and under it **one checkbox line per finding** — `- [ ] F<n> [severity] Kurztitel`. This is the single list Tobias ticks off while walking the diff (posted, decided, dropped — the tick means „erledigt", whatever he did with it); Obsidian renders the boxes clickable, so they go into the index only, not into the finding sections, and never into a heading. Files without findings are omitted.
+- **Right after the status block, add a `## Reihenfolge (Gitea-Diff)` index as a plain list**: one line per file in diff order, and under it **one line per finding** — `- F<n> [severity] Kurztitel`. No checkboxes in the index. Files without findings are omitted.
+- **The „erledigt" checkbox sits at the finding itself**: the first line under every `### F<n> · …` heading is `- [ ] Erledigt: ` (Obsidian renders it clickable). Tobias ticks it while walking the diff — posted, decided, dropped — and may add a reason after the colon („nicht postenswert", „verworfen", „eigener Kommentar gepostet"). Never put the box into the index or into a heading. Decided by Tobias on 2026-10-19 (RTM-3944: jumping between index and finding section was impractical with 18 findings).
 - **Give every finding a stable id `F<n>`, numbered in diff order** — F1 is the first finding in the first file, and the count runs on through the `## Ohne Diff-Bezug` section. The id goes into the finding title (`### F3 · [minor] …`) and in front of its entry in the `Reihenfolge` index. It exists **only for talking about the review** — so the user can say "F3 ist erledigt, F5 poste ich nicht" instead of quoting the title — and must **never** appear in a pasted Gitea comment. Assign the numbers once and do not renumber within a review file; if a finding is dropped later, its number stays retired. Whenever a status table, a cross-reference or a later section points back at a finding, use the id.
 
 Example skeleton:
@@ -153,18 +154,21 @@ Example skeleton:
 ## Reihenfolge (Gitea-Diff)
 
 1. `app/Http/Controllers/.../FooController.php`
-   - [ ] F1 [nit] Meldung im Konjunktiv
+   - F1 [nit] Meldung im Konjunktiv
 2. `app/Service/Foo/Actions/BarAction.php`
-   - [ ] F2 [major] Kein Broadcast
-   - [ ] F3 [minor] Falsche Begründung
+   - F2 [major] Kein Broadcast
+   - F3 [minor] Falsche Begründung
 3. `tests/Feature/Service/Foo/BazTest.php`
-   - [ ] F4 [minor] Test im falschen Verzeichnis
+   - F4 [minor] Test im falschen Verzeichnis
 4. Ohne Diff-Bezug
-   - [ ] F5 [minor] Schwester-Endpoint ohne Guard
+   - F5 [minor] Schwester-Endpoint ohne Guard
 
 ## `app/Http/Controllers/.../FooController.php`
 
 ### F1 · [nit] Meldung im Konjunktiv
+
+- [ ] Erledigt: 
+
 …
 ```
 
@@ -172,6 +176,8 @@ Example skeleton:
 
 ```
 ### F<n> · [blocker|major|minor|nit] Kurzer Titel
+
+- [ ] Erledigt: 
 
 📍 **`path/to/File.php:42`** · `methodOrSymbolName()` <— zur Orientierung, wo der Kommentar hingehört
 
@@ -248,8 +254,8 @@ Same folder as `review.md` (a second re-review overwrites it; note the round in 
 
 - `# Re-Review PR <n> · <TICKET> · Push vom <Datum Zeit>`
 - `## Status (für dich)`: PR link, new head (old head in brackets), base and whether it moved; **what the push is** (pure rebase/force-push, or new commits with one line each, PR text changed?); **Durchlauf** (checked yourself, or one reviewer plus your refutation, and why); ticket assignment/status; then the CI block from 5a for the new head, with „neu gegenüber dem Review" called out.
-- `## Alte Befunde`: one checkbox line per `F<n>` from `review.md`, ids kept: `- [x] F<n> · behoben · <Beleg in einem Satz>` for a fixed one, `- [ ] F<n> · offen | neu bewertet · <Beleg in einem Satz>` for the rest, so the open ones are the ones left to tick. An open one keeps its comment and Hergang in `review.md` (do not repeat them); a re-rated one gets its new severity and the reason in whole sentences.
-- **New findings** as in 5b/5c: `## Reihenfolge (Gitea-Diff)` checklist plus one `## <path>` section per file with the full Hergang block, numbered on from the last `F<n>` of `review.md` — „Keine neuen Befunde" when there are none. Then `## Widerlegt` (new ones only, with the Urteil as in 5c). No `## Offene Fragen` here either.
+- `## Alte Befunde`: one plain line per `F<n>` from `review.md`, ids kept, no checkboxes: `- F<n> · behoben · <Beleg in einem Satz>` for a fixed one, `- F<n> · offen | neu bewertet · <Beleg in einem Satz>` for the rest. An open one keeps its comment, Hergang and its `Erledigt` box in `review.md` (do not repeat them); a re-rated one gets its new severity and the reason in whole sentences.
+- **New findings** as in 5b/5c: `## Reihenfolge (Gitea-Diff)` plain index plus one `## <path>` section per file with the `- [ ] Erledigt: ` line under the heading and the full Hergang block, numbered on from the last `F<n>` of `review.md` — „Keine neuen Befunde" when there are none. Then `## Widerlegt` (new ones only, with the Urteil as in 5c). No `## Offene Fragen` here either.
 
 ## 6. Tell the lead
 

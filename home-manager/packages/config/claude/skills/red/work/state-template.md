@@ -49,7 +49,7 @@ updated: 2026-01-01 00:00
 | FRAGEN | Fragen an Tobias und Umbau-Hinweise aus der Analyse (oder aus dem Bau heraus); Stopp nur wenn es welche gibt · Status `automatisch` oder `Tobias` | | | |
 | LOOP | kein Stopp: Implementer → Refactorer → Logik-Review, bis kein major/blocker offen, max. 3 Durchläufe, dann ESK | | | |
 | VOLL-REVIEW | kein Stopp: zwei unabhängige Reviewer über den ganzen Stand, Orchestrator führt zusammen und widerlegt; Kleinigkeiten fixt er selbst, Größeres geht in den Loop; max. 2 Runden, dann ESK | | | |
-| PR | Tobias pusht und legt den PR an (kein Teil der Abnahme), Worker prüft lesend | | | |
+| PR | Tobias pusht und legt den PR an (kein Teil der Abnahme), Worker prüft lesend und postet den PR-Link in Jira | | | |
 | ABNAHME | handover.md: Hergang der Änderung, Diff, DoD, Reviewer, offene Punkte, Commits, PR | | | |
 
 ## Log

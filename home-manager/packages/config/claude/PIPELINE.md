@@ -37,7 +37,13 @@ dorthin jeden Gate-Block und die Done-Zeile. Der Lead antwortet mit
 `state.md`. herdr bleibt die Sicht von außen (idle, working, blocked) und
 der Ort, an dem ich Permission-Prompts beantworte.
 
-Der Lead läuft auf Fable, der Worker und die Agents auf Opus.
+Lead, Worker und Agents laufen auf Opus 5.5 (Lead seit 2026-10-22 testweise
+statt Fable: seine Arbeit ist `wl`, Jira-Suchen und Nachrichten, Fable
+brachte dort keinen Mehrwert; zurück mit `WT_LEAD_MODEL=fable`). Einzige
+Ausnahme: der zweite Voll-Reviewer (B) läuft seit 2026-10-22 auf Fable 5.1,
+als Versuch, ob ein zweites Modell eine zweite Perspektive bringt. Gemessen
+wird über die Quelle-Spalte im Befund-Register (`Voll r1 A`, `B`, `A+B`):
+Befunde, die nur B sah, gegen die, die nur A sah, nach Schwere und Ausgang.
 
 | Agent | Station | Darf | Gibt zurück |
 |---|---|---|---|
@@ -153,8 +159,8 @@ und RTM-3883).
 |---|---|---|---|---|
 | **FRAGEN** | hart, nur wenn es Fragen, einen Umbau oder eine Aufgabe „vor dem Bauen" gibt | nach assess; aus dem Loop heraus bei einer fachlichen Frage des Implementers | die Fragen an mich, in einem Rutsch | `ok` (alles wie empfohlen) · `1: <Option oder eigener Text> 2: <…>` (abweichend, Rückfrage oder Kontext; Rest wie empfohlen) · `siehe ticket.md` · `diskussion <n>` · `nein: <Notiz>` · jeweils `manual` anhängen = ich committe selbst |
 | **ESK** | hart | der Refactorer eskaliert ein Bestands-Refactoring, ein Rundenlimit ist erschöpft, ein Widerspruch zum Ticket beim Bauen | die eine Frage oder „Wie weiter?" | `1: A` · `1: <eigener Text>` · `redo <phase>` · `park <Notiz>` · `diskussion 1` |
-| **PR** | hart, kurz, nicht Teil der Abnahme | nach review, `handover.md` liegt vor; nach jeder Nacharbeit erneut (dann nur Push) | nichts, ich pushe und lege den PR an | `pr da` (Worker prüft Branch und PR lesend, trägt `pr:` ein, dann ABNAHME) · `ohne pr` · `parken` |
-| **ABNAHME** | hart, immer | nach PR | abnehmen oder zurückschicken | `abnehmen` (nackter PR-Link als Jira-Kommentar ohne Prompt; der PR bleibt offen, mergen tue ich) · `abnehmen ohne-jira` · `nacharbeiten <Notiz>` (`siehe PR` = meine Kommentare im PR) · `parken` · offene Punkte wie bei FRAGEN |
+| **PR** | hart, kurz, nicht Teil der Abnahme | nach review, `handover.md` liegt vor; nach jeder Nacharbeit erneut (dann nur Push) | nichts, ich pushe und lege den PR an | `pr da` (Worker prüft Branch und PR lesend, trägt `pr:` ein, postet beim ersten Mal den nackten PR-Link als Jira-Kommentar ohne Prompt, dann ABNAHME) · `ohne pr` · `parken` |
+| **ABNAHME** | hart, immer | nach PR | abnehmen oder zurückschicken | `abnehmen` (kein Jira-Schreibzugriff mehr, der Link steht seit `pr da` im Ticket; der PR bleibt offen, mergen tue ich) · `abnehmen ohne-jira` · `nacharbeiten <Notiz>` (`siehe PR` = meine Kommentare im PR) · `parken` · offene Punkte wie bei FRAGEN |
 
 **Befund-Register.** Jeder Befund eines Reviewers und jede Nacharbeit-Notiz
 von mir bekommt eine Id in `pruefung/befunde.md` und wird fortan nur über
@@ -276,7 +282,7 @@ nach jeder Loop-Runde und nach einem Kleinigkeits-Fix (wenn `commits:
 auto`; die Message ist genau die Commit-Zeile, ohne Trailer), Subagents
 starten, Nachrichten zwischen Lead und Worker, der eigene Compose-Stack,
 Jira-Schreibzugriffe, die ich im Chat angefordert habe oder die der
-Schritt vorsieht (der nackte PR-Link bei ABNAHME): meine Anweisung ist die
+Schritt vorsieht (der nackte PR-Link bei `pr da`): meine Anweisung ist die
 Freigabe, ein zweiter Prompt bringt nichts.
 
 Immer mit Prompt im Worker-Space (das ist der Zweck, nicht ein Fehler):

@@ -103,7 +103,10 @@ Gates (ids as used in `gate_id:` and in `wl`):
 - **Befund-Register.** Every finding a reviewer returns, and every
   Nacharbeit note from Tobias, gets an Id before anything else happens:
   `wl-write befund <TICKET> add <phase> <Schwere> "<Quelle> r<n>" "<Befund
-  in einem Satz>"` → `B07`. From then on it is addressed by its Id: in the
+  in einem Satz>"` → `B07`. Several findings from one result block go in
+  **one** call: `wl-write befund <TICKET> add <phase> -- <Schwere> "<Quelle>"
+  "<Befund>" -- <Schwere> "<Quelle>" "<Befund>" …` → one Id per line, in
+  order. From then on it is addressed by its Id: in the
   implementer's brief (`B07 · major · <Text> · <Korrektur>`), in its answer
   (`umgesetzt` or `zurückgewiesen: <Beleg>`), in the re-review
   (`erledigt`/`offen`). Status via `wl-write befund <TICKET> set
@@ -159,7 +162,7 @@ Gates (ids as used in `gate_id:` and in `wl`):
   prompt); then the groups stay staged one after another and the plan goes
   to `## Commits`. **Never push, never create, merge, approve or change a
   PR**, never `--amend`. Gitea is read-only for this session; the only
-  Jira write is the PR link at `abnehmen`.
+  Jira write the step itself prescribes is the bare PR link at `pr da`.
 - **One worker per ticket.** On start write `session: ${CLAUDE_SESSION_ID}`
   and `session_name: <your name from ListAgents' first line>` into the
   frontmatter. If a different id is there and `updated` is less than 10
@@ -177,10 +180,15 @@ Gates (ids as used in `gate_id:` and in `wl`):
   `wl` and the Prüfverlauf rely on them.
 - **Prüfverlauf — every agent call leaves a trace** in `$store/pruefung/`:
   after each agent returns, **one** call `wl-write runde <TICKET> <phase>
-  <runde> <agent> <agent-id> <ergebnis> <befunde> "<Ausgang>"`. It appends
-  the verlauf row and writes `pruefung/<nr>-<phase>-<agent>-r<n>.md` from
-  the agent's transcript. Never retype a result block into a file. Your
-  own analysis and full-review merge are logged as log lines, not rounds.
+  <runde> <agent> <agent-id> <ergebnis> <befunde> "<Ausgang>" [--set
+  <key> <value>]… [--log "<Satz>"] [--next "<Text>"]`. It appends the
+  verlauf row, writes `pruefung/<nr>-<phase>-<agent>-r<n>.md` from the
+  agent's transcript, and does the station's `state.md` bookkeeping in the
+  same call: the agent id (`--set implementer_id <id>`), the log line, the
+  next step. No separate `wl-write set`/`log` after a station; a phase
+  transition stays one `wl-write phase`. Never retype a result block into
+  a file. Your own analysis and full-review merge are logged as log lines,
+  not rounds.
 - **Continue an agent for its next round, start fresh for a new phase.**
   The loop's three agents keep their sessions across rounds: after the
   Logik review's findings the **same** implementer, refactorer and
@@ -446,10 +454,16 @@ it is what every agent and every later session reads.
   register, „backend only unless the ticket touches the frontend", and
   „keine Tests laufen lassen" (they run in parallel on one test database
   and would deadlock each other; the Logik gate ran the tests). Blind to
-  each other. Record `reviewer_ids`.
+  each other. **Reviewer A runs on the profile's model (Opus), reviewer B
+  on Fable: pass `model: fable` on B's `Agent` call** (experiment since
+  2026-10-22: a second model as a second perspective; the briefs stay
+  identical and say nothing about the model). Record `reviewer_ids` in the
+  order A,B.
 - **Merge** (V2): same spot + same claim → one Id, count `n/2` as
   information; never drop a single-reviewer finding. Register every merged
-  finding (Quelle `Voll r<n>`, with the count).
+  finding in one batch call, Quelle naming who saw it: `Voll r<n> A`,
+  `Voll r<n> B` or `Voll r<n> A+B` (that is how the experiment is measured,
+  so never a bare `Voll r<n> (1/2)`).
 - **Refute yourself** at the code, with your ticket knowledge: open the
   cited code, follow the chain, read the tests. A rule finding dies when
   the rule does not say that, the code does not violate it, or an
@@ -544,10 +558,16 @@ it is what every agent and every later session reads.
     `list_gitea_pull_request_checks` for the head: a red check whose cause
     lies in the new code is a Befund (Quelle `CI`, severity `major`) that
     goes through one loop round and is folded into the commit it belongs
-    to (§0), then `PR` again with the force-push line. Record `pr:`, log
-    line, gate `ABNAHME`. Not up to date or no PR → say what is missing,
+    to (§0), then `PR` again with the force-push line. Record `pr:`, and
+    **the first time a `pr:` is recorded for this ticket, post the PR link
+    to Jira now**: a comment that is the bare PR URL and nothing else (no
+    text, no marker) — a Jira write the step prescribes and `pr da`
+    orders, no prompt (the acceptance is not the condition for it; the
+    team sees the PR in the ticket as soon as it exists). Log line
+    (`PR-Link in Jira`), gate `ABNAHME`. A later `PR` gate (force-push)
+    posts nothing again. Not up to date or no PR → say what is missing,
     `PR` stays open.
-  - `ohne pr` → straight to `ABNAHME`, `pr:` empty.
+  - `ohne pr` → straight to `ABNAHME`, `pr:` empty, no Jira write.
   - `parken` → as the `park` mode.
   With `manual` commits the gate asks him to commit the staged series
   first, then push.
@@ -568,14 +588,14 @@ it is what every agent and every later session reads.
   this ticket, record the key in `ticket.md ## Entscheidungen`. Never send
   him to another checkout, never spawn an agent for it: you have every
   piece of context the skill needs. `/tickets` lists what is linked.
-- **On `abnehmen`:** with a `pr:`, the PR link to Jira as a comment that is
-  the bare PR URL and nothing else (no text, no marker) — a Jira write
-  Tobias ordered with `abnehmen`, no prompt. Without `pr:` no Jira write.
-  **The PR stays open; merging is his.** `phase: done`, log line, the done
-  line to the lead. Then offer the `brain` skill once if something
-  non-obvious was learned (an environment quirk that cost a round belongs
-  in the work-brain note `pipeline-stolpersteine`).
-- **On `abnehmen ohne-jira`:** as above without the Jira comment.
+- **On `abnehmen`:** no Jira write; the PR link went to Jira at `pr da`
+  (a `pr:` from before 2026-10-22 without that log line: post it now, same
+  bare form). **The PR stays open; merging is his.** `phase: done`, log
+  line, the done line to the lead. Then offer the `brain` skill once if
+  something non-obvious was learned (an environment quirk that cost a
+  round belongs in the work-brain note `pipeline-stolpersteine`).
+- **On `abnehmen ohne-jira`:** as above, and the catch-up comment stays out
+  too.
 - **On `nacharbeiten <Notiz>`:** the §1 row: the note becomes a Befund,
   one loop round, full review with the same reviewers, `handover.md`
   updated with „Diff seit letzter Abnahme", `PR` again (push only),
@@ -645,11 +665,13 @@ Per gate:
   sentence with the ticket's goal; no questions; `Für dich zu tun:` the
   push command and the PR (head → `develop`, title verbatim, no
   description), each on its own line in backticks; Antwort: `pr da` =
-  Branch und PR prüfen, dann Abnahme · `ohne pr` · `parken`; Details: path
+  Branch und PR prüfen, PR-Link in Jira, dann Abnahme · `ohne pr` ·
+  `parken`; Details: path
   of `handover.md`, commits, check line.
 - **`ABNAHME`:** TLDR from „In 30 Sekunden"; the open points from „Offen"
   as questions; tasks from „Für dich zu tun"; Antwort: `abnehmen` =
-  PR-Link in Jira, PR bleibt offen · `abnehmen ohne-jira` · `nacharbeiten
+  Ticket fertig, PR bleibt offen (PR-Link steht seit `pr da` in Jira) ·
+  `abnehmen ohne-jira` · `nacharbeiten
   <Notiz>` = eine Loop-Runde, Voll-Review, neuer Push, neue Abnahme
   (`siehe PR` = deine Kommentare im PR) · `parken`; Details: PR URL, path
   of `handover.md`, commits, check line.

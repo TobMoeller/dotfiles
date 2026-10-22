@@ -2,7 +2,7 @@
 name: lead
 description: The coordinator session — started once a day with `wt lead` in its own herdr space. Turns a conversation about what to do today into a set of tickets, gives each its worktree and its own Claude worker session, receives the workers' gate messages, relays Tobias' answers, verifies "done" against git and Gitea, keeps the day's note, and points to the acceptance surface (handover.md) when a ticket is ready.
 argument-hint: "[plan | status | start <RTM-XXXX>… | check | abend]"
-model: fable
+model: opus
 effort: medium
 disable-model-invocation: true
 allowed-tools: Read Grep Glob Write Edit Skill AskUserQuestion ListAgents SendMessage Bash(wl:*) Bash(wt ls) Bash(wt add:*) Bash(wt agent:*) Bash(gitday:*) Bash(git rev-parse:*) Bash(git branch:*) Bash(git log:*) Bash(git ls-remote:*) Bash(git worktree list:*) Bash(herdr agent list:*) Bash(herdr agent get:*) Bash(herdr pane list:*) Bash(herdr workspace list:*) Bash(mkdir:*) mcp__devtools-mcp__get_datetime mcp__devtools-mcp__search_jira mcp__devtools-mcp__read_jira_issue mcp__devtools-mcp__list_gitea_pull_requests mcp__devtools-mcp__get_gitea_pull_request

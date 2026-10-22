@@ -727,9 +727,10 @@ cmd_lead() {
         if [[ -n "$t" && "$(date -r "$t" +%F)" == "$(date +%F)" ]]; then how=resume; else how=fresh; fi
     fi
     export WT_NO_FOCUS=   # the lead space is where Tobias wants to be
-    # the lead talks to Tobias and judges; it runs on Fable (override with
-    # WT_LEAD_MODEL=opus). Workers and specialists stay on Opus.
-    export WT_CLAUDE_MODEL="${WT_LEAD_MODEL:-fable}"
+    # the lead talks to Tobias and judges; since 2026-10-22 it runs on Opus
+    # like the workers (Fable brought no benefit for wl, Jira and messages;
+    # override with WT_LEAD_MODEL=fable to compare).
+    export WT_CLAUDE_MODEL="${WT_LEAD_MODEL:-opus}"
     run_space_agent "lead" "$path" "lead" "$how" "${prompt[*]:-/lead}"
 }
 
