@@ -34,6 +34,8 @@ alias la='ls -A'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias gs='git status -sb'
+alias d='docker'
+alias dc='docker compose'
 
 # Optional machine-local additions, outside this repository.
 [[ ! -f "$ZDOTDIR/local.zsh" ]] || source "$ZDOTDIR/local.zsh"
