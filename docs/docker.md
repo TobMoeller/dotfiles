@@ -109,5 +109,8 @@ Quellen: [Gruppenrechte](https://docs.docker.com/engine/install/linux-postinstal
 Prüfstand vom 2026-10-23: NixOS-Toplevel evaluiert, Flake-Checks und vollständiger
 Systembuild erfolgreich. `dockerd --validate` akzeptiert die erzeugte
 Konfiguration. CLI-Aufrufe bestätigen Docker 29.8.1, Compose 5.4.0, Buildx
-0.31.1 und lazydocker 0.25.2. Nicht aktiviert; Container-Laufzeittests folgen
-nach Aktivierung durch den Benutzer.
+0.31.1 und lazydocker 0.25.2. Nach Aktivierung und Reboot erfolgreich getestet:
+`hello-world`, eigener Nginx-Build über Compose/Buildx, HTTP auf localhost sowie
+Schreiben im Bind-Mount als Benutzer `1000:100`. Testcontainer und Netzwerk
+anschließend entfernt. Datenbank-Volumes und ein echtes Anwendungsprojekt
+stehen noch aus.

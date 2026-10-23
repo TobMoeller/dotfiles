@@ -33,6 +33,8 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 
 ## Aktueller Umfang
 
+- Google Chrome als Standardbrowser für Weblinks auf dem ThinkPad; Firefox bleibt verfügbar. Browserprofile und Einstellungen bleiben in den Anwendungen.
+
 - NixOS 26.05, passende Home-Manager-Release-Linie und flake-parts.
 - Bestehende ThinkPad-Installation einschließlich Hardware, Verschlüsselung und Plasma als Basis; Hostname und Flake-Auswahl `nixos`, Geräteverzeichnis `thinkpad`.
 - Integrierter Home Manager für `tobias`.

@@ -20,4 +20,5 @@ Generation wählen. Das Menü lässt sich beim Start durch Halten der Leertaste
 anzeigen.
 
 Evaluation, Flake-Checks und Systembuild einschließlich neuem Initrd sind
-erfolgreich. Der Boot-/LUKS-Test auf dem Gerät steht nach Aktivierung noch aus.
+erfolgreich. Grafische LUKS-Eingabe nach Reboot am 2026-10-23 vom Benutzer
+erfolgreich bestätigt.

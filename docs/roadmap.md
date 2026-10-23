@@ -32,7 +32,8 @@
 - [ ] Caps-Lock-Remapping aktivieren und die Insertmodus-Tastenkürzel interaktiv prüfen.
 - [ ] Steam-Fensterbedienung prüfen: native Menüs/Titelleiste des Clients und Login-Dialogs von Niris Dekorationen unterscheiden. Keine globale Dekorationsumstellung als vermeintliche Steam-spezifische Lösung.
 - [x] Plymouth mit Standardtheme `bgrt`, frühem deutschem Konsolenlayout und Intel-Grafik im Initrd deklarieren.
-- [ ] Grafische LUKS-Eingabe beim nächsten Boot auf dem Notebook-Display prüfen; Details in `docs/boot.md`.
+- [x] Grafische LUKS-Eingabe nach Reboot am 2026-10-23 vom Benutzer bestätigt; Details in `docs/boot.md`.
+- [ ] Google Chrome als Hauptbrowser aktivieren und HTTP-/HTTPS-Standardzuordnung prüfen; Firefox bleibt verfügbar.
 - [ ] Fingerabdrucksensor erfassen und Treibersupport prüfen; anschließend Anmeldung, Niri-/Noctalia-Entsperren und optional sudo über fprintd/PAM einrichten und testen. LUKS-Entsperrung beim Boot separat behandeln.
 - [x] herdr-Tastenkürzel, vim-nav und Projekthelfer `t` gezielt übernehmen; `wt` verwendet die native Worktree-Verwaltung.
 - [x] herdr aktiviert und erster Benutzertest erfolgreich.
@@ -51,7 +52,8 @@
 - [ ] direnv aktivieren und im Alltag prüfen; erste stackspezifische devShell in einem Anwendungsprojekt einrichten und testen.
 - [ ] Weitere eigenständige Projektvorlagen bereitstellen, zuerst PHP mit passender Composer-Version; weitere Stacks nach Bedarf. Die Basisvorlage bleibt klein.
 - [x] Docker Engine mit System-Daemon, Compose und Buildx für den Hackathon auswählen und deklarieren; Socket-Aktivierung, rotierte Logs, lokale Port-Bindings und lazydocker. Podman/rootless später anhand konkreter Projekte vergleichen.
-- [ ] Docker aktivieren, Gruppenrechte erneuern und Registry-Zugriff, eigene Builds, Compose, Bind-Mount-Dateirechte sowie Datenbank-Volumes im echten Projekt prüfen. Details in `docs/docker.md`.
+- [x] Docker nach Reboot aktiviert und Gruppenrechte bestätigt; Registry-Zugriff, eigener Compose-/Buildx-Build, HTTP und Bind-Mount-Schreibrechte erfolgreich getestet. Details in `docs/docker.md`.
+- [ ] Datenbank-Volumes und Docker-/Editor-Arbeitsablauf in einem echten Anwendungsprojekt prüfen.
 - [ ] Bei Bedarf grafische Containeroberfläche auswählen; vorerst CLI und lazydocker, später z. B. Portainer prüfen.
 - [ ] `brain` und Obsidian überführen: Repo/Vault-Pfad festlegen, Notizen synchronisieren, Plugins und portable Konfiguration prüfen; persönliche Inhalte und Zugangsdaten außerhalb der öffentlichen Dotfiles halten.
 - [ ] Gemeinsame Skills für Codex/GPT und Claude pflegen: gemeinsame Quellen, unterstützte Dateiformate und Symlinks/Adapter prüfen; an einem Skill testen und produktspezifische Regeln getrennt halten.
