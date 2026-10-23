@@ -22,6 +22,27 @@ Anwendungen; eine Codex-Sitzung im Terminal gegebenenfalls später fortsetzen.
 
 ## Erste Tastenkürzel
 
+Die Niri-Konfiguration setzt `GTK_IM_MODULE=simple` für gestartete Anwendungen.
+Damit funktionieren tote Tasten im deutschen Layout auch in GTK-Anwendungen
+wie Ghostty (GTK 4.20+ ohne separates IBus/Fcitx). `^` + Leertaste ergibt `^`,
+`^` + `e` ergibt `ê`. Am 2026-10-23 mit einem separaten Ghostty-Prozess vom
+Benutzer bestätigt. Das Layout bleibt `de`, nicht `de(nodeadkeys)`.
+
+Bereits laufende Ghostty-/Launcher-/herdr-Prozesse übernehmen neue
+Umgebungsvariablen nicht rückwirkend. Die nächste reguläre Neuanmeldung
+verteilt den Wert an die gesamte neue Sitzung. Für den sofortigen Einsatz
+ohne Abmelden:
+
+```bash
+GTK_IM_MODULE=simple ghostty --gtk-single-instance=false
+```
+
+Das Flag erzwingt einen neuen Ghostty-Prozess statt eines Fensters der alten
+Instanz. Ein bereits laufender herdr-Server behält seine alte Umgebung;
+das Ghostty-Eingabeverhalten wird im neuen Terminalprozess behandelt.
+Falls später IBus/Fcitx eingerichtet wird, diese Fallback-Vorgabe ersetzen.
+[Upstream-Hinweis](https://github.com/ghostty-org/ghostty/discussions/8899).
+
 `Mod` ist die Super-/Windows-Taste.
 
 | Tasten | Aktion |

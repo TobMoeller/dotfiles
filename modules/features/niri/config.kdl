@@ -2,6 +2,11 @@
 // Hosts may provide native monitor settings next to this symlink.
 include optional=true "outputs.kdl"
 
+environment {
+    // GTK 4.20+ needs an explicit fallback for dead keys without an IME.
+    GTK_IM_MODULE "simple"
+}
+
 input {
     keyboard {
         xkb { layout "de"; }
