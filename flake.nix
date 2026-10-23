@@ -23,6 +23,7 @@
         ./modules/system/base.nix
         ./modules/features/dotfiles.nix
         ./modules/features/development.nix
+        ./modules/features/docker.nix
         ./modules/features/generation-cleanup/default.nix
         ./modules/features/herdr/default.nix
         ./modules/features/neovim/default.nix

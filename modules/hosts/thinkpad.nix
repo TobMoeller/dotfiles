@@ -8,6 +8,7 @@ in
     networking.hostName = hostName;
     imports = [
       self.modules.nixos.base
+      self.modules.nixos.docker
       self.modules.nixos.generation-cleanup
       self.modules.nixos.nvidia-prime
       self.modules.nixos.hibernate
@@ -21,7 +22,7 @@ in
     ];
 
     users.users.tobias.shell = pkgs.zsh;
-    users.users.tobias.extraGroups = [ "gamemode" ];
+    users.users.tobias.extraGroups = [ "gamemode" "docker" ];
 
     # Measured PCI addresses on this ThinkPad; PRIME uses decimal notation.
     hardware.nvidia.prime = {

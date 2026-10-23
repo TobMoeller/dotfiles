@@ -47,6 +47,12 @@ Das ThinkPad wählt außerdem das Home-Manager-Feature `plasma-sleep`. Dessen na
 
 ## Benutzer und Abweichungen
 
+Das ThinkPad wählt das NixOS-Feature `docker` ausdrücklich aus. Es stellt
+Docker Engine, Compose-/Buildx-Plugins und die Terminalübersicht bereit.
+Die Docker-Gruppenzugehörigkeit bleibt im Hostmodul. Compose-Dateien gehören
+in die jeweiligen Projekte; veränderliche Containerdaten werden nicht durch
+Nix oder Nix-GC verwaltet. Details stehen in `docs/docker.md`.
+
 Das Betriebssystemkonto steht in der Hostkonfiguration. `modules.homeManager.tobias` ist eine gemeinsame persönliche Umgebung mit herdr, npm, zsh und Git. Benutzername, Home-Verzeichnis und Home-Manager-Kompatibilitätsversion setzt der Host. Die private Git-Identität steht ebenfalls im ThinkPad-Host; gemeinsame Git-Einstellungen enthalten keine Identität. Die NixOS-zsh-Integration und die Auswahl der Login-Shell werden ausdrücklich auf dem Host aktiviert, die native interaktive Konfiguration bleibt im zsh-Feature.
 
 Module können bestehende Optionen setzen. `lib.mkDefault` kennzeichnet bewusst überschreibbare Vorgaben; normale Zuweisungen überschreiben diese. Widersprüchliche gleichrangige einfache Werte führen zu einem Fehler. Importreihenfolge bedeutet nicht „letzte Datei gewinnt“. Eigene Optionen führen wir nur bei konkretem Bedarf ein.

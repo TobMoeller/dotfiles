@@ -26,6 +26,7 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 - [herdr, Projekte und Worktrees](docs/herdr.md)
 - [Neovim, Laravel-LSP und große Dateien](docs/neovim.md)
 - [Projekt-devShells und direnv](docs/development.md)
+- [Docker, Compose und Containerdaten](docs/docker.md)
 - [Generationen aufbewahren und bereinigen](docs/generations.md)
 
 ## Aktueller Umfang

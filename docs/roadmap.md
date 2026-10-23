@@ -49,7 +49,9 @@
 - [x] devShell für das Dotfiles-Repo und kleine unabhängige Projektvorlage bereitstellen; direnv/nix-direnv mit Shell-Anbindung deklarieren.
 - [ ] direnv aktivieren und im Alltag prüfen; erste stackspezifische devShell in einem Anwendungsprojekt einrichten und testen.
 - [ ] Weitere eigenständige Projektvorlagen bereitstellen, zuerst PHP mit passender Composer-Version; weitere Stacks nach Bedarf. Die Basisvorlage bleibt klein.
-- [ ] Container-Setup entscheiden: Docker, rootless Docker oder Podman anhand der benötigten Compose-/Projekt-Workflows vergleichen und anschließend gezielt konfigurieren.
+- [x] Docker Engine mit System-Daemon, Compose und Buildx für den Hackathon auswählen und deklarieren; Socket-Aktivierung, rotierte Logs, lokale Port-Bindings und lazydocker. Podman/rootless später anhand konkreter Projekte vergleichen.
+- [ ] Docker aktivieren, Gruppenrechte erneuern und Registry-Zugriff, eigene Builds, Compose, Bind-Mount-Dateirechte sowie Datenbank-Volumes im echten Projekt prüfen. Details in `docs/docker.md`.
+- [ ] Bei Bedarf grafische Containeroberfläche auswählen; vorerst CLI und lazydocker, später z. B. Portainer prüfen.
 - [ ] `brain` und Obsidian überführen: Repo/Vault-Pfad festlegen, Notizen synchronisieren, Plugins und portable Konfiguration prüfen; persönliche Inhalte und Zugangsdaten außerhalb der öffentlichen Dotfiles halten.
 - [ ] Gemeinsame Skills für Codex/GPT und Claude pflegen: gemeinsame Quellen, unterstützte Dateiformate und Symlinks/Adapter prüfen; an einem Skill testen und produktspezifische Regeln getrennt halten.
 - [ ] Aktualisierte playground-Pipeline (`44ab6f2`) gezielt überführen: `wt agent/lead`, Bootstrap-Hooks und Bereitschaftsmarker, `wt testdb`, `main/back` sowie `wl`, `wl-write`, `wl-runden` und `gitday` prüfen. Die neue native Worktree-Verwaltung ersetzt diese zusätzlichen Abläufe noch nicht; mit Projekt-devShells und gemeinsamen Skills abstimmen.
