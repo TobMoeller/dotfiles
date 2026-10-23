@@ -9,6 +9,7 @@ in
     imports = [
       self.modules.nixos.base
       self.modules.nixos.docker
+      self.modules.nixos.syncthing
       self.modules.nixos.generation-cleanup
       self.modules.nixos.nvidia-prime
       self.modules.nixos.hibernate
@@ -25,7 +26,11 @@ in
     ];
 
     users.users.tobias.shell = pkgs.zsh;
-    users.users.tobias.extraGroups = [ "gamemode" "docker" "librepods" ];
+    users.users.tobias.extraGroups = [
+      "gamemode"
+      "docker"
+      "librepods"
+    ];
 
     # The internal display is driven by Intel; make it available for Plymouth.
     boot.initrd.kernelModules = [ "i915" ];
@@ -55,6 +60,7 @@ in
       users.tobias = { config, ... }: {
         imports = [
           self.modules.homeManager.tobias
+          self.modules.homeManager.syncthing
           self.modules.homeManager.plasma-sleep
           self.modules.homeManager.niri
           self.modules.homeManager.noctalia

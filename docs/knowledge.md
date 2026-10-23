@@ -22,7 +22,34 @@ einen Init-Aufruf überschreiben; hostbezogene Vorgaben stehen in Home Manager.
 
 In Obsidian **Ordner als Vault öffnen** wählen und `brain` auswählen. Profile,
 Plugins und Vault-Einstellungen bleiben im Wissensrepo beziehungsweise lokal;
-die Dotfiles installieren nur Obsidian. Es gibt keinen automatischen Git-Sync.
+die Dotfiles installieren Obsidian. Es gibt keinen automatischen Git-Sync.
+
+## Syncthing
+
+Nach `dotfiles-rebuild` im Launcher **Syncthing Web UI** öffnen oder
+`http://127.0.0.1:8384` aufrufen. Der Dienst läuft als Benutzer; Geräte und
+Freigaben werden in der Weboberfläche verwaltet und bleiben bei Rebuilds erhalten.
+Die Weboberfläche ist nur lokal erreichbar; die Firewall erlaubt die üblichen
+Synchronisations- und LAN-Erkennungsports. Schlüssel bleiben lokal.
+
+Alle drei Geräte direkt miteinander koppeln und denselben brain-Ordner teilen.
+Die vorhandene Ordner-ID übernehmen und hier `~/code/knowledge/brain` wählen.
+Vor der ersten Synchronisation auf jedem Gerät unter **Ignorierte Muster** setzen:
+
+```text
+.git
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+```
+
+Git-Repositories bleiben pro Gerät unabhängig. Vorerst Syncthing für den
+Dateiaustausch nutzen und Git-Commits/-Pushes bewusst ausführen; keine zusätzliche
+automatische Git-Pull-Synchronisation aktivieren. Bei Bedarf Ordner-Versionierung
+aktivieren; sie ersetzt kein separates Backup. Einen automatisch angelegten
+Standardordner nur bei Bedarf nutzen, brain separat hinzufügen.
+
+Diagnose: `systemctl --user status syncthing` und
+`journalctl --user -b -u syncthing`. Der praktische Gerätetest steht noch aus.
 
 Für Agents später nach Bedarf `project-log/<projekt>/context.md`, `status.md`
 und `sessions/` anlegen. Langlebige Erkenntnisse wandern ins brain. Die alten

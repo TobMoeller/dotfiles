@@ -52,6 +52,10 @@ Wissenspfade und den explizit aufgerufenen Klon-Helfer. Das NixOS-Feature
 `fingerprint` wählt nur der ThinkPad; Details stehen in `docs/knowledge.md`
 und `docs/fingerprint.md`.
 
+Der ThinkPad wählt `syncthing` in beiden Kontexten: NixOS öffnet die Sync-Ports,
+Home Manager startet den Benutzerdienst und stellt einen Launcher für die lokale
+Weboberfläche bereit. Geräte und Ordner bleiben interaktiv verwaltet.
+
 Das ThinkPad wählt das NixOS-Feature `docker` ausdrücklich aus. Es stellt
 Docker Engine, Compose-/Buildx-Plugins und die Terminalübersicht bereit.
 Die Docker-Gruppenzugehörigkeit bleibt im Hostmodul. Compose-Dateien gehören

@@ -35,7 +35,8 @@
 - [x] Grafische LUKS-Eingabe nach Reboot am 2026-10-23 vom Benutzer bestätigt; Details in `docs/boot.md`.
 - [ ] Google Chrome als Hauptbrowser aktivieren und HTTP-/HTTPS-Standardzuordnung prüfen; Firefox bleibt verfügbar.
 - [x] Fingerabdrucksensor `06cb:00f9` und Unterstützung im fixierten libfprint geprüft; fprintd, SDDM und Noctalia konfiguriert und System gebaut. Passwort-Fallback ohne Sensorwartezeit für Noctalia; Details in `docs/fingerprint.md`.
-- [ ] Fingerabdruck-Konfiguration aktivieren, Finger einlernen und SDDM-/Noctalia-Entsperren einschließlich Passwort-Fallback und Suspend testen. sudo bleibt vorerst beim Passwort; LUKS ebenfalls.
+- [x] Fingerabdruck-Konfiguration aktiviert; Finger eingelernt und Funktion vom Benutzer bestätigt (2026-10-23).
+- [ ] SDDM-/Noctalia-Entsperren einschließlich Passwort-Fallback und Suspend vollständig prüfen. sudo bleibt vorerst beim Passwort; LUKS ebenfalls.
 - [x] herdr-Tastenkürzel, vim-nav und Projekthelfer `t` gezielt übernehmen; `wt` verwendet die native Worktree-Verwaltung.
 - [x] herdr aktiviert und erster Benutzertest erfolgreich.
 - [x] Neovim-Seite der herdr-Split-Navigation ergänzt; Splitwechsel und CLI-Aufruf am Rand headless geprüft, echter herdr-Test nach Aktivierung offen.
@@ -49,6 +50,7 @@
 - [x] Steam, GE-Proton, GameMode, MangoHud, Gamescope und Protontricks deklarieren und System bauen.
 - [ ] Lokale KI: CUDA-/GPU-Unterstützung prüfen und eine erste Laufzeit auswählen (z. B. Ollama oder llama.cpp); Systemdienste und Projektumgebungen bewusst trennen.
 - [ ] Lokale KI: erstes Modell für 16 GiB VRAM auswählen und GPU-Nutzung, Geschwindigkeit, Speicherbedarf und Leistungsaufnahme messen; Chat-Oberfläche und Coding-Anbindung anschließend ergänzen.
+- [ ] KI-Testplan: Ollama mit kleinem Text-/Coding-Modell, Whisper large-v3-turbo über whisper.cpp für Transkription. Erst Audiodatei und CLI testen, danach Mikrofon-Diktat/API und Coding-Agent-Anbindung. Fachsprache und Alltagssprache anhand eigener Aufnahmen vergleichen.
 - [x] devShell für das Dotfiles-Repo und kleine unabhängige Projektvorlage bereitstellen; direnv/nix-direnv mit Shell-Anbindung deklarieren.
 - [ ] direnv aktivieren und im Alltag prüfen; erste stackspezifische devShell in einem Anwendungsprojekt einrichten und testen.
 - [ ] Weitere eigenständige Projektvorlagen bereitstellen, zuerst PHP mit passender Composer-Version; weitere Stacks nach Bedarf. Die Basisvorlage bleibt klein.
@@ -58,7 +60,12 @@
 - [ ] Bei Bedarf grafische Containeroberfläche auswählen; vorerst CLI und lazydocker, später z. B. Portainer prüfen.
 - [x] Obsidian installieren und Wissenspfade `~/code/knowledge/{brain,project-log}` festlegen; kleiner SSH-Klon-Helfer mit Schutz vorhandener Verzeichnisse. Details in `docs/knowledge.md`.
 - [x] `brain` und das noch leere `project-log` per SSH nach `~/code/knowledge` geklont (2026-10-23).
-- [ ] brain in Obsidian öffnen; Plugins und portable Vault-Konfiguration prüfen. Persönliche Inhalte und Zugangsdaten bleiben außerhalb der öffentlichen Dotfiles.
+- [x] brain in Obsidian geöffnet; normaler Vault-Betrieb vom Benutzer bestätigt.
+- [ ] Obsidian-Plugins und portable Vault-Konfiguration prüfen. Persönliche Inhalte und Zugangsdaten bleiben außerhalb der öffentlichen Dotfiles.
+- [x] Syncthing als Benutzerdienst mit Launcher für die lokale Weboberfläche konfigurieren und System bauen; Geräte und Ordner bleiben interaktiv verwaltbar. NixOS öffnet die Synchronisationsports.
+- [ ] Syncthing aktivieren und brain mit MacBook und red koppeln; bestehende Ordner-ID verwenden, Git-Metadaten und gerätespezifische Obsidian-Dateien ausschließen. Synchronisation, Konfliktverhalten und Backups prüfen.
+- [ ] README für project-log anhand der Vorlage vom red-PC erstellen; Nutzung als Agent-Kontext und optional zweiter Obsidian-Vault festhalten.
+- [ ] Syncthing später um einen ständig verfügbaren zentralen Server ergänzen; direkte Verbindungen der Notebooks können bestehen bleiben.
 - [ ] Gemeinsame Skills für Codex/GPT und Claude pflegen: gemeinsame Quellen, unterstützte Dateiformate und Symlinks/Adapter prüfen; an einem Skill testen und produktspezifische Regeln getrennt halten.
 - [ ] Aktualisierte playground-Pipeline (`44ab6f2`) gezielt überführen: `wt agent/lead`, Bootstrap-Hooks und Bereitschaftsmarker, `wt testdb`, `main/back` sowie `wl`, `wl-write`, `wl-runden` und `gitday` prüfen. Die neue native Worktree-Verwaltung ersetzt diese zusätzlichen Abläufe noch nicht; mit Projekt-devShells und gemeinsamen Skills abstimmen.
 - [ ] MacBook und red nach Bestandsaufnahme einzeln anbinden.
