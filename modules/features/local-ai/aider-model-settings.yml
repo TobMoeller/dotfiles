@@ -1,0 +1,7 @@
+# Keep the initial coding experiments within the laptop's VRAM budget.
+- name: ollama_chat/qwen3.5:9b
+  extra_params:
+    num_ctx: 8192
+- name: ollama_chat/qwen2.5-coder:14b
+  extra_params:
+    num_ctx: 8192

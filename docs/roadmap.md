@@ -48,9 +48,10 @@
 - [ ] Themes, Schriftgrößen und Hintergrundbilder für Niri/Noctalia/Ghostty abstimmen; Bildquellen und Lizenzen festhalten.
 - [ ] Steam/Proton-Gaming aktivieren: Anmeldung, erstes Spiel, NVIDIA-Offload, GameMode und MangoHud prüfen; Gamescope anschließend separat testen.
 - [x] Steam, GE-Proton, GameMode, MangoHud, Gamescope und Protontricks deklarieren und System bauen.
-- [ ] Lokale KI: CUDA-/GPU-Unterstützung prüfen und eine erste Laufzeit auswählen (z. B. Ollama oder llama.cpp); Systemdienste und Projektumgebungen bewusst trennen.
-- [ ] Lokale KI: erstes Modell für 16 GiB VRAM auswählen und GPU-Nutzung, Geschwindigkeit, Speicherbedarf und Leistungsaufnahme messen; Chat-Oberfläche und Coding-Anbindung anschließend ergänzen.
-- [ ] KI-Testplan: Ollama mit kleinem Text-/Coding-Modell, Whisper large-v3-turbo über whisper.cpp für Transkription. Erst Audiodatei und CLI testen, danach Mikrofon-Diktat/API und Coding-Agent-Anbindung. Fachsprache und Alltagssprache anhand eigener Aufnahmen vergleichen.
+- [x] Lokale KI: Ollama als Benutzerdienst, CUDA-Whisper und Aider eingerichtet, ausgewertet und vollständig gebaut. RTX-3080-Backends auf Architektur 8.6 begrenzt; Laufzeittests erfolgreich. Bedienung und Prüfstand in `docs/local-ai.md`.
+- [ ] Lokale KI: Modelle im echten Coding-/Lernablauf vergleichen und Geschwindigkeit, Speicherbedarf und Leistungsaufnahme messen; bisher nur kurze Smoke-Tests, kein Qualitätsbenchmark.
+- [x] KI-Smoke-Tests: Qwen3.5 9B und Qwen2.5-Coder 14B heruntergeladen, beide vollständig auf GPU geladen; Aider-Dateikorrektur geprüft. Whisper large-v3-turbo transkribiert die öffentliche Testaufnahme auf CUDA erfolgreich.
+- [ ] Lokale KI aktivieren und im echten Projekt testen; deutsche Mikrofonaufnahmen mit Alltagssprache und Fachbegriffen vergleichen. Anschließend Diktat-Shortcut, API-/Weboberfläche und Lernexperimente für den Hackathon nach Bedarf ergänzen.
 - [x] devShell für das Dotfiles-Repo und kleine unabhängige Projektvorlage bereitstellen; direnv/nix-direnv mit Shell-Anbindung deklarieren.
 - [ ] direnv aktivieren und im Alltag prüfen; erste stackspezifische devShell in einem Anwendungsprojekt einrichten und testen.
 - [ ] Weitere eigenständige Projektvorlagen bereitstellen, zuerst PHP mit passender Composer-Version; weitere Stacks nach Bedarf. Die Basisvorlage bleibt klein.
@@ -63,8 +64,8 @@
 - [x] brain in Obsidian geöffnet; normaler Vault-Betrieb vom Benutzer bestätigt.
 - [ ] Obsidian-Plugins und portable Vault-Konfiguration prüfen. Persönliche Inhalte und Zugangsdaten bleiben außerhalb der öffentlichen Dotfiles.
 - [x] Syncthing als Benutzerdienst mit Launcher für die lokale Weboberfläche konfigurieren und System bauen; Geräte und Ordner bleiben interaktiv verwaltbar. NixOS öffnet die Synchronisationsports.
-- [ ] Syncthing aktivieren und brain mit MacBook und red koppeln; bestehende Ordner-ID verwenden, Git-Metadaten und gerätespezifische Obsidian-Dateien ausschließen. Synchronisation, Konfliktverhalten und Backups prüfen.
-- [ ] README für project-log anhand der Vorlage vom red-PC erstellen; Nutzung als Agent-Kontext und optional zweiter Obsidian-Vault festhalten.
+- [x] Syncthing aktiviert; brain synchronisiert laut Benutzer erfolgreich. Konfliktverhalten und separates Backup noch prüfen.
+- [x] README für project-log anhand der Vorlage vom red-PC erstellt: projektbezogene Artefakte, `state.md` als Wiedereinstieg und klare Trennung von brain und Firmenwissen. Lokal im separaten Repo committed.
 - [ ] Syncthing später um einen ständig verfügbaren zentralen Server ergänzen; direkte Verbindungen der Notebooks können bestehen bleiben.
 - [ ] Gemeinsame Skills für Codex/GPT und Claude pflegen: gemeinsame Quellen, unterstützte Dateiformate und Symlinks/Adapter prüfen; an einem Skill testen und produktspezifische Regeln getrennt halten.
 - [ ] Aktualisierte playground-Pipeline (`44ab6f2`) gezielt überführen: `wt agent/lead`, Bootstrap-Hooks und Bereitschaftsmarker, `wt testdb`, `main/back` sowie `wl`, `wl-write`, `wl-runden` und `gitday` prüfen. Die neue native Worktree-Verwaltung ersetzt diese zusätzlichen Abläufe noch nicht; mit Projekt-devShells und gemeinsamen Skills abstimmen.

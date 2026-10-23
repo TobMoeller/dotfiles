@@ -57,10 +57,11 @@ in
     home-manager = {
       useGlobalPkgs = true;
       useUserPackages = true;
-      users.tobias = { config, ... }: {
+      users.tobias = { config, pkgs, ... }: {
         imports = [
           self.modules.homeManager.tobias
           self.modules.homeManager.syncthing
+          self.modules.homeManager.local-ai
           self.modules.homeManager.plasma-sleep
           self.modules.homeManager.niri
           self.modules.homeManager.noctalia
@@ -75,6 +76,18 @@ in
           homeDirectory = "/home/tobias";
           stateVersion = "26.05";
         };
+        # CUDA backends belong to this NVIDIA host, not the shared AI feature.
+        services.ollama.package = pkgs.ollama-cuda.override { cudaArches = [ "sm_86" ]; };
+        localAI.whisperPackage =
+          (pkgs.whisper-cpp.override {
+            cudaSupport = true;
+            cudaPackages = pkgs.cudaPackages;
+          }).overrideAttrs
+            (old: {
+              # RTX 3080 Laptop: avoid compiling kernels for unrelated GPUs.
+              cmakeFlags = old.cmakeFlags ++ [ "-DCMAKE_CUDA_ARCHITECTURES=86" ];
+            });
+
         # Private identity belongs to this host, not the shared Git feature.
         programs.git.settings.user = {
           name = "TobMoeller";

@@ -24,6 +24,7 @@
         ./modules/features/dotfiles.nix
         ./modules/features/development.nix
         ./modules/features/knowledge.nix
+        ./modules/features/local-ai/default.nix
         ./modules/features/syncthing.nix
         ./modules/features/docker.nix
         ./modules/features/generation-cleanup/default.nix
