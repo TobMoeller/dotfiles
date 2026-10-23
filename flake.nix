@@ -39,6 +39,7 @@
         ./modules/features/ghostty/default.nix
         ./modules/features/gaming/default.nix
         ./modules/features/voice-chat.nix
+        ./modules/features/airpods.nix
         ./modules/features/caps-to-escape.nix
         ./modules/users/tobias.nix
         ./modules/hosts/thinkpad.nix

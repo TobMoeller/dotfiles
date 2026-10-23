@@ -16,13 +16,14 @@ in
       self.modules.nixos.niri
       self.modules.nixos.noctalia
       self.modules.nixos.gaming
+      self.modules.nixos.airpods
       self.modules.nixos.caps-to-escape
       ../../hosts/thinkpad/configuration.nix
       inputs.home-manager.nixosModules.home-manager
     ];
 
     users.users.tobias.shell = pkgs.zsh;
-    users.users.tobias.extraGroups = [ "gamemode" "docker" ];
+    users.users.tobias.extraGroups = [ "gamemode" "docker" "librepods" ];
 
     # Measured PCI addresses on this ThinkPad; PRIME uses decimal notation.
     hardware.nvidia.prime = {
@@ -55,6 +56,7 @@ in
           self.modules.homeManager.ghostty
           self.modules.homeManager.gaming
           self.modules.homeManager.voice-chat
+          self.modules.homeManager.airpods
         ];
         home = {
           username = "tobias";

@@ -27,6 +27,7 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 - [Neovim, Laravel-LSP und große Dateien](docs/neovim.md)
 - [Projekt-devShells und direnv](docs/development.md)
 - [Docker, Compose und Containerdaten](docs/docker.md)
+- [AirPods Pro 2 mit LibrePods](docs/airpods.md)
 - [Generationen aufbewahren und bereinigen](docs/generations.md)
 
 ## Aktueller Umfang
