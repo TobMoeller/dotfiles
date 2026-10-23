@@ -4,6 +4,9 @@ Der ThinkPad wählt das Home-Manager-Feature `local-ai` und seine CUDA-Pakete
 explizit. Ollama läuft als Benutzerdienst auf `127.0.0.1:11434`; die API ist
 nicht im Netzwerk freigegeben. Whisper startet nur bei Aufruf.
 
+Ollama kommt aus `nixpkgs-tools` (unstable), aktuell 0.40.4 für Nimble.
+Whisper und Aider bleiben im System-Paketsatz.
+
 ```bash
 dotfiles-rebuild
 systemctl --user status ollama
@@ -29,6 +32,29 @@ Ein Modell gleichzeitig, eine Anfrage parallel, standardmäßig 8192 Tokens
 Kontext. Nach einer Minute ohne Anfrage wird das Textmodell entladen.
 Clients können den Kontext überschreiben; größere Kontexte benötigen mehr VRAM.
 Mit `ollama stop qwen3.5:9b` vor Gaming oder Whisper Speicher freigeben.
+
+## Entscheidungen mit Nimble
+
+Nimble benötigt mindestens Ollama 0.40.4 und wird über die Entscheidungs-API
+angesprochen, nicht als normaler Chat:
+
+```bash
+ollama pull nimble:9b
+curl http://127.0.0.1:11434/v1/systemone -H 'Content-Type: application/json' -d '{
+  "model": "nimble:9b",
+  "state": "Ich freue mich sehr auf den Hackathon!",
+  "questions": {
+    "stimmung": {
+      "type": "choice",
+      "instructions": "Welche Stimmung drückt der Text aus?",
+      "criteria": {"positiv": "Freude oder Zuversicht", "negativ": "Ärger oder Traurigkeit"}
+    }
+  }
+}'
+```
+
+Die Antwort enthält die gewählte Kategorie und Wahrscheinlichkeiten für die
+vorgegebenen Kategorien. Die Beispielanfrage ist ein Funktionstest.
 
 ## Coding
 
@@ -78,6 +104,14 @@ Ollama 0.40.3 lädt beide Modelle bei 8192 Tokens vollständig auf die GPU
 Qwen2.5-Coder eine absichtlich fehlerhafte Python-Funktion im temporären
 Testverzeichnis korrigiert; Ergebnis mit positiven, negativen und Nullwerten
 geprüft. Testserver danach beendet; dauerhafter Dienst noch nicht aktiviert.
+
+Update 2026-10-24: Ollama 0.40.4 aus dem aktualisierten Tools-Input vollständig
+gebaut, Flake-Prüfung erfolgreich. CUDA 12.9 stammt ebenfalls aus diesem Input.
+Nimble 9B heruntergeladen und mit einer deutschen Choice-Frage über
+`/v1/systemone` geprüft: Kategorie `positiv`, vollständig auf GPU geladen
+(ca. 9,7 GB bei rund 8192 Tokens Kontext). Testserver beendet. Anschließender
+Benutzer-Rebuild ist bestätigt: laufendes System entspricht dem geprüften Build,
+der reguläre Ollama-Dienst meldet 0.40.4.
 
 Quellen: [Ollama](https://docs.ollama.com/faq),
 [Qwen3.5](https://ollama.com/library/qwen3.5:9b),

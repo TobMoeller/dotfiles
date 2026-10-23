@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-    # herdr is not yet available in the 26.05 package set.
+    # Selected recent tools: herdr, Noctalia and Ollama.
     nixpkgs-tools.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
@@ -26,6 +26,7 @@
         ./modules/features/knowledge.nix
         ./modules/features/local-ai/default.nix
         ./modules/features/syncthing.nix
+        ./modules/features/system-tools.nix
         ./modules/features/docker.nix
         ./modules/features/generation-cleanup/default.nix
         ./modules/features/herdr/default.nix

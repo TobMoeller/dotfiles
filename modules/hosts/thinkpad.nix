@@ -77,7 +77,19 @@ in
           stateVersion = "26.05";
         };
         # CUDA backends belong to this NVIDIA host, not the shared AI feature.
-        services.ollama.package = pkgs.ollama-cuda.override { cudaArches = [ "sm_86" ]; };
+        services.ollama.package =
+          let
+            toolsPkgs = import inputs.nixpkgs-tools {
+              system = pkgs.stdenv.hostPlatform.system;
+              config.allowUnfree = true;
+            };
+          in
+          toolsPkgs.ollama-cuda.override {
+            cudaArches = [ "sm_86" ];
+            # Keep CUDA 12.9, with all build hooks from the same package set.
+            cudaPackages = toolsPkgs.cudaPackages_12;
+          };
+        programs.btop.package = pkgs.btop.override { cudaSupport = true; };
         localAI.whisperPackage =
           (pkgs.whisper-cpp.override {
             cudaSupport = true;

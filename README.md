@@ -36,6 +36,8 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 
 ## Aktueller Umfang
 
+- btop als interaktive Ressourcenübersicht mit NVIDIA-Unterstützung auf dem ThinkPad; fastfetch für eine kompakte Systemübersicht. Aufruf jeweils direkt im Terminal.
+
 - Google Chrome als Standardbrowser für Weblinks auf dem ThinkPad; Firefox bleibt verfügbar. Browserprofile und Einstellungen bleiben in den Anwendungen.
 
 - NixOS 26.05, passende Home-Manager-Release-Linie und flake-parts.

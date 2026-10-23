@@ -108,6 +108,7 @@ Dateiänderungen wirken nach dem Neuladen des Programms. Ein System-Rollback set
 
 Das Home-Manager-Feature `local-ai` richtet Ollama, Whisper und Aider ein.
 Der ThinkPad wählt die CUDA-Pakete; andere Hosts können andere Backends nutzen.
+Ollama kommt aus dem fixierten unstable-Tools-Input für die Nimble-Unterstützung.
 Modellgewichte bleiben außerhalb des Nix-Stores. Bedienung: `docs/local-ai.md`.
 
 Das Neovim-Feature wird vom gemeinsamen Benutzerprofil ausgewählt. Nix
