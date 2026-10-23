@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Clone personal knowledge repositories once; existing checkouts stay untouched.
+set -euo pipefail
+
+if (( $# != 1 )) || [[ ! "$1" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]*$ ]]; then
+  echo 'Usage: dotfiles-init-knowledge <github-owner>' >&2
+  exit 2
+fi
+owner="$1"
+
+clone_if_missing() {
+  local repository="$1" destination="$2"
+  if [[ -e "$destination" || -L "$destination" ]]; then
+    if [[ -e "$destination/.git" ]]; then
+      printf 'Already exists: %s\n' "$destination"
+      return
+    fi
+    printf 'Refusing to overwrite a non-checkout: %s\n' "$destination" >&2
+    exit 1
+  fi
+  mkdir -p -- "$(dirname -- "$destination")"
+  git clone -- "git@github.com:$owner/$repository.git" "$destination"
+}
+
+clone_if_missing brain "${BRAIN:-$HOME/code/knowledge/brain}"
+clone_if_missing project-log "${PROJECT_LOG:-$HOME/code/knowledge/project-log}"

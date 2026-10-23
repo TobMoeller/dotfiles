@@ -5,6 +5,7 @@
     imports = [
       self.modules.homeManager.dotfiles
       self.modules.homeManager.development
+      self.modules.homeManager.knowledge
       self.modules.homeManager.herdr
       self.modules.homeManager.neovim
       self.modules.homeManager.npm

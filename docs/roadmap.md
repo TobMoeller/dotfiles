@@ -34,7 +34,8 @@
 - [x] Plymouth mit Standardtheme `bgrt`, frühem deutschem Konsolenlayout und Intel-Grafik im Initrd deklarieren.
 - [x] Grafische LUKS-Eingabe nach Reboot am 2026-10-23 vom Benutzer bestätigt; Details in `docs/boot.md`.
 - [ ] Google Chrome als Hauptbrowser aktivieren und HTTP-/HTTPS-Standardzuordnung prüfen; Firefox bleibt verfügbar.
-- [ ] Fingerabdrucksensor erfassen und Treibersupport prüfen; anschließend Anmeldung, Niri-/Noctalia-Entsperren und optional sudo über fprintd/PAM einrichten und testen. LUKS-Entsperrung beim Boot separat behandeln.
+- [x] Fingerabdrucksensor `06cb:00f9` und Unterstützung im fixierten libfprint geprüft; fprintd, SDDM und Noctalia konfiguriert und System gebaut. Passwort-Fallback ohne Sensorwartezeit für Noctalia; Details in `docs/fingerprint.md`.
+- [ ] Fingerabdruck-Konfiguration aktivieren, Finger einlernen und SDDM-/Noctalia-Entsperren einschließlich Passwort-Fallback und Suspend testen. sudo bleibt vorerst beim Passwort; LUKS ebenfalls.
 - [x] herdr-Tastenkürzel, vim-nav und Projekthelfer `t` gezielt übernehmen; `wt` verwendet die native Worktree-Verwaltung.
 - [x] herdr aktiviert und erster Benutzertest erfolgreich.
 - [x] Neovim-Seite der herdr-Split-Navigation ergänzt; Splitwechsel und CLI-Aufruf am Rand headless geprüft, echter herdr-Test nach Aktivierung offen.
@@ -55,7 +56,9 @@
 - [x] Docker nach Reboot aktiviert und Gruppenrechte bestätigt; Registry-Zugriff, eigener Compose-/Buildx-Build, HTTP und Bind-Mount-Schreibrechte erfolgreich getestet. Details in `docs/docker.md`.
 - [ ] Datenbank-Volumes und Docker-/Editor-Arbeitsablauf in einem echten Anwendungsprojekt prüfen.
 - [ ] Bei Bedarf grafische Containeroberfläche auswählen; vorerst CLI und lazydocker, später z. B. Portainer prüfen.
-- [ ] `brain` und Obsidian überführen: Repo/Vault-Pfad festlegen, Notizen synchronisieren, Plugins und portable Konfiguration prüfen; persönliche Inhalte und Zugangsdaten außerhalb der öffentlichen Dotfiles halten.
+- [x] Obsidian installieren und Wissenspfade `~/code/knowledge/{brain,project-log}` festlegen; kleiner SSH-Klon-Helfer mit Schutz vorhandener Verzeichnisse. Details in `docs/knowledge.md`.
+- [x] `brain` und das noch leere `project-log` per SSH nach `~/code/knowledge` geklont (2026-10-23).
+- [ ] brain in Obsidian öffnen; Plugins und portable Vault-Konfiguration prüfen. Persönliche Inhalte und Zugangsdaten bleiben außerhalb der öffentlichen Dotfiles.
 - [ ] Gemeinsame Skills für Codex/GPT und Claude pflegen: gemeinsame Quellen, unterstützte Dateiformate und Symlinks/Adapter prüfen; an einem Skill testen und produktspezifische Regeln getrennt halten.
 - [ ] Aktualisierte playground-Pipeline (`44ab6f2`) gezielt überführen: `wt agent/lead`, Bootstrap-Hooks und Bereitschaftsmarker, `wt testdb`, `main/back` sowie `wl`, `wl-write`, `wl-runden` und `gitday` prüfen. Die neue native Worktree-Verwaltung ersetzt diese zusätzlichen Abläufe noch nicht; mit Projekt-devShells und gemeinsamen Skills abstimmen.
 - [ ] MacBook und red nach Bestandsaufnahme einzeln anbinden.

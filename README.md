@@ -26,6 +26,8 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 - [Steam, Proton und Gaming-Werkzeuge](docs/gaming.md)
 - [herdr, Projekte und Worktrees](docs/herdr.md)
 - [Neovim, Laravel-LSP und große Dateien](docs/neovim.md)
+- [brain und Obsidian](docs/knowledge.md)
+- [Fingerabdruck einrichten](docs/fingerprint.md)
 - [Projekt-devShells und direnv](docs/development.md)
 - [Docker, Compose und Containerdaten](docs/docker.md)
 - [AirPods Pro 2 mit LibrePods](docs/airpods.md)

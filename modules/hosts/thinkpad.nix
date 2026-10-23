@@ -13,6 +13,7 @@ in
       self.modules.nixos.nvidia-prime
       self.modules.nixos.hibernate
       self.modules.nixos.plymouth
+      self.modules.nixos.fingerprint
       self.modules.nixos.zsh
       self.modules.nixos.niri
       self.modules.nixos.noctalia

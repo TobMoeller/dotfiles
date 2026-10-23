@@ -23,6 +23,7 @@
         ./modules/system/base.nix
         ./modules/features/dotfiles.nix
         ./modules/features/development.nix
+        ./modules/features/knowledge.nix
         ./modules/features/docker.nix
         ./modules/features/generation-cleanup/default.nix
         ./modules/features/herdr/default.nix
@@ -31,6 +32,7 @@
         ./modules/features/npm.nix
         ./modules/features/hibernate.nix
         ./modules/features/plymouth.nix
+        ./modules/features/fingerprint.nix
         ./modules/features/plasma-sleep/default.nix
         ./modules/features/zsh/default.nix
         ./modules/features/starship/default.nix

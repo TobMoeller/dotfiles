@@ -38,6 +38,13 @@ Home Manager nimmt `~/.local/bin` in den persönlichen PATH auf. npm verwendet �
 
 Eigene Repo-Scripts werden gezielt als Symlinks in `~/.local/bin` bereitgestellt. Es gibt keine Kopien und keinen Sync-Schritt; Änderungen an der Quelldatei gelten unmittelbar. Auf dem ThinkPad verknüpft Home Manager `dotfiles-rebuild` mit `$DOTFILES/scripts/rebuild`. Dieser NixOS-Helfer wird im Hostmodul ausgewählt.
 
+## init-knowledge
+
+`dotfiles-init-knowledge TobMoeller` klont `brain` und `project-log` unter
+`~/code/knowledge`. Vor Aktivierung: `./scripts/init-knowledge TobMoeller`.
+Bestehende Checkouts bleiben unangetastet. Pfade kommen aus `BRAIN` und
+`PROJECT_LOG`, der GitHub-Owner aus dem Argument. Details: [Wissensrepos](../docs/knowledge.md).
+
 ## t und wt
 
 Das herdr-Feature verknüpft beide Scripts in `~/.local/bin`:

@@ -12,6 +12,7 @@ polkit_agent = true
 [lockscreen]
 enabled = true
 lock_before_suspend = true
+fingerprint = true
 
 [idle.behavior.lock]
 enabled = true

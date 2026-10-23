@@ -47,6 +47,11 @@ Das ThinkPad wählt außerdem das Home-Manager-Feature `plasma-sleep`. Dessen na
 
 ## Benutzer und Abweichungen
 
+Das gemeinsame Benutzerprofil wählt `knowledge`: Obsidian, überschreibbare
+Wissenspfade und den explizit aufgerufenen Klon-Helfer. Das NixOS-Feature
+`fingerprint` wählt nur der ThinkPad; Details stehen in `docs/knowledge.md`
+und `docs/fingerprint.md`.
+
 Das ThinkPad wählt das NixOS-Feature `docker` ausdrücklich aus. Es stellt
 Docker Engine, Compose-/Buildx-Plugins und die Terminalübersicht bereit.
 Die Docker-Gruppenzugehörigkeit bleibt im Hostmodul. Compose-Dateien gehören
