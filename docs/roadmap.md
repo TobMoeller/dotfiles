@@ -31,7 +31,8 @@
 - [x] Gewohnte zsh-Shortcuts im Vi-Insertmodus ergänzt; Caps Lock → Escape über keyd deklariert.
 - [ ] Caps-Lock-Remapping aktivieren und die Insertmodus-Tastenkürzel interaktiv prüfen.
 - [ ] Steam-Fensterbedienung prüfen: native Menüs/Titelleiste des Clients und Login-Dialogs von Niris Dekorationen unterscheiden. Keine globale Dekorationsumstellung als vermeintliche Steam-spezifische Lösung.
-- [ ] Grafischen Boot-/LUKS-Bildschirm mit Plymouth einrichten.
+- [x] Plymouth mit Standardtheme `bgrt`, frühem deutschem Konsolenlayout und Intel-Grafik im Initrd deklarieren.
+- [ ] Grafische LUKS-Eingabe beim nächsten Boot auf dem Notebook-Display prüfen; Details in `docs/boot.md`.
 - [ ] Fingerabdrucksensor erfassen und Treibersupport prüfen; anschließend Anmeldung, Niri-/Noctalia-Entsperren und optional sudo über fprintd/PAM einrichten und testen. LUKS-Entsperrung beim Boot separat behandeln.
 - [x] herdr-Tastenkürzel, vim-nav und Projekthelfer `t` gezielt übernehmen; `wt` verwendet die native Worktree-Verwaltung.
 - [x] herdr aktiviert und erster Benutzertest erfolgreich.

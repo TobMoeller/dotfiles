@@ -30,6 +30,7 @@
         ./modules/features/nvidia-prime.nix
         ./modules/features/npm.nix
         ./modules/features/hibernate.nix
+        ./modules/features/plymouth.nix
         ./modules/features/plasma-sleep/default.nix
         ./modules/features/zsh/default.nix
         ./modules/features/starship/default.nix

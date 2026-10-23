@@ -12,6 +12,7 @@ in
       self.modules.nixos.generation-cleanup
       self.modules.nixos.nvidia-prime
       self.modules.nixos.hibernate
+      self.modules.nixos.plymouth
       self.modules.nixos.zsh
       self.modules.nixos.niri
       self.modules.nixos.noctalia
@@ -24,6 +25,9 @@ in
 
     users.users.tobias.shell = pkgs.zsh;
     users.users.tobias.extraGroups = [ "gamemode" "docker" "librepods" ];
+
+    # The internal display is driven by Intel; make it available for Plymouth.
+    boot.initrd.kernelModules = [ "i915" ];
 
     # Measured PCI addresses on this ThinkPad; PRIME uses decimal notation.
     hardware.nvidia.prime = {
