@@ -36,6 +36,8 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 
 ## Aktueller Umfang
 
+- VLC als Medienplayer und Standard für gängige Videoformate auf dem ThinkPad; Einstellungen werden in der Anwendung verwaltet.
+
 - btop als interaktive Ressourcenübersicht mit NVIDIA-Unterstützung auf dem ThinkPad; fastfetch für eine kompakte Systemübersicht. Aufruf jeweils direkt im Terminal.
 
 - Google Chrome als Standardbrowser für Weblinks auf dem ThinkPad; Firefox bleibt verfügbar. Browserprofile und Einstellungen bleiben in den Anwendungen.

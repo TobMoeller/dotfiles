@@ -68,6 +68,7 @@ in
           self.modules.homeManager.ghostty
           self.modules.homeManager.chrome
           self.modules.homeManager.thunderbird
+          self.modules.homeManager.vlc
           self.modules.homeManager.gaming
           self.modules.homeManager.voice-chat
           self.modules.homeManager.airpods

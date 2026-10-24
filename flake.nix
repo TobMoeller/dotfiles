@@ -45,6 +45,7 @@
         ./modules/features/ghostty/default.nix
         ./modules/features/chrome.nix
         ./modules/features/thunderbird.nix
+        ./modules/features/vlc.nix
         ./modules/features/gaming/default.nix
         ./modules/features/voice-chat.nix
         ./modules/features/airpods.nix
