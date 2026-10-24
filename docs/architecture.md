@@ -87,6 +87,12 @@ Das separate Home-Manager-Feature `voice-chat` installiert Discord und
 TeamSpeak nur auf den ausdrücklich ausgewählten Hosts, aktuell dem ThinkPad.
 Die persönlichen App-Einstellungen verbleiben in den Anwendungen.
 
+Das Home-Manager-Feature `thunderbird` wird ebenfalls ausdrücklich vom ThinkPad
+gewählt. Es installiert den Mailclient und setzt die Standardanwendung für
+`mailto:` und Maildateien (`message/rfc822`). Konten, Zugangsdaten und persönliche
+Einstellungen bleiben im lokalen Thunderbird-Profil und werden in der Anwendung
+verwaltet.
+
 Das separate Home-Manager-Feature `starship` stellt den Prompt und seine
 zsh-Integration bereit. `modules/features/starship/starship.toml` wird direkt
 als `~/.config/starship.toml` verknüpft. Tastenkürzel bleiben im zsh-Feature;

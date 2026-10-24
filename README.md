@@ -40,6 +40,8 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 
 - Google Chrome als Standardbrowser für Weblinks auf dem ThinkPad; Firefox bleibt verfügbar. Browserprofile und Einstellungen bleiben in den Anwendungen.
 
+- Thunderbird als Mailclient auf dem ThinkPad und Standard für Mail-Links sowie `.eml`-Dateien. Konten und persönliche Einstellungen werden nach der Aktivierung direkt in Thunderbird eingerichtet.
+
 - NixOS 26.05, passende Home-Manager-Release-Linie und flake-parts.
 - Bestehende ThinkPad-Installation einschließlich Hardware, Verschlüsselung und Plasma als Basis; Hostname und Flake-Auswahl `nixos`, Geräteverzeichnis `thinkpad`.
 - Integrierter Home Manager für `tobias`.
