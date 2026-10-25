@@ -108,6 +108,7 @@
             pyright
             lua-language-server
             nil
+            rust-analyzer
           ]
           ++ lib.optionals pkgs.stdenv.isLinux [
             wl-clipboard

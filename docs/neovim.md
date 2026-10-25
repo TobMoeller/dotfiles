@@ -60,7 +60,11 @@ Testabhängigkeiten kommen aus dem jeweiligen Projekt/devShell.
 ## Sprachserver und Laravel
 
 Installiert sind Intelephense, der **offizielle** `laravel/lsp` (0.0.32),
-TypeScript-LSP samt TypeScript, Tailwind CSS, Pyright, Lua-LSP und nil für Nix.
+TypeScript-LSP samt TypeScript, Tailwind CSS, Pyright, Lua-LSP, nil für Nix
+und rust-analyzer für Rust. Rust-Projekte stellen Cargo, rustc und die passenden
+Standardbibliothek-Quellen (`rust-src`) über ihre devShell/Toolchain bereit.
+Nach dem Rebuild eine Rust-Datei im Cargo-Projekt öffnen und mit
+`:checkhealth vim.lsp` prüfen, ob `rust_analyzer` verbunden ist.
 Dart, SourceKit und ZLS werden nur aktiviert, wenn das jeweilige SDK/Programm
 im PATH vorhanden ist; große SDKs werden nicht global installiert.
 Projekt-devShells können andere Toolversionen bereitstellen: Die zusätzlichen

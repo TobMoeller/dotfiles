@@ -38,6 +38,7 @@ for name, executable in pairs({
   intelephense = 'intelephense', laravel_lsp = 'laravel-lsp',
   ts_ls = 'typescript-language-server', tailwindcss = 'tailwindcss-language-server',
   pyright = 'pyright-langserver', lua_ls = 'lua-language-server', nil_ls = 'nil',
+  rust_analyzer = 'rust-analyzer',
   dartls = 'dart', sourcekit = 'sourcekit-lsp', zls = 'zls',
 }) do
   if name ~= 'laravel_lsp' then
