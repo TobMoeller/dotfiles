@@ -36,6 +36,8 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 
 ## Aktueller Umfang
 
+- Nautilus zusätzlich zu Dolphin zum Ausprobieren, mit GVfs für Laufwerke und Netzwerkfreigaben. Start über `nautilus` oder „Dateien“ im App-Menü; keine zusätzlichen Standardzuordnungen.
+
 - VLC als Medienplayer und Standard für gängige Videoformate auf dem ThinkPad; Einstellungen werden in der Anwendung verwaltet.
 
 - btop als interaktive Ressourcenübersicht mit NVIDIA-Unterstützung auf dem ThinkPad; fastfetch für eine kompakte Systemübersicht. Aufruf jeweils direkt im Terminal.

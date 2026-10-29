@@ -17,6 +17,7 @@ in
       self.modules.nixos.fingerprint
       self.modules.nixos.zsh
       self.modules.nixos.niri
+      self.modules.nixos.nautilus
       self.modules.nixos.noctalia
       self.modules.nixos.gaming
       self.modules.nixos.airpods
@@ -64,6 +65,7 @@ in
           self.modules.homeManager.local-ai
           self.modules.homeManager.plasma-sleep
           self.modules.homeManager.niri
+          self.modules.homeManager.nautilus
           self.modules.homeManager.noctalia
           self.modules.homeManager.ghostty
           self.modules.homeManager.chrome
