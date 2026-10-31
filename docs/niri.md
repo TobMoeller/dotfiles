@@ -69,7 +69,11 @@ Falls später IBus/Fcitx eingerichtet wird, diese Fallback-Vorgabe ersetzen.
 | Mod+Shift+Slash | Tastenkürzel anzeigen |
 
 Lautstärke- und Helligkeitstasten sind mit Noctalia verbunden. Nach zehn Minuten
-Inaktivität wird gesperrt, nach elf Minuten der Bildschirm abgeschaltet.
+Inaktivität wird im Akkubetrieb gesperrt; am Netz bleibt die automatische Sperre
+aus. Dafür fragt der Idle-Befehl UPower ab; schlägt die Abfrage fehl, wird gesperrt.
+Der Idle-Fade ist deaktiviert, damit die übersprungene Sperre am Netz nicht kurz
+abdunkelt. Nach elf Minuten wird der Bildschirm unabhängig davon abgeschaltet.
+Manuelles Sperren und die Sperre vor Suspend bleiben aktiv.
 Ein zusätzlicher automatischer Idle-Suspend ist zunächst nicht konfiguriert.
 
 Größenänderungen sind ohne Animation; andere Animationen bleiben aktiv.

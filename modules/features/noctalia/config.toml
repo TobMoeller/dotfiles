@@ -14,10 +14,16 @@ enabled = true
 lock_before_suspend = true
 fingerprint = true
 
+[idle]
+# Avoid a fade when the power-gated lock command does nothing on AC.
+pre_action_fade_seconds = 0
+
 [idle.behavior.lock]
 enabled = true
 timeout = 600
-action = "lock"
+action = "command"
+# UPower also handles power supplied through a USB-C dock. Lock if the query fails.
+command = 'if [ "$(busctl --system get-property org.freedesktop.UPower /org/freedesktop/UPower org.freedesktop.UPower OnBattery)" != "b false" ]; then noctalia msg session lock; fi'
 
 [idle.behavior.screen-off]
 enabled = true
