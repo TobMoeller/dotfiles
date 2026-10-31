@@ -80,22 +80,21 @@ Lokale Notizen (`docs/`) und Testskripte (`.local/`) werden nicht versioniert.
 
 ## Navigation und Themes
 
-Neovim: `<Leertaste>n` schaltet nvim-tree links ein/aus und zeigt die aktuelle
+Neovim: `<Leertaste>E` (Shift+e) schaltet nvim-tree links ein/aus und zeigt die aktuelle
 Datei. Im Baum öffnet Enter Dateien/Ordner,
 `a` legt an, `r` benennt um, `R` aktualisiert, `g?` zeigt die Tastenbelegung.
 Der Baum übernimmt wieder die Git-Anzeige aus der alten Konfiguration.
 `-` oder `<Leertaste>e` öffnet Oil im aktuellen Fenster: Enter öffnet einen
 Eintrag, `-` geht nach oben, `g?` zeigt Hilfe. Dateinamen wie Text bearbeiten;
 `:w` wendet die Dateioperationen nach Bestätigung an.
-Strg+N/P wechselt im Normalmodus native Tabs (Fensterlayouts), `<Leertaste>tn`
-legt einen Tab an, `<Leertaste>tc` schließt ihn. Buffer sind tabübergreifend.
+Native Tabs sind Fensterlayouts. `<Leertaste>tn` legt einen Tab an, `<Leertaste>tc` schließt ihn. Buffer sind tabübergreifend.
 `<Leertaste>g` öffnet Neogit, `bn`/`bp` nach Leertaste wechseln Buffer,
 `ff` sucht Dateien, `fg` Projekttext, `fb` offene Buffer und `fh` zuletzt
 geöffnete Dateien über Telescope. Strg+J/K bewegt die Auswahl, Enter öffnet im
 aktuellen Fenster und Strg+T im neuen Tab,
 Esc schließt. `fF` sucht auch ignorierte Dateien, `fs` Dokumentsymbole und
 `<Leertaste>?` durchsucht die Tastenkürzel. Die Suche startet im Arbeitsverzeichnis und beachtet Git-Ignores.
-Die obere Bufferline zeigt offene Dateien; `<Leertaste>` Tab/Shift-Tab wechselt
+Die obere Bufferline zeigt offene Dateien; Strg+N/P wechselt im Normalmodus
 zwischen ihnen, `<Leertaste>q` schließt den Buffer und erhält das Fenster.
 `tt`/`tf`/`tl` nach Leertaste führen nächsten Test, Datei oder letzten Test aus;
 `tx` schließt das Test-Pane. `gd`/`gi`/`gr` springen zu Definitionen,

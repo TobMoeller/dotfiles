@@ -1,8 +1,8 @@
 local map = vim.keymap.set
 map("n", "mn", "<cmd>BufferLineMoveNext<CR>", { desc = "Move buffer right" })
 map("n", "mp", "<cmd>BufferLineMovePrev<CR>", { desc = "Move buffer left" })
-map("n", "<leader><Tab>", "<cmd>BufferLineCycleNext<CR>", { desc = "Next buffer in bar" })
-map("n", "<leader><S-Tab>", "<cmd>BufferLineCyclePrev<CR>", { desc = "Previous buffer in bar" })
+map("n", "<C-n>", "<cmd>BufferLineCycleNext<CR>", { desc = "Next buffer in bar" })
+map("n", "<C-p>", "<cmd>BufferLineCyclePrev<CR>", { desc = "Previous buffer in bar" })
 map("n", "<leader>^", function() require("bufferline").go_to(1, true) end, { desc = "First buffer" })
 map("n", "<leader>$", function() require("bufferline").go_to(-1, true) end, { desc = "Last buffer" })
 map("n", "<leader>br", "<cmd>BufferLineCloseRight<CR>", { desc = "Close buffers to right" })
