@@ -15,7 +15,7 @@ lock_before_suspend = true
 fingerprint = true
 
 [idle]
-# Avoid a fade when the power-gated lock command does nothing on AC.
+# Avoid a fade when power-gated idle commands do nothing on AC.
 pre_action_fade_seconds = 0
 
 [idle.behavior.lock]
@@ -28,4 +28,6 @@ command = 'if [ "$(busctl --system get-property org.freedesktop.UPower /org/free
 [idle.behavior.screen-off]
 enabled = true
 timeout = 660
-action = "screen_off"
+action = "command"
+command = 'if [ "$(busctl --system get-property org.freedesktop.UPower /org/freedesktop/UPower org.freedesktop.UPower OnBattery)" != "b false" ]; then noctalia msg dpms-off; fi'
+resume_command = "noctalia msg dpms-on"

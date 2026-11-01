@@ -72,7 +72,8 @@ Lautstärke- und Helligkeitstasten sind mit Noctalia verbunden. Nach zehn Minute
 Inaktivität wird im Akkubetrieb gesperrt; am Netz bleibt die automatische Sperre
 aus. Dafür fragt der Idle-Befehl UPower ab; schlägt die Abfrage fehl, wird gesperrt.
 Der Idle-Fade ist deaktiviert, damit die übersprungene Sperre am Netz nicht kurz
-abdunkelt. Nach elf Minuten wird der Bildschirm unabhängig davon abgeschaltet.
+abdunkelt. Nach elf Minuten wird der Bildschirm nur im Akkubetrieb abgeschaltet;
+am Netz bleibt er an. Bei Aktivität werden die Bildschirme wieder eingeschaltet.
 Manuelles Sperren und die Sperre vor Suspend bleiben aktiv.
 Ein zusätzlicher automatischer Idle-Suspend ist zunächst nicht konfiguriert.
 
