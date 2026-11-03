@@ -95,6 +95,10 @@ binds {
     Mod+Alt+Right hotkey-overlay-title="Focus right monitor" { focus-monitor-right; }
     Mod+Shift+Left hotkey-overlay-title="Move window to left monitor" { move-window-to-monitor-left; }
     Mod+Shift+Right hotkey-overlay-title="Move window to right monitor" { move-window-to-monitor-right; }
+    Mod+Shift+Alt+H hotkey-overlay-title="Move window to left monitor" { move-window-to-monitor-left; }
+    Mod+Shift+Alt+J hotkey-overlay-title="Move window to monitor below" { move-window-to-monitor-down; }
+    Mod+Shift+Alt+K hotkey-overlay-title="Move window to monitor above" { move-window-to-monitor-up; }
+    Mod+Shift+Alt+L hotkey-overlay-title="Move window to right monitor" { move-window-to-monitor-right; }
     Mod+Ctrl+H { move-column-left; }
     Mod+Ctrl+J { move-window-down; }
     Mod+Ctrl+K { move-window-up; }
