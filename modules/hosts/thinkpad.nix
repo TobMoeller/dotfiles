@@ -4,7 +4,7 @@ let
   hostName = "nixos";
 in
 {
-  flake.modules.nixos.thinkpad = { pkgs, ... }: {
+  flake.modules.nixos.thinkpad = { config, pkgs, ... }: {
     networking.hostName = hostName;
     imports = [
       self.modules.nixos.base
@@ -42,10 +42,61 @@ in
       nvidiaBusId = "PCI:1:0:0";
     };
 
-    # Both suspend paths hit a GSP crash with fine-grained RTD3 (Xid 120).
-    # Coarse-grained runtime PM passed suspend and hibernate on this device.
-    hardware.nvidia.powerManagement.finegrained = false;
-    hardware.nvidia.moduleParams.nvidia.NVreg_DynamicPowerManagement = "0x01";
+    # NVIDIA's new feature branch (hashes from nixos-unstable): 610.57.04
+    # fixed suspend/resume failures with RTD3. Drop this block once the
+    # system default reaches 610+; see docs/thinkpad-hardware.md.
+    hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
+      version = "615.78.08";
+      sha256_64bit = "sha256-Pj9t3cLudnoIGFMAr3vjyyhuznZpjS3eNSRZl4LQf/4=";
+      sha256_aarch64 = "sha256-UHYBE1AYHoGgMfD9AS/jX+S+N8eCDWUft6qolK9Eejc=";
+      openSha256 = "sha256-HBINiOjL0ZJLIAJeNIBYHBnwgUXtNwPPtnFpAI1YwF4=";
+      settingsSha256 = "sha256-inDRpG02sdDgHmlqgu/DsgK8OFdOt1fZIYyXdhlGC/c=";
+      persistencedSha256 = "sha256-RzeR6Ldct6MUxjnXRyThdh5Y3jjMehTVg85MtwuWNX4=";
+    };
+
+    # With 595.71.05, both suspend paths hit a GSP crash with fine-grained
+    # RTD3 (Xid 120); coarse-grained (finegrained = false plus
+    # NVreg_DynamicPowerManagement = "0x01") passed suspend and hibernate.
+    # With 615.78.08, fine-grained (feature default) passed both as well.
+    # If Xid 120 returns, restore those two settings.
+
+    # Second login session that renders niri on NVIDIA (see docs/niri.md).
+    services.displayManager.sessionPackages =
+      let
+        launcher = pkgs.writeShellScript "niri-nvidia-session" ''
+          export NIRI_CONFIG="$HOME/.config/niri/nvidia.kdl"
+          ${config.programs.niri.package}/bin/niri-session "$@"
+          status=$?
+          # niri-session imports the login environment into systemd --user;
+          # drop the override so a later normal session renders on Intel again.
+          systemctl --user unset-environment NIRI_CONFIG
+          exit $status
+        '';
+      in
+      [
+        ((pkgs.writeTextDir "share/wayland-sessions/niri-nvidia.desktop" ''
+          [Desktop Entry]
+          Name=Niri (NVIDIA)
+          Comment=Niri rendered on the NVIDIA GPU, for the dock monitors
+          Exec=${launcher}
+          Type=Application
+          DesktopNames=niri
+        '').overrideAttrs { passthru.providedSessions = [ "niri-nvidia" ]; })
+      ];
+
+    # CPU and GPU share one cooler; CPU turbo costs the GPU thermal headroom.
+    # GameMode disables turbo while a game runs (see docs/gaming.md).
+    systemd.tmpfiles.rules = [
+      "z /sys/devices/system/cpu/intel_pstate/no_turbo 0664 root gamemode -"
+    ];
+    programs.gamemode.settings.custom = {
+      start = toString (pkgs.writeShellScript "gamemode-turbo-off" ''
+        echo 1 > /sys/devices/system/cpu/intel_pstate/no_turbo
+      '');
+      end = toString (pkgs.writeShellScript "gamemode-turbo-on" ''
+        echo 0 > /sys/devices/system/cpu/intel_pstate/no_turbo
+      '');
+    };
 
     # ext4 inside LUKS: the hibernation image is encrypted along with root.
     swapDevices = [
@@ -113,6 +164,8 @@ in
           config.lib.file.mkOutOfStoreSymlink "${config.dotfiles.repositoryPath}/scripts/rebuild";
         xdg.configFile."niri/outputs.kdl".source =
           config.lib.file.mkOutOfStoreSymlink "${config.dotfiles.repositoryPath}/hosts/thinkpad/niri-outputs.kdl";
+        xdg.configFile."niri/nvidia.kdl".source =
+          config.lib.file.mkOutOfStoreSymlink "${config.dotfiles.repositoryPath}/hosts/thinkpad/niri-nvidia.kdl";
       };
     };
   };

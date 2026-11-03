@@ -204,3 +204,98 @@ Quellen: [Kernel: Thunderbolt/USB4](https://docs.kernel.org/admin-guide/thunderb
 [Kernel: USB-Fehler](https://docs.kernel.org/driver-api/usb/error-codes.html),
 [Kernel: Hibernate/Resume](https://docs.kernel.org/power/swsusp.html),
 [Dynabook: PS0120-Video-Firmwarehinweis](https://aps2.support.emea.dynabook.com/kb0/STC2C041O0000R01.htm).
+
+## Neuer Anlauf am 2026-11-01
+
+Kurzfassung: Dock-Abstürze beim Spielen kamen von unzureichender
+Stromversorgung. Der fehlende zweite Monitor unter Wayland liegt am
+MST-Verteiler des Docks zusammen mit dem NVIDIA-DRM-Treiber, nicht am
+Compositor.
+
+### Verdrahtung
+
+- Die externen Anschlüsse des Docks erscheinen an `card0`, also an NVIDIA
+  (`0000:01:00.0`): `DP-5`, `DP-6`, `DP-7`, `HDMI-A-2`. Das interne Display
+  hängt an Intel (`card1-eDP-1`).
+- Im Hybrid-Modus rendert Niri auf Intel (`renderD128`); jedes Bild für die
+  Dells wird zur NVIDIA kopiert. Wahrscheinliche Ursache des früheren
+  Flackerns unter Niri, nicht separat bewiesen.
+
+### Stromversorgung
+
+- Ohne Lenovo-Netzteil stürzte die Dock-Verbindung beim Spielstart ab;
+  frühere Logs zeigten danach `AC/online=0`. Mit zusätzlichem 170-W-Netzteil
+  am Rundstecker liefen Spiele am Dock unter X11 und Niri stabil.
+- Dock-USB-C liefert typischerweise 90–100 W; das Gerät ist für 230 W
+  ausgelegt. Notebookcheck maß beim baugleichen X1 Extreme G4 mit RTX 3080
+  beim Spielen etwa 155 W, Spitzen 171 W; 170 W liegt damit an der Grenze.
+- Auf Akku begrenzt NVIDIA die GPU auf 55 W.
+
+### MST: Dock-DP/HDMI-Ausgänge
+
+- Die Dynabook-Firmwareanleitung nennt zwei MST-Verteiler, „Video 1“ und
+  „Video 2“, je mit DP und HDMI. **DP oder HDMI am Dock macht daher keinen
+  Unterschied**; beide laufen über MST. Nur der Thunderbolt-Ausgang des
+  Docks bekommt einen eigenen DP-Kanal.
+- Xorg-Log unter Plasma X11: USB-C/TB-Dell als `DFP-3`, DP-Dell als
+  `DFP-0.2` (MST). Unter X11 verwaltet der NVIDIA-Treiber MST selbst; dort
+  liefen beide Dells.
+- Unter Niri und unter Plasma Wayland legte `nvidia-drm` für den
+  MST-Monitor keinen Anschluss an; sysfs zeigte nur `DP-6`. Monitor aus/an
+  und Dock neu verbinden änderten nichts. In einer früheren Niri-Sitzung
+  erschien einmal `DP-8`; MST über DRM ist also unzuverlässig, nicht
+  grundsätzlich unmöglich.
+- Der zusätzliche USB-C-Anschluss des Docks gab mit TB4-Kabel weder Bild
+  noch ein USB-Ereignis aus; vermutlich nur Daten.
+- **Funktionierender Aufbau:** linker Dell `GR9HQC4` am TB-Ausgang des Docks
+  (`DP-6`), rechter Dell `HM1XPB4` per TB4-Kabel direkt am zweiten
+  Thunderbolt-Anschluss des Notebooks (`DP-5`). Beide unter Plasma Wayland
+  erkannt. Niri ordnet die Monitore über die Seriennummer zu.
+- Am rechten Dell hängt ein Qi-Ladegerät; die gleichzeitigen USB-Fehler
+  (`device not accepting address`, `-71`) betreffen vermutlich nur dieses.
+- Ähnliche, ungelöste Berichte: MST-Monitore mit NVIDIA 595.84 erst nach
+  echtem Hotplug sichtbar
+  ([NVIDIA-Forum](https://forums.developer.nvidia.com/t/rtx-5060-ti-linux-dp-mst-daisy-chained-monitors-not-detected-during-boot-with-driver-595-84/381478),
+  [Fedora](https://discussion.fedoraproject.org/t/nvidia-driver-wayland-and-mst-daisy-chain-display-port-monitors/158757)).
+  Keine NVIDIA-Antwort und kein Fix bekannt.
+
+### Erfasster Stand
+
+- NVIDIA open 595.71.05, Kernel 6.18.56, BIOS 1.32.
+- Dock: Thunderbolt `1-1`, NVM `38.0`, 2 Lanes à 20 Gb/s. Das ist das
+  Thunderbolt-4-Maximum (40 Gb/s); ein anderes TB4-Kabel bringt nichts.
+  Zwei Dells bei 1440p/144 Hz brauchen grob 27 Gb/s und passen hinein.
+- MST-Firmware ist unter Linux nicht auslesbar; fwupd kennt das Dock nicht.
+  Neuestes gefundenes Update: v1.0.0.2 (2022), MST-Verteiler `v5.06.101`,
+  „random external video connection issues“. Tool nur für Windows; das Dock
+  muss währenddessen zweimal stromlos gemacht werden
+  ([Hinweis](https://aps2.support.emea.dynabook.com/kb0/STC2C041O0000R01.htm),
+  [Anleitung](https://aps2.support.emea.dynabook.com/kb0/STC2C041O0000R01_TB4Dock_FW1.0.0.2_Instructions.pdf)).
+- Plasma X11 flutete das Kernel-Log mit rund 4,3 Mio.
+  `NVRM: dispcmnCtrlCmdSystemGetVblankCounter_IMPL: invalid head number!`
+  (Vblank-Abfrage für einen nicht aktiven Ausgang). Unter Niri nicht.
+- Der laufende Boot stammte vom 2026-10-24 mit mehreren Hibernate-Zyklen.
+  Ein Kaltstart mit angeschlossenem Dock und MST-Monitor ist noch ungetestet.
+
+### Lenovo ThinkPad Thunderbolt 4 Workstation Dock (40B0)
+
+- 2× DP 1.4, 1× HDMI 2.1, ein TB-Ausgang für Geräte
+  ([U Michigan](https://teamdynamix.umich.edu/TDClient/30/Portal/KB/PrintArticle?ID=11397)).
+- Bis 230 W nur mit Split-Kabel (TB + Rundstecker, 4X91K16970) am
+  300-W-Netzteil; P1 Gen 4 (20Y4) wird bei mehreren Händlern genannt,
+  Angaben widersprüchlich
+  ([Lenovo](https://support.lenovo.com/np/hi/solutions/pd500533)).
+- Drei Bildausgänge bei höchstens zwei DP-Kanälen über TB4: intern sehr
+  wahrscheinlich ebenfalls MST (nicht bestätigt). Löst damit das
+  Stromproblem, vermutlich nicht das MST-Problem.
+
+### Offene Schritte
+
+1. Kaltstart im Hybrid-Modus mit rechtem Dell am Dock-DP. Fehlt er, unter
+   Niri das DP-Kabel am Dock ab- und anstecken.
+2. BIOS „Discrete Graphics“ und „OS Detection for NVIDIA Optimus: Disabled“;
+   vorher vollständig herunterfahren. Erwartung: weniger Flackern unter
+   Niri; am MST-Problem vermutlich keine Änderung.
+3. Neueren NVIDIA-Zweig aus Nixpkgs testen; danach Suspend/Hibernate erneut
+   prüfen (GSP-/Xid-120-Vorgeschichte in `docs/thinkpad-hardware.md`).
+4. Dock-Firmware nur nach Versionsabgleich und mit Windows-Rechner.

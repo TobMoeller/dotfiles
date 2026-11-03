@@ -64,6 +64,52 @@ nvidia-smi
 
 Danach Suspend und beide GPU-Prüfungen wiederholen. Noch kein Hibernate und kein Zwischencommit, bis das Schlafverhalten geklärt ist.
 
+### New-Feature-Treiber 615.78.08 (seit 2026-11-01)
+
+Das Hostmodul setzt `hardware.nvidia.package` per `nvidiaPackages.mkDriver`
+auf 615.78.08 (offene Module); Version und Prüfsummen stammen aus
+`nvidia-x11/default.nix` von nixos-unstable. Grund: 610.57.04 behebt laut
+NVIDIA fehlschlagendes Suspend/Resume mit RTD3, 615.78.08 bringt weitere
+Suspend- und Wayland-Fixes. Für das Flackern bei Rendern auf Intel mit
+Ausgabe auf NVIDIA oder für MST ist kein Fix dokumentiert. Bazzite lieferte
+im Release 44.20261026 dieselbe Version als „Nvidia Open“ aus.
+
+Ergebnis nach dem Neustart: Treiber läuft, keine Xid-Meldungen. Normales
+Niri (Rendern auf Intel) flackert an den Dock-Monitoren weiterhin; die
+Sitzung „Niri (NVIDIA)“ ist flackerfrei (siehe `docs/niri.md`). Der rechte
+Dell am Dock-DP (MST) wurde nach diesem Kaltstart erkannt; ob Treiber oder
+Kaltstart das bewirkten, ist offen. Rückweg Treiber: den `mkDriver`-Block
+entfernen oder die vorherige Generation booten.
+
+#### Feine Runtime-Energieverwaltung (wieder aktiv)
+
+Mit 615.78.08 gilt wieder der Feature-Standard `finegrained = true`, also
+`NVreg_DynamicPowerManagement=0x02`; die Host-Overrides auf `0x01` sind
+entfernt. Aktivieren mit `dotfiles-rebuild boot` und Neustart. Test ohne
+Dock in der normalen Niri-Sitzung:
+
+```bash
+grep DynamicPowerManagement: /proc/driver/nvidia/params   # erwartet: 2
+cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status   # erwartet: suspended
+```
+
+Danach Suspend und Hibernate, jeweils `nvidia-smi` und
+`nvidia-offload glxinfo -B` nach dem Aufwachen; Kernel-Log auf Xid 120/154
+prüfen. `nvidia-smi` weckt die GPU auf; den Ruhezustand vorher lesen.
+Rückweg: `finegrained = false` und `NVreg_DynamicPowerManagement = "0x01"`
+im Hostmodul wiederherstellen.
+
+Ergebnis 2026-11-01/02, normale Niri-Sitzung auf Akku ohne Dock:
+`DynamicPowerManagement: 2`, `power/control=auto`, GPU im Leerlauf
+`suspended`. Suspend (s2idle, 23:39–23:46) und Hibernate (Resume 00:07)
+erfolgreich, keine Xid-/GSP-Meldungen; danach `nvidia-smi`, OpenGL- und
+Vulkan-Offload auf der RTX 3080 funktionsfähig, die GPU schlief anschließend
+wieder ein. Vorher meldete `nvidia-smi` auf Akku im Leerlauf etwa 11 W für
+die wache GPU; jetzt zog das System im Leerlauf (power-saver, 10 %
+Helligkeit) etwa 15–18 W insgesamt. Ein offenes `btop` (mit CUDA/NVML)
+hält die GPU dauerhaft wach. Noch ungetestet: Suspend am Dock in der
+Sitzung „Niri (NVIDIA)“.
+
 ## Erster Start mit NVIDIA
 
 Für den ersten Treiberwechsel die neue Generation für den nächsten Boot vorbereiten. So werden laufende Grafikprogramme bis zum Neustart nicht auf neue Treiberbibliotheken umgestellt:

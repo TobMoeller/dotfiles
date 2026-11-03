@@ -8,16 +8,14 @@ output "eDP-1" {
 
 // Match monitor identity rather than dock-dependent DP connector numbers.
 output "Dell Inc. DELL S2725DC GR9HQC4" {
-    // Use the highest offered mode with only this external display enabled.
+    // Highest offered mode; both Dells run at it together.
     mode "2560x1440@143.973"
     scale 1
     position x=1707 y=0
 }
 
 output "Dell Inc. DELL S2725DC HM1XPB4" {
-    // Keep the right Dell disabled until the dock issues are resolved.
-    off
-    mode "2560x1440@59.951"
+    mode "2560x1440@143.973"
     scale 1
     position x=4267 y=0
 }

@@ -1,0 +1,9 @@
+// Entry point for the "Niri (NVIDIA)" session: the normal configuration,
+// rendered on NVIDIA. The dock outputs hang off NVIDIA; rendering on Intel
+// copies every frame across GPUs and flickers there. Stable PCI path, since
+// renderD numbers can change between boots and BIOS GPU modes.
+include "config.kdl"
+
+debug {
+    render-drm-device "/dev/dri/by-path/pci-0000:01:00.0-render"
+}

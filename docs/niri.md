@@ -134,7 +134,7 @@ Anordnung, von links nach rechts:
 | --- | --- | --- | --- |
 | ThinkPad, eDP-1 | 3840×2400, 60 Hz | 225 % | 0, 0 |
 | Dell S2725DC, GR9HQC4 | 2560×1440, 143,973 Hz | 100 % | 1707, 0 |
-| Dell S2725DC, HM1XPB4 | Vorläufig ausgeschaltet | 100 % | 4267, 0 (reserviert) |
+| Dell S2725DC, HM1XPB4 | 2560×1440, 143,973 Hz | 100 % | 4267, 0 |
 
 Die Dells werden über Hersteller/Modell/Seriennummer erkannt, unabhängig von
 wechselnden DP-Steckernamen am Dock. 1707 ist die aufgerundete logische Breite
@@ -157,6 +157,37 @@ In den abgefragten Kernel-Logs erschienen keine
 NVRM-/Xid-/Display-Link-Fehler. Dock, Kabel, Versorgung und Softwarepfad sind
 damit noch nicht als Ursache voneinander unterschieden. Den gleichzeitigen
 Betrieb beider externen Monitore erst nach Klärung der Verbindung erneut testen.
+
+### Sitzung „Niri (NVIDIA)“, Stand 2026-11-01
+
+Ursache des Flackerns: Die Dock-Ausgänge hängen an der RTX 3080, Niri rendert
+im Hybrid-Modus aber auf Intel und kopiert jedes Bild zur NVIDIA. Mit
+`debug.render-drm-device` auf NVIDIA waren beide Dells bei 143,973 Hz
+stabil. Niri rendert auf einer einzigen GPU; Upstream schloss
+[niri #2477](https://github.com/niri-wm/niri/issues/2477) als NVIDIA-Problem
+und nennt diese Einstellung als Workaround.
+
+Die Render-GPU wird nur beim Sitzungsstart gewählt. Deshalb gibt es in SDDM
+zwei Einträge:
+
+- **Niri:** rendert auf Intel; unterwegs, NVIDIA darf schlafen.
+- **Niri (NVIDIA):** für das Dock. Startet `niri-session` mit
+  `NIRI_CONFIG=~/.config/niri/nvidia.kdl`. Diese Datei
+  (`hosts/thinkpad/niri-nvidia.kdl`) lädt die normale `config.kdl` und setzt
+  nur die Render-GPU, über den stabilen Pfad
+  `/dev/dri/by-path/pci-0000:01:00.0-render`. Nach Sitzungsende entfernt das
+  Startskript `NIRI_CONFIG` wieder aus der systemd-Benutzerumgebung.
+
+Prüfen nach dem Anmelden: `journalctl --user -b -o cat | grep 'render node'`
+nennt in der NVIDIA-Sitzung `renderD129` als Primärknoten; die Nummer kann je
+Boot abweichen, maßgeblich ist der by-path-Link. Bekannter Bericht aus dem
+Upstream-Issue: Mit NVIDIA als Render-GPU kann das interne Display nach
+Suspend hängen; das ist hier noch nicht geprüft.
+
+Monitorbetrieb am Dock: Die DP-/HDMI-Ausgänge des Docks laufen über
+MST-Verteiler, die `nvidia-drm` unter Wayland nicht zuverlässig anlegt (siehe
+`docs/dock-diagnostics.md`). Der rechte Dell hängt daher per TB4-Kabel direkt
+am zweiten Thunderbolt-Anschluss des Notebooks.
 
 Die externen DP-Ausgänge liegen an der RTX 3080, das interne Display an
 Intel. Desktop-Ausgabe mit drei Displays wurde erkannt; daraus folgt keine

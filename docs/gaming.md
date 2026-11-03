@@ -60,6 +60,63 @@ jede Overlay-/Optimierungskombination; bei Startproblemen erst nur
 `nvidia-offload %command%` verwenden und Werkzeuge einzeln hinzufügen.
 Ein installierter Client ist noch kein bestätigter Spiel-/Proton-Test.
 
+### CPU-Turbo während des Spiels
+
+CPU und GPU teilen sich im ThinkPad einen Kühler. Im Test am 2026-11-01
+drosselte die GPU wegen Temperatur (`sw_thermal_slowdown`); ohne CPU-Turbo
+stieg ihr Verbrauch von etwa 74 auf 77–80 W. Deshalb schaltet GameMode auf
+diesem Host den Turbo beim Spielstart ab und am Ende wieder ein. Das gilt nur
+für Spiele mit `gamemoderun`. Dafür ist
+`/sys/devices/system/cpu/intel_pstate/no_turbo` für die Gruppe `gamemode`
+beschreibbar.
+
+Prüfen während des Spiels: `cat /sys/devices/system/cpu/intel_pstate/no_turbo`
+liefert `1`, nach Spielende wieder `0`. Die Lüfter nicht abdecken; ein Ständer
+direkt unter den Lüftern kostete im Test deutlich GPU-Leistung.
+
+### Kühlung und Leistung: Messwerte und Quellen
+
+Messungen am 2026-11-01 mit Spiel am Netzteil (170 W), RTX 3080 Laptop:
+
+| Zustand | GPU-Leistung | GPU-Takt | GPU | CPU |
+| --- | --- | --- | --- | --- |
+| Lüfter durch Ständer verdeckt | 46–62 W | 780 MHz | 87 °C | 93 °C |
+| Lüfter frei, Turbo an | ~72–74 W | – | – | – |
+| Lüfter frei, Turbo aus | 75–78 W | ~1000–1035 MHz | 87 °C | 84 °C |
+
+- Drosselgrund laut Treiber durchgehend `sw_thermal_slowdown`, nicht das
+  Leistungslimit. Limits: 80 W Standard, 100 W maximal, 55 W auf Akku.
+  Lüfter in Automatik bei etwa 4270 U/min.
+- NVIDIA-Nenn-Boost der 80-W-Stufe: 1245 MHz
+  ([Notebookcheck](https://notebookcheck.net/Comprehensive-list-of-all-laptops-featuring-the-NVIDIA-GeForce-RTX-3080-Laptop-GPU-along-with-corresponding-TGPs.517977.0.html)).
+- CPU-Limits (i9-11950H): MSR 109 W dauerhaft, aber die Firmware setzt per
+  MMIO 30 W dauerhaft (Fenster ~56 s) und 135 W kurzzeitig; es gilt das
+  niedrigere Limit, also 30 W. Notebookcheck sah unter Windows ebenfalls
+  etwa 30 W CPU bei kombinierter Last. Turbo aus senkt die CPU-Wärme
+  vermutlich weiter unter dieses Limit; der echte CPU-Verbrauch ist noch
+  nicht gemessen (`turbostat` braucht root).
+- Notebookcheck, baugleicher X1 Extreme G4 mit RTX 3080: GPU stabil bei
+  80 W, Witcher 3 Ultra ~85 FPS auf Netz und ~50 FPS auf Akku; GPU-Takt und
+  -Temperatur nicht gemessen
+  ([Test](https://www.notebookcheck.net/Lenovo-ThinkPad-X1-Extreme-G4-Review-The-best-Multimedia-Laptop-thanks-to-Core-i9-and-RTX-3080.588585.0.html)).
+  Stärkere P1-G4-GPUs haben laut Notebookcheck eine Vapor Chamber
+  ([Hinweis](https://www.notebookcheck.net/Customers-are-left-in-the-dark-Only-vapor-chamber-models-of-the-Lenovo-ThinkPad-P1-G4-X1-Extreme-G4-offer-full-CPU-performance.573365.0.html)).
+- Reddit, P1 Gen 4 mit i9/RTX 3080
+  ([Beitrag](https://www.reddit.com/r/thinkpad/comments/rmnaqj/p1_gen_4_repaste_round_1_great_job_on_the_thermal/)):
+  schlecht sitzendes VRAM-Pad, mittelmäßige Paste, überlappende Folie. Nur
+  neue Paste: CPU deutlich kühler, Spiel weiter unruhig. Zusätzlich neue
+  Pads (2 mm und 0,5 mm; Thermalright Odyssey, Gelid GC Extreme): stabile
+  60 FPS, nach 40 min GPU 86 °C/CPU 84 °C. Ein anderer Nutzer sah nach
+  mehrfachem Neupasten keine Verbesserung. Keine GPU-Takt-Angaben.
+- Einschätzung: Ein Pastenwechsel ist nur zusammen mit neuen Pads sinnvoll
+  und vom Montagezustand abhängig. Mehr als 80 W lässt die Firmware nicht
+  zu; erwartbar sind eher stabilere Takte und weniger Lärm als ein großer
+  FPS-Sprung. Vorher/nachher mit gleicher Szene messen.
+- Weitere Stellschrauben, noch nicht umgesetzt: CPU-Dauerlimit beim
+  Spielen auf 20–25 W senken, `scaling_max_freq` begrenzen, FPS-Limit per
+  MangoHud, Lüfter manuell über `thinkpad_acpi fan_control=1`,
+  `hardware.nvidia.dynamicBoost.enable`.
+
 ## Gamescope und Reparaturwerkzeuge
 
 Gamescope ist optional, beispielsweise als Startoption für ein Spiel:
