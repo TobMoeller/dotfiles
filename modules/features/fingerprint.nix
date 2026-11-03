@@ -2,6 +2,19 @@
   flake.modules.nixos.fingerprint = { config, lib, ... }: {
     services.fprintd.enable = true;
 
+    # Right after resume, logind can briefly report the local session as
+    # inactive. fprintd's default verify rule then denies the lock screen,
+    # which falls back to the password-protected enroll permission and shows
+    # a "manage fingerprints" prompt. Allow only verifying for local sessions;
+    # enrolling and deleting fingerprints stay protected.
+    security.polkit.extraConfig = ''
+      polkit.addRule(function (action, subject) {
+        if (action.id == "net.reactivated.fprint.device.verify" && subject.local) {
+          return polkit.Result.YES;
+        }
+      });
+    '';
+
     # Noctalia v5 verifies fingers directly through fprintd over D-Bus.
     # Its password path uses PAM login and must not wait for the same reader.
     security.pam.services =
