@@ -31,6 +31,15 @@ Das Präfix ist **Strg+Y**: drücken, loslassen, dann die folgende Taste drücke
 | `Umschalt+W` | Vorhandenen Worktree öffnen |
 | `Umschalt+K` | Worktree mit Bestätigung entfernen |
 | `Umschalt+R` | Konfiguration neu laden |
+| `y` (oder `[`) | Kopiermodus mit Verlauf |
+| `e` | Verlauf des Panes in `$EDITOR` öffnen |
+
+Kopiermodus: `[` braucht auf der deutschen Tastatur AltGr und wird deshalb
+nicht zuverlässig erkannt; `y` ist zusätzlich belegt. Bewegen mit
+`h/j/k/l`, `w/b/e`, `Bild↑/↓`, `Strg+U/D`; Suche mit `/` bzw. `?`, dann
+`n`/`N`. `v` oder Leertaste startet die Auswahl, `y` oder Enter kopiert,
+`q` oder Esc verlässt den Modus. Mit der Maus markierter Text wird ohne
+Kopiermodus direkt kopiert.
 
 Direkt funktionieren **Alt+J/K** für nächsten/vorherigen Workspace und
 **Alt+H/L** für vorherigen/nächsten Agenten. Im Navigationsmodus wählen `j/k`

@@ -32,6 +32,8 @@ previous_workspace = "alt+k"
 next_workspace = "alt+j"
 previous_agent = "alt+h"
 next_agent = "alt+l"
+# "[" needs AltGr on the German layout; prefix+y (yank) works on any layout.
+copy_mode = ["prefix+[", "prefix+y"]
 
 # In navigate mode, j/k selects workspaces; arrow left/right selects panes.
 navigate_workspace_down = "j"
