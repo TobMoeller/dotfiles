@@ -35,7 +35,12 @@ dotfiles-rebuild
 nixos-generations preview
 ```
 
-Ohne Unterbefehl erscheint ebenfalls nur eine Vorschau. Sie benötigt kein
+`dotfiles-rebuild` aktiviert sofort (`switch`). Für Treiber- oder
+Kerneländerungen `dotfiles-rebuild boot` verwenden und danach neu starten;
+`dotfiles-rebuild test` aktiviert ohne Bootmenü-Eintrag. Alle Varianten
+teilen sich die Sperre mit der Generationenbereinigung.
+
+`nixos-generations` ohne Unterbefehl zeigt ebenfalls nur eine Vorschau. Sie benötigt kein
 sudo und zeigt für jede Generation die Gründe zum Behalten oder Löschen.
 Profile, Bootmenü und Store bleiben dabei unverändert.
 

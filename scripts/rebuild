@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 set -eu
 
+# Usage: dotfiles-rebuild [switch|boot|test]   (default: switch)
+# Use "boot" for driver or kernel changes, then reboot.
+action="${1:-switch}"
+case "$action" in
+  switch | boot | test) ;;
+  *)
+    echo "usage: dotfiles-rebuild [switch|boot|test]" >&2
+    exit 2
+    ;;
+esac
+
 cd -- "$DOTFILES"
 # Share the lock with generation cleanup, including while building.
-sudo flock /run/lock/dotfiles-system.lock nixos-rebuild switch --flake .
+sudo flock /run/lock/dotfiles-system.lock nixos-rebuild "$action" --flake .
