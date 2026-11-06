@@ -42,6 +42,7 @@
         ./modules/features/git.nix
         ./modules/features/niri/default.nix
         ./modules/features/nautilus.nix
+        ./modules/features/flatpak.nix
         ./modules/features/noctalia/default.nix
         ./modules/features/ghostty/default.nix
         ./modules/features/chrome.nix

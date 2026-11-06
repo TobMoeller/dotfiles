@@ -18,6 +18,7 @@ in
       self.modules.nixos.zsh
       self.modules.nixos.niri
       self.modules.nixos.nautilus
+      self.modules.nixos.flatpak
       self.modules.nixos.noctalia
       self.modules.nixos.gaming
       self.modules.nixos.airpods

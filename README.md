@@ -33,6 +33,7 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 - [Docker, Compose und Containerdaten](docs/docker.md)
 - [AirPods Pro 2 mit LibrePods](docs/airpods.md)
 - [Generationen aufbewahren und bereinigen](docs/generations.md)
+- [Flatpak und Bambu Studio](docs/flatpak.md)
 
 ## Aktueller Umfang
 
