@@ -67,6 +67,10 @@ Flatpak-Programme werden imperativ installiert und gehören nicht zu den
 NixOS-Generationen; das Feature liefert nur Flatpak und die Quelle Flathub.
 Details stehen in `docs/flatpak.md`.
 
+Das NixOS-Feature `tailscale` wählt nur der ThinkPad, als reinen Client für
+freigegebene Tailnet-Routen. Die Anmeldung erfolgt interaktiv; Auth-Keys
+gehören nicht ins Repository. Details stehen in `docs/tailscale.md`.
+
 Das Betriebssystemkonto steht in der Hostkonfiguration. `modules.homeManager.tobias` ist eine gemeinsame persönliche Umgebung mit herdr, npm, zsh und Git. Benutzername, Home-Verzeichnis und Home-Manager-Kompatibilitätsversion setzt der Host. Die private Git-Identität steht ebenfalls im ThinkPad-Host; gemeinsame Git-Einstellungen enthalten keine Identität. Die NixOS-zsh-Integration und die Auswahl der Login-Shell werden ausdrücklich auf dem Host aktiviert, die native interaktive Konfiguration bleibt im zsh-Feature.
 
 Module können bestehende Optionen setzen. `lib.mkDefault` kennzeichnet bewusst überschreibbare Vorgaben; normale Zuweisungen überschreiben diese. Widersprüchliche gleichrangige einfache Werte führen zu einem Fehler. Importreihenfolge bedeutet nicht „letzte Datei gewinnt“. Eigene Optionen führen wir nur bei konkretem Bedarf ein.

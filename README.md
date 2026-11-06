@@ -34,6 +34,7 @@ Home Manager setzt `DOTFILES` auf den Repository-Pfad. Damit funktioniert nach d
 - [AirPods Pro 2 mit LibrePods](docs/airpods.md)
 - [Generationen aufbewahren und bereinigen](docs/generations.md)
 - [Flatpak und Bambu Studio](docs/flatpak.md)
+- [Tailscale-Zugang zum Heimnetz](docs/tailscale.md)
 
 ## Aktueller Umfang
 
