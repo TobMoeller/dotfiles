@@ -61,7 +61,8 @@ Testabhängigkeiten kommen aus dem jeweiligen Projekt/devShell.
 
 Installiert sind Intelephense, der **offizielle** `laravel/lsp` (0.0.32),
 TypeScript-LSP samt TypeScript, Tailwind CSS, Pyright, Lua-LSP, nil für Nix
-und rust-analyzer für Rust. Rust-Projekte stellen Cargo, rustc und die passenden
+und rust-analyzer für Rust sowie tofu-ls für OpenTofu. Rust-Projekte stellen
+Cargo, rustc und die passenden
 Standardbibliothek-Quellen (`rust-src`) über ihre devShell/Toolchain bereit.
 Nach dem Rebuild eine Rust-Datei im Cargo-Projekt öffnen und mit
 `:checkhealth vim.lsp` prüfen, ob `rust_analyzer` verbunden ist.
@@ -71,6 +72,15 @@ Projekt-devShells können andere Toolversionen bereitstellen: Die zusätzlichen
 Editor-Werkzeuge werden an PATH angehängt. Node-/Ruby-/Python-Provider bleiben
 aus, da diese Lua-/Vimscript-Plugins sie nicht benötigen. Die entsprechenden
 Sprachserver funktionieren trotzdem.
+
+OpenTofu verwendet `tofu-ls` für `.tf`, `.tfvars` und `.tofu`. `.tofu` wird in
+Neovim dem Dateityp `terraform` zugeordnet; die HCL-/Terraform-Treesitter-Parser
+liefern das Highlighting. Neovim startet den Server automatisch mit `tofu-ls serve`,
+sobald eine passende Datei geöffnet wird, und kommuniziert über dessen
+Standardein-/ausgabe. Ein manueller Serverstart oder Hintergrunddienst ist
+nicht nötig; die anderen Sprachserver werden genauso vom Editor verwaltet.
+Die OpenTofu-CLI (`tofu`) und Provider gehören in die jeweilige Projektumgebung;
+dieses Editor-Feature installiert sie nicht.
 
 Intelephense bearbeitet PHP. Laravel-LSP ergänzt Laravel-spezifische
 Vervollständigung, Navigation und Diagnosen nur in Projekten mit `artisan`.

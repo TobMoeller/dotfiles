@@ -1,5 +1,8 @@
 local large = require('dotfiles.large-files')
-vim.filetype.add({ pattern = { ['.*%.blade%.php'] = 'blade' } })
+vim.filetype.add({
+  extension = { tofu = 'terraform' },
+  pattern = { ['.*%.blade%.php'] = 'blade' },
+})
 
 vim.lsp.config('*', {
   capabilities = require('cmp_nvim_lsp').default_capabilities(),
@@ -8,6 +11,9 @@ vim.lsp.config('*', {
 
 vim.lsp.config('ts_ls', {
   filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact' },
+})
+vim.lsp.config('tofu_ls', {
+  filetypes = { 'terraform', 'terraform-vars', 'opentofu', 'opentofu-vars' },
 })
 vim.lsp.config('lua_ls', {
   settings = { Lua = { diagnostics = { globals = { 'vim' } }, telemetry = { enable = false } } },
@@ -39,6 +45,7 @@ for name, executable in pairs({
   ts_ls = 'typescript-language-server', tailwindcss = 'tailwindcss-language-server',
   pyright = 'pyright-langserver', lua_ls = 'lua-language-server', nil_ls = 'nil',
   rust_analyzer = 'rust-analyzer',
+  tofu_ls = 'tofu-ls',
   dartls = 'dart', sourcekit = 'sourcekit-lsp', zls = 'zls',
 }) do
   if name ~= 'laravel_lsp' then

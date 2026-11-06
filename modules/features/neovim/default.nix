@@ -50,6 +50,7 @@
               dockerfile
               go
               gomod
+              hcl
               html
               javascript
               jsdoc
@@ -66,6 +67,7 @@
               rust
               sql
               swift
+              terraform
               toml
               tsx
               typescript
@@ -109,6 +111,7 @@
             lua-language-server
             nil
             rust-analyzer
+            tofu-ls
           ]
           ++ lib.optionals pkgs.stdenv.isLinux [
             wl-clipboard
