@@ -19,3 +19,11 @@ output "Dell Inc. DELL S2725DC HM1XPB4" {
     scale 1
     position x=4267 y=0
 }
+
+// Main monitor when connected: gets focus at login, so new windows open here.
+output "ASUSTek COMPUTER INC VG27A KALMQS055919" {
+    mode "2560x1440@144.006"
+    scale 1
+    position x=1707 y=0
+    focus-at-startup
+}

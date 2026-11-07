@@ -89,7 +89,9 @@ aus dem fixierten Tools-Input, Niri aus dem System-Paketsatz.
 Ghostty und Gaming werden ebenfalls nur vom ThinkPad ausgewählt. Ghostty
 verknüpft seine native Konfiguration und stellt Terminal und Schrift bereit.
 Gaming teilt sich in NixOS-Integration für Steam/GameMode/Gamescope und einen
-Home-Manager-Teil für MangoHud mit nativer Overlay-Konfiguration. Die private
+Home-Manager-Teil für Hedgewars, SuperTuxKart, Lutris, Heroic und MangoHud
+mit nativer Overlay-Konfiguration. Spiele aus Steam, Epic und Battle.net
+werden in den jeweiligen Launchern verwaltet. Die private
 Gruppenzugehörigkeit für GameMode steht im Host.
 
 Das separate Home-Manager-Feature `voice-chat` installiert Discord und

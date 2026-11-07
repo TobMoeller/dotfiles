@@ -19,6 +19,37 @@ Controller-Regeln ein. GE-Proton wird über Nix bereitgestellt; reguläres
 Proton und Proton Experimental verwaltet Steam. GameMode, MangoHud,
 Gamescope und Protontricks sind ebenfalls installiert.
 
+Das Home-Manager-Modul desselben Features stellt außerdem die nativen Spiele
+Hedgewars und SuperTuxKart sowie Lutris (Battle.net) und Heroic (Epic)
+bereit. Konten, Spielstände, Launcher-Einstellungen und darüber installierte
+Spiele bleiben außerhalb des Repositorys.
+
+## Weitere Spiele und Launcher
+
+- **Hedgewars, SuperTuxKart:** im App-Menü bzw. als `hedgewars` und
+  `supertuxkart`; mit NVIDIA über `nvidia-offload gamemoderun supertuxkart`.
+  Für gemeinsame Partien dieselbe Version wie die Mitspieler nutzen; Steam
+  bietet Hedgewars nur als Windows-Version an, hier die native nehmen.
+- **Steam-Spiele:** Native Linux-Versionen zuerst ohne Proton starten.
+  Windows-Spiele unter Eigenschaften → Kompatibilität mit Proton bzw.
+  GE-Proton.
+- **Battle.net (z. B. StarCraft II) über Lutris:** den
+  [Community-Installer](https://lutris.net/games/starcraft-ii/) über die
+  Suche in Lutris starten; Wine-Runner verwaltet Lutris. Bei
+  Grafikproblemen in der Spielkonfiguration NVIDIA-/PRIME-Offload aktivieren.
+- **Epic über Heroic:** anmelden, Spiel mit einer von Heroic angebotenen
+  Wine-/Proton-Version installieren, in den Spieleinstellungen die dedizierte
+  GPU aktivieren.
+
+Ein erfolgreicher Programmstart bestätigt noch keine Lobby-Verbindung:
+Mehrspielerpartien vorher kurz mit den anderen testen. Die Firewall bleibt
+unverändert; Beitreten zu fremden Servern geht ohne offene Ports. Soll dieser
+Rechner selbst einen Server hosten, die Ports gezielt für das konkrete Spiel
+freigeben.
+
+Quellen: [Lutris unter NixOS](https://wiki.nixos.org/wiki/Lutris),
+[Heroic-Wiki](https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/wiki).
+
 ## Aktivieren und erster Start
 
 ```bash

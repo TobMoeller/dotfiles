@@ -12,7 +12,13 @@
     programs.gamescope.enable = true;
   };
 
-  flake.modules.homeManager.gaming = { config, ... }: {
+  flake.modules.homeManager.gaming = { config, pkgs, ... }: {
+    home.packages = with pkgs; [
+      hedgewars
+      supertuxkart
+      lutris
+      heroic
+    ];
     programs.mangohud.enable = true;
     xdg.configFile."MangoHud/MangoHud.conf".source = config.lib.file.mkOutOfStoreSymlink
       "${config.dotfiles.repositoryPath}/modules/features/gaming/MangoHud.conf";

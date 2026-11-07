@@ -135,11 +135,19 @@ Anordnung, von links nach rechts:
 | ThinkPad, eDP-1 | 3840×2400, 60 Hz | 225 % | 0, 0 |
 | Dell S2725DC, GR9HQC4 | 2560×1440, 143,973 Hz | 100 % | 1707, 0 |
 | Dell S2725DC, HM1XPB4 | 2560×1440, 143,973 Hz | 100 % | 4267, 0 |
+| ASUS VG27A, KALMQS055919 | 2560×1440, 144,006 Hz | 100 % | 1707, 0 |
 
 Die Dells werden über Hersteller/Modell/Seriennummer erkannt, unabhängig von
 wechselnden DP-Steckernamen am Dock. 1707 ist die aufgerundete logische Breite
 des Notebook-Displays bei 225 %. Die externen Displays bleiben in ihrer
 bisherigen relativen Reihenfolge. Alle Oberkanten sind ausgerichtet.
+
+Der ASUS VG27A (HDMI) ist Hauptmonitor, wenn er angeschlossen ist:
+`focus-at-startup` gibt ihm beim Anmelden den Fokus, neue Fenster öffnen
+dort. Er sitzt rechts neben dem Notebook. Ohne die Option erhielte das erste
+Display in niris Sortierung den Fokus. Sind gleichzeitig die Dells
+angeschlossen, überlappen ASUS und linker Dell; niri verschiebt dann eines
+der Displays automatisch, und die Positionen müssten angepasst werden.
 
 Prüfung am 2026-10-20: Beide Dells bieten maximal 143,973 Hz in WQHD an;
 165 Hz wird nicht angeboten. Beide wurden gleichzeitig auf 143,973 Hz
